@@ -5,7 +5,9 @@ App iOS chạy client Army 2 Coffee (file J2ME `.jar`). Dựng trên **phoneME i
 So với bản gốc, repo này thêm:
 
 - Gói sẵn client `Bundled/Army2Coffee.jar`. Lần đầu mở app sẽ tự nhập client vào thư viện, mỗi lần mở app là vào game luôn.
-  - Màn hình ngang, cao 360, rộng theo tỉ lệ máy, dùng cảm ứng, tắt bàn phím ảo.
+  - Màn hình dọc, rộng 320, cao vừa phần trên bàn phím. Dùng cảm ứng, vuốt lên xuống để cuộn danh sách.
+  - Bàn phím ảo 4×2 dưới màn hình: `F1 ▲ LỰC MAX F2` / `◀ ▼ ▶ OK`. Mỗi nút nhấn khi chạm, nhả khi buông như phím thật (giữ OK để tăng lực, buông là bắn). LỰC MAX tự giữ phím bắn đến khi đầy lực.
+  - Thanh công cụ của app được ẩn. Vuốt từ mép trên màn hình game xuống để hiện lại.
   - Ô nhập tên và mật khẩu dùng bàn phím iPhone.
 - Tên app **Army 2 Coffee**, icon lấy từ client, bundle id `vn.army2coffee.game`.
 - Bỏ quyền iCloud, để công cụ ký (eSign, Scarlet, AltStore, Sideloadly) không bị lỗi.

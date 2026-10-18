@@ -404,25 +404,24 @@ enum KeyboardLayoutCatalog {
         )
     }
 
+    /// Army 2 Coffee: 2 phim mem hai ben (OK = phim mem trai, Back = phim mem
+    /// phai), 4 phim huong va nut Ban o giua (giu de tang luc, tha ra la ban).
+    /// Moi nut gui nhan khi cham va nha khi buong, giong phim that.
     private static func arrowsOnly() -> KeyboardLayoutDefinition {
         let controls: [KeyboardControlDescriptor] = [
-            key(.softLeft, groupID: "soft-keys", column: 0, row: 0),
-            diagonal("↖", [.up, .left], id: "up-left", column: 1, row: 0),
-            key(.up, label: "↑", groupID: "directions", column: 2, row: 0),
-            diagonal("↗", [.up, .right], id: "up-right", column: 3, row: 0),
-            key(.softRight, groupID: "soft-keys", column: 4, row: 0),
-            key(.left, label: "←", groupID: "directions", column: 1, row: 1),
-            key(.fire, label: "F", groupID: "directions", column: 2, row: 1),
-            key(.right, label: "→", groupID: "directions", column: 3, row: 1),
-            diagonal("↙", [.down, .left], id: "down-left", column: 1, row: 2),
-            key(.down, label: "↓", groupID: "directions", column: 2, row: 2),
-            diagonal("↘", [.down, .right], id: "down-right", column: 3, row: 2)
+            key(.softLeft, label: "OK", groupID: "soft-keys", column: 0, row: 0),
+            key(.up, label: "▲", groupID: "directions", column: 2, row: 0),
+            key(.softRight, label: "Back", groupID: "soft-keys", column: 4, row: 0),
+            key(.left, label: "◀", groupID: "directions", column: 1, row: 1),
+            key(.fire, label: "Bắn", groupID: "directions", column: 2, row: 1),
+            key(.right, label: "▶", groupID: "directions", column: 3, row: 1),
+            key(.down, label: "▼", groupID: "directions", column: 2, row: 2)
         ]
         return KeyboardLayoutDefinition(
-            metricColumns: 6,
+            metricColumns: 5,
             contentColumns: 5,
             rows: 3,
-            keyHeightFactor: 0.75,
+            keyHeightFactor: 0.8,
             controls: controls
         )
     }
@@ -1411,3 +1410,360 @@ private extension Color {
         )
     }
 }
+
+
+// MARK: - Army 2 Coffee: ban phim 4x2 duoi man hinh doc
+//
+//   F1 (phim mem trai) | ▲ | LUC MAX | F2 (phim mem phai)
+//   ◀                  | ▼ |    ▶    | OK (ban / chon)
+//
+// Moi o gui nhan khi cham va nha khi buong (giu OK de tang luc, buong la ban).
+// LUC MAX: giu phim ban du lau de luc len toi da (game tu ban khi day luc).
+// Truot ngon tay giua cac phim huong doi phim ngay, khong can nhac tay.
+
+struct Army2KeypadView: View {
+    @EnvironmentObject private var session: EmulatorSession
+
+    static let columns = 4
+    static let rows = 2
+
+    var body: some View {
+#if canImport(UIKit)
+        Army2PadRepresentable { key, pressed in
+            session.send(key, pressed: pressed)
+        }
+        .aspectRatio(
+            CGFloat(Self.columns) / CGFloat(Self.rows),
+            contentMode: .fit
+        )
+        .frame(maxWidth: .infinity)
+        .background(Color.white.ignoresSafeArea(edges: .bottom))
+#else
+        EmptyView()
+#endif
+    }
+}
+
+#if canImport(UIKit)
+private enum Army2KeypadLabels {
+    // chu vang cua game (font/font -> fcg14m.png), ve san thanh PNG nho
+    static let f1 = "iVBORw0KGgoAAAANSUhEUgAAAA4AAAANCAYAAACZ3F9/AAAAWklEQVR42rWQsQkAMQwDta7G+H1+nd/ky4BDClW5kCLEoEa+A2PZLkmYsYN9OlU9lIDYn4pvwqcCsxc1Zi8CcEf8EjwVGS6nWYl/giIwp2KrBEVmbK8ekkGmA+NdNXYox4jOAAAAAElFTkSuQmCC"
+    static let f2 = "iVBORw0KGgoAAAANSUhEUgAAABIAAAANCAYAAACkTj4ZAAAAdUlEQVR42p2T2wmAMBAEr92UYT+2Yyd+CitCYAJ3cUMO5sddh5BHtNYUESU9C9vpIx01FH3HishtL6QT8rJznr950UeWexFQYJBsibyEzb5gdvz0YOzUImZJgugGRDmnAwg3RBNx6BEkETkA/5T3hBnz3/f2AvXCn2XyKtfOAAAAAElFTkSuQmCC"
+    static let ok = "iVBORw0KGgoAAAANSUhEUgAAABMAAAANCAYAAABLjFUnAAAAcklEQVR42rWTwQnAMAwDva7G6D5dp5v0WXDRp8LI4EeawD2kJBfycHAByIho4Z7OlJ6U/B3Ko0dC60nNKpz+IlF22SmY5873AazIXLQgM9EO2SWYx05IuC5zYeYtmOeuzSYzxgeUNQFP9ugL1pOSf53NF9V35P4CqFKZAAAAAElFTkSuQmCC"
+    static let lucMax = "iVBORw0KGgoAAAANSUhEUgAAAEIAAAASCAMAAADYBPgtAAAAGFBMVEUAAAAAAABpaWn/rAD/gQD8/wD/9AD/1QAKf4Y0AAAAAXRSTlMAQObYZgAAAMZJREFUeNqtlFEKhDAMRPPGrt7/xkvTpGKwsOLOx8yQyCsK1aoEsneiNeyZBChTQGvCpbrPrEHzY0d2a6K5BoPRFM+JsWBOKYg0F4loaIRFxsnBZds2zEYWM593hctzFrclQoASkYLZxGwrhKWI0+peJOE3BDfvKIJgHMdB5rRA5Fyo7vvAV0tEfou6DyFmM/Z9B+RZzBFRYurKNsw4Z6XdIIqJgfi40Cxnc0RvmRdDph4mXDqLre/IxXRzrx35XO8Q//rbfAHXcgiSVBcmkgAAAABJRU5ErkJggg=="
+
+    static func image(_ base64: String) -> UIImage? {
+        guard let data = Data(base64Encoded: base64) else { return nil }
+        return UIImage(data: data, scale: 1)
+    }
+}
+
+private struct Army2PadRepresentable: UIViewRepresentable {
+    let onKey: (J2MEKey, Bool) -> Void
+
+    func makeUIView(context: Context) -> Army2PadHostView {
+        let view = Army2PadHostView()
+        view.onKey = onKey
+        return view
+    }
+
+    func updateUIView(_ uiView: Army2PadHostView, context: Context) {
+        uiView.onKey = onKey
+    }
+
+    static func dismantleUIView(_ uiView: Army2PadHostView, coordinator: Void) {
+        uiView.releaseAll()
+        uiView.onKey = nil
+    }
+}
+
+final class Army2PadHostView: UIView {
+    private enum Action: Equatable {
+        case key(J2MEKey)
+        case lucMax
+    }
+
+    private struct Cell {
+        let action: Action
+        let label: String?
+        let symbol: String?
+    }
+
+    /// thoi gian giu phim ban cho LUC MAX (luc toi da = 30 khung hinh ~ 1 giay)
+    static let lucMaxHold: TimeInterval = 1.6
+
+    var onKey: ((J2MEKey, Bool) -> Void)?
+
+    private let cells: [Cell] = [
+        Cell(action: .key(.softLeft), label: Army2KeypadLabels.f1, symbol: nil),
+        Cell(action: .key(.up), label: nil, symbol: "chevron.up"),
+        Cell(action: .lucMax, label: Army2KeypadLabels.lucMax, symbol: nil),
+        Cell(action: .key(.softRight), label: Army2KeypadLabels.f2, symbol: nil),
+        Cell(action: .key(.left), label: nil, symbol: "chevron.left"),
+        Cell(action: .key(.down), label: nil, symbol: "chevron.down"),
+        Cell(action: .key(.right), label: nil, symbol: "chevron.right"),
+        Cell(action: .key(.fire), label: Army2KeypadLabels.ok, symbol: nil)
+    ]
+    private var cellViews: [UIView] = []
+    private var labelViews: [UIImageView] = []
+    private var labelImages: [UIImage?] = []
+    private var touchCells: [ObjectIdentifier: Int] = [:]
+    private var cellTouchCount: [Int] = []
+    private var keyOwners: [J2MEKey: Int] = [:]
+    private var lucMaxActive = false
+    private var lucMaxWork: DispatchWorkItem?
+    private let haptic = UIImpactFeedbackGenerator(style: .light)
+
+    private let normalColor = UIColor.white
+    private let pressedColor = UIColor(red: 0.80, green: 0.91, blue: 1.0, alpha: 1)
+    private let lineColor = UIColor(red: 0.63, green: 0.81, blue: 0.93, alpha: 1)
+    private let arrowColor = UIColor(red: 0.27, green: 0.30, blue: 0.36, alpha: 1)
+
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        setup()
+    }
+
+    required init?(coder: NSCoder) {
+        super.init(coder: coder)
+        setup()
+    }
+
+    private func setup() {
+        backgroundColor = normalColor
+        isMultipleTouchEnabled = true
+        isExclusiveTouch = false
+        isAccessibilityElement = false
+        cellTouchCount = Array(repeating: 0, count: cells.count)
+        for cell in cells {
+            let box = UIView()
+            box.isUserInteractionEnabled = false
+            box.backgroundColor = normalColor
+            box.layer.borderColor = lineColor.cgColor
+            box.layer.borderWidth = 0.5
+            let imageView = UIImageView()
+            imageView.isUserInteractionEnabled = false
+            var image: UIImage?
+            if let label = cell.label {
+                image = Army2KeypadLabels.image(label)
+                imageView.image = image
+                imageView.contentMode = .scaleToFill
+                imageView.layer.magnificationFilter = .nearest
+                imageView.layer.minificationFilter = .nearest
+            } else if let symbol = cell.symbol {
+                let configuration = UIImage.SymbolConfiguration(pointSize: 20, weight: .light)
+                imageView.image = UIImage(systemName: symbol, withConfiguration: configuration)?
+                    .withRenderingMode(.alwaysTemplate)
+                imageView.tintColor = arrowColor
+                imageView.contentMode = .center
+            }
+            box.addSubview(imageView)
+            addSubview(box)
+            cellViews.append(box)
+            labelViews.append(imageView)
+            labelImages.append(image)
+        }
+        haptic.prepare()
+    }
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        let columns = Army2KeypadView.columns
+        let rows = Army2KeypadView.rows
+        let cellWidth = bounds.width / CGFloat(columns)
+        let cellHeight = bounds.height / CGFloat(rows)
+        // cung 1 co chu cho moi nhan: theo chu dai nhat (LUC MAX), phong to
+        // so nguyen lan diem anh that cua man hinh de chu pixel net
+        let screenScale = max(window?.screen.scale ?? UIScreen.main.scale, 1)
+        let widest = labelImages.compactMap { $0?.size.width }.max() ?? 1
+        let devicePixels = max(1, floor(cellWidth * 0.8 * screenScale / widest))
+        let labelScale = devicePixels / screenScale
+        for (index, box) in cellViews.enumerated() {
+            let column = index % columns
+            let row = index / columns
+            box.frame = CGRect(
+                x: (CGFloat(column) * cellWidth).rounded(),
+                y: (CGFloat(row) * cellHeight).rounded(),
+                width: (CGFloat(column + 1) * cellWidth).rounded() - (CGFloat(column) * cellWidth).rounded(),
+                height: (CGFloat(row + 1) * cellHeight).rounded() - (CGFloat(row) * cellHeight).rounded()
+            )
+            let imageView = labelViews[index]
+            if let image = labelImages[index] {
+                let size = CGSize(
+                    width: image.size.width * labelScale,
+                    height: image.size.height * labelScale
+                )
+                imageView.frame = CGRect(
+                    x: ((box.bounds.width - size.width) / 2 * screenScale).rounded() / screenScale,
+                    y: ((box.bounds.height - size.height) / 2 * screenScale).rounded() / screenScale,
+                    width: size.width,
+                    height: size.height
+                )
+            } else {
+                imageView.frame = box.bounds
+            }
+        }
+    }
+
+    override func didMoveToWindow() {
+        super.didMoveToWindow()
+        if window == nil {
+            releaseAll()
+        } else {
+            setNeedsLayout()
+        }
+    }
+
+    // ------------------------------------------------------------ cham
+    private func cellIndex(at point: CGPoint) -> Int? {
+        guard bounds.width > 0, bounds.height > 0,
+              point.x >= 0, point.y >= 0,
+              point.x < bounds.width, point.y < bounds.height else {
+            return nil
+        }
+        let columns = Army2KeypadView.columns
+        let rows = Army2KeypadView.rows
+        let column = min(columns - 1, max(0, Int(point.x / (bounds.width / CGFloat(columns)))))
+        let row = min(rows - 1, max(0, Int(point.y / (bounds.height / CGFloat(rows)))))
+        return row * columns + column
+    }
+
+    private func isDirection(_ index: Int) -> Bool {
+        switch cells[index].action {
+        case .key(let key):
+            return key == .up || key == .down || key == .left || key == .right
+        case .lucMax:
+            return false
+        }
+    }
+
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        for touch in touches {
+            guard let index = cellIndex(at: touch.location(in: self)) else { continue }
+            touchCells[ObjectIdentifier(touch)] = index
+            press(index)
+        }
+    }
+
+    override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
+        for touch in touches {
+            let id = ObjectIdentifier(touch)
+            guard let old = touchCells[id],
+                  let now = cellIndex(at: touch.location(in: self)),
+                  now != old,
+                  isDirection(old),
+                  isDirection(now) else {
+                continue
+            }
+            release(old)
+            touchCells[id] = now
+            press(now)
+        }
+    }
+
+    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+        finish(touches)
+    }
+
+    override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
+        finish(touches)
+    }
+
+    private func finish(_ touches: Set<UITouch>) {
+        for touch in touches {
+            if let index = touchCells.removeValue(forKey: ObjectIdentifier(touch)) {
+                release(index)
+            }
+        }
+    }
+
+    func releaseAll() {
+        lucMaxWork?.cancel()
+        lucMaxWork = nil
+        lucMaxActive = false
+        touchCells.removeAll()
+        for index in cellTouchCount.indices {
+            cellTouchCount[index] = 0
+            setPressed(index, false)
+        }
+        let held = Array(keyOwners.keys)
+        keyOwners.removeAll()
+        for key in held {
+            onKey?(key, false)
+        }
+    }
+
+    // ------------------------------------------------------------ phim
+    private func press(_ index: Int) {
+        cellTouchCount[index] += 1
+        let first = cellTouchCount[index] == 1
+        if first {
+            setPressed(index, true)
+            haptic.impactOccurred()
+            haptic.prepare()
+        }
+        switch cells[index].action {
+        case .key(let key):
+            keyDown(key)
+        case .lucMax:
+            if first {
+                startLucMax(index)
+            }
+        }
+    }
+
+    private func release(_ index: Int) {
+        guard cellTouchCount[index] > 0 else { return }
+        cellTouchCount[index] -= 1
+        if case .key(let key) = cells[index].action {
+            keyUp(key)
+        }
+        if cellTouchCount[index] == 0 {
+            if cells[index].action == .lucMax, lucMaxActive {
+                return
+            }
+            setPressed(index, false)
+        }
+    }
+
+    private func startLucMax(_ index: Int) {
+        guard !lucMaxActive else { return }
+        lucMaxActive = true
+        keyDown(.fire)
+        let work = DispatchWorkItem { [weak self] in
+            guard let self = self else { return }
+            self.lucMaxActive = false
+            self.lucMaxWork = nil
+            self.keyUp(.fire)
+            if self.cellTouchCount[index] == 0 {
+                self.setPressed(index, false)
+            }
+        }
+        lucMaxWork = work
+        DispatchQueue.main.asyncAfter(deadline: .now() + Self.lucMaxHold, execute: work)
+    }
+
+    private func keyDown(_ key: J2MEKey) {
+        let owners = keyOwners[key, default: 0]
+        keyOwners[key] = owners + 1
+        if owners == 0 {
+            onKey?(key, true)
+        }
+    }
+
+    private func keyUp(_ key: J2MEKey) {
+        guard let owners = keyOwners[key] else { return }
+        if owners <= 1 {
+            keyOwners.removeValue(forKey: key)
+            onKey?(key, false)
+        } else {
+            keyOwners[key] = owners - 1
+        }
+    }
+
+    private func setPressed(_ index: Int, _ pressed: Bool) {
+        guard index >= 0, index < cellViews.count else { return }
+        cellViews[index].backgroundColor = pressed ? pressedColor : normalColor
+    }
+}
+#endif

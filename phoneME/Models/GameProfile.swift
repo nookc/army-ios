@@ -427,6 +427,9 @@ struct GameProfile: Codable, Equatable {
     var keyboardTuning: KeyboardTuning?
     var keyboardCustomBaseType: VirtualKeyboardType?
     var keyboardLayoutCustomization: KeyboardLayoutCustomization?
+    // Army 2 Coffee: ban phim 4x2 rieng (F1 ▲ LUC MAX F2 / ◀ ▼ ▶ OK) dat duoi
+    // man hinh doc. Optional de JSON cu van doc duoc; nil = khong dung.
+    var army2Keypad: Bool?
 
     static let defaultFrameRate = 30
     static let maximumFrameRate = 60

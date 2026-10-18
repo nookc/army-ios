@@ -258,8 +258,11 @@ struct LibraryView: View {
                   let game = library.seedBundledGame() else {
                 return
             }
-            if !profiles.hasProfile(for: game) {
+            let defaults = UserDefaults.standard
+            if !profiles.hasProfile(for: game) ||
+                defaults.integer(forKey: Self.army2CoffeeProfileVersionKey) < Self.army2CoffeeProfileVersion {
                 profiles.save(army2CoffeeProfile(), for: game)
+                defaults.set(Self.army2CoffeeProfileVersion, forKey: Self.army2CoffeeProfileVersionKey)
             }
             activeGame = game
         }
@@ -679,26 +682,49 @@ struct LibraryView: View {
         return String(baseName.prefix(80)) + "-RMS"
     }
 
-    /// Cau hinh mac dinh cho Army 2 Coffee: man ngang, cao 360, rong theo ti le man hinh may, dung cam ung.
+    /// Phien ban cau hinh Army 2 Coffee. Tang so nay de app ghi de cau hinh cu 1 lan khi cap nhat.
+    /// 1: man ngang (ban dau). 2: man doc + ban phim 4x2 duoi man hinh.
+    static let army2CoffeeProfileVersion = 2
+    static let army2CoffeeProfileVersionKey = "army2coffee.profileVersion"
+
+    /// Cau hinh mac dinh cho Army 2 Coffee: man doc, rong 320, cao vua phan tren ban phim 4x2
+    /// (o vuong, chiem nua be rong man hinh), dung cam ung + vuot cuon.
     private func army2CoffeeProfile() -> GameProfile {
         var profile = GameProfile()
-        let height = 360
-        var width = 640
+        let width = 320
+        var height = 460
 #if os(iOS)
         let bounds = UIScreen.main.bounds
-        let longSide = Double(max(bounds.width, bounds.height))
         let shortSide = Double(max(min(bounds.width, bounds.height), 1))
-        width = Int((Double(height) * longSide / shortSide).rounded())
-        width -= width % 2
-        width = min(max(width, 480), 960)
+        let longSide = Double(max(bounds.width, bounds.height))
+        var insets = UIEdgeInsets.zero
+        if let window = UIApplication.shared.connectedScenes
+            .compactMap({ $0 as? UIWindowScene })
+            .flatMap(\.windows)
+            .first(where: \.isKeyWindow) {
+            insets = window.safeAreaInsets
+        }
+        // may co tai tho / Dynamic Island: le tren (man doc) ~47-59, le duoi 34; may co nut Home: 20 / 0
+        let largest = Double(max(insets.top, insets.bottom, insets.left, insets.right))
+        let hasHomeIndicator = largest > 24
+        let topInset = hasHomeIndicator ? max(largest, 47) : 20
+        let bottomInset = hasHomeIndicator ? 34.0 : 0
+        let keypadHeight = shortSide / 2      // 4 cot x 2 hang o vuong
+        let canvasPoints = longSide - topInset - bottomInset - keypadHeight
+        var computed = Int((Double(width) * canvasPoints / shortSide).rounded())
+        computed -= computed % 2
+        height = min(max(computed, 360), 600)
 #endif
         profile.screenWidth = width
         profile.screenHeight = height
-        profile.orientation = .landscape
-        profile.screenGravity = .center
+        profile.orientation = .portrait
+        profile.screenGravity = .top
         profile.scaleType = .fit
         profile.touchInput = true
         profile.showVirtualKeyboard = false
+        profile.army2Keypad = true
+        profile.showAppBar = false
+        profile.showStatusBar = true
         return profile
     }
 
