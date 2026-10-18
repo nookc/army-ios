@@ -7,9 +7,12 @@ on:
         description: "thuong = IPA chua ky (eSign, Scarlet, AltStore, Sideloadly); trollstore = .tipa co JIT"
         type: choice
         options: [thuong, trollstore, ca-hai]
-        default: thuong
+        default: ca-hai
   push:
     branches: [main]
+
+permissions:
+  contents: write
 
 jobs:
   build:
@@ -43,11 +46,43 @@ jobs:
           ls -la Army2Coffee.ipa
 
       - name: Build TrollStore (.tipa)
-        if: ${{ inputs.loai == 'trollstore' || inputs.loai == 'ca-hai' }}
+        if: ${{ github.event_name == 'push' || inputs.loai == 'trollstore' || inputs.loai == 'ca-hai' }}
         run: |
           brew install ldid
           bash Scripts/build-trollstore-tipa.sh --output "$PWD/Army2Coffee-TrollStore.tipa" \
             --derived-data "$PWD/.build/trollstore" 2>&1 | tail -40
+
+      - name: Day IPA va log len nhanh ban-build
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          rm -rf /tmp/pub && mkdir -p /tmp/pub
+          for f in Army2Coffee.ipa Army2Coffee-TrollStore.tipa; do [ -f "$f" ] && cp "$f" /tmp/pub/; done
+          for f in build-thuong.log Artifacts/*.log; do
+            [ -f "$f" ] || continue
+            grep -E "error:|warning: unable|BUILD (SUCCEEDED|FAILED)|\*\* " "$f" | tail -200 > "/tmp/pub/$(basename "$f" .log)-loi.txt" || true
+            tail -400 "$f" > "/tmp/pub/$(basename "$f" .log)-cuoi.txt"
+          done
+          echo "run ${GITHUB_RUN_NUMBER} sha ${GITHUB_SHA} status ${{ job.status }}" > /tmp/pub/KET_QUA.txt
+          cd /tmp/pub
+          git init -q -b ban-build
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git add -A
+          git commit -q -m "Build ${GITHUB_RUN_NUMBER} (${GITHUB_SHA::7}) ${{ job.status }}"
+          git push -q -f "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" ban-build
+
+      - name: Tao Release de tai IPA
+        if: success()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          FILES=""
+          for f in Army2Coffee.ipa Army2Coffee-TrollStore.tipa; do [ -f "$f" ] && FILES="$FILES $f"; done
+          gh release delete ios-moi-nhat -y --cleanup-tag || true
+          gh release create ios-moi-nhat $FILES --title "Army 2 Coffee iOS - build ${GITHUB_RUN_NUMBER}" \
+            --notes "IPA chua ky: ky bang eSign, Scarlet, AltStore hoac Sideloadly. File .tipa (neu co): cai bang TrollStore." --latest
 
       - uses: actions/upload-artifact@v4
         with:
