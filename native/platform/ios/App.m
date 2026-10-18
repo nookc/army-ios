@@ -250,6 +250,7 @@ int plat_sound_create(const uint8_t *data, int len, const char *type) {
     NSData *d = [NSData dataWithBytes:data length:(NSUInteger)len];
     NSError *err = nil;
     AVAudioPlayer *p = [[AVAudioPlayer alloc] initWithData:d error:&err];
+    NSLog(@"[am thanh] %s %d byte: %@", type, len, p ? @"ok" : err.localizedDescription);
     pthread_mutex_lock(&gSoundMu);
     if (!gSounds) gSounds = [NSMutableDictionary dictionary];
     int h = gSoundNext++;
@@ -336,6 +337,15 @@ static void autotest(void) {
         }
         usleep(1500000);
         save_png(@"t5_go_ten");
+        /* cham 2 lan vao o mat khau -> game mo TextBox -> hop nhap chu cua iOS (anh simctl o cuoi) */
+        for (int k = 0; k < 2; k++) {
+            j2n_post(J2N_POINTER_PRESS, 188, gH - 89);
+            usleep(80000);
+            j2n_post(J2N_POINTER_RELEASE, 188, gH - 89);
+            usleep(700000);
+        }
+        usleep(1500000);
+        save_png(@"t6_cham_mat_khau");
         /* do toc do: dem khung trong 10 giay */
         int f0 = j2n_frames();
         usleep(10000000);

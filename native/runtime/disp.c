@@ -202,6 +202,8 @@ typedef struct mstart {
 static void *main_entry(void *arg) {
     /* luong Java chinh: tao ngu canh rieng */
     extern int rt_attach_thread(jctx *ctx);
+    extern void rt_thread_qos(void);
+    rt_thread_qos();
     jctx *c = (jctx *)GC_MALLOC_UNCOLLECTABLE(sizeof(jctx));
     memset(c, 0, sizeof *c);
     c->id = 1;

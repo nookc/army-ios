@@ -64,6 +64,16 @@ CC1
   if [ "$SDK" = iphonesimulator ]; then
     /usr/libexec/PlistBuddy -c "Set :CFBundleSupportedPlatforms:0 iPhoneSimulator" "$APP/Info.plist"
   fi
+  # khoa DT* nhu Xcode them (mot so cong cu ky / cai dat can)
+  local SV
+  SV=$(xcrun --sdk "$SDK" --show-sdk-version)
+  local PB=/usr/libexec/PlistBuddy
+  $PB -c "Add :DTPlatformName string $SDK" "$APP/Info.plist"
+  $PB -c "Add :DTPlatformVersion string $SV" "$APP/Info.plist"
+  $PB -c "Add :DTSDKName string $SDK$SV" "$APP/Info.plist"
+  $PB -c "Add :DTXcode string $(xcodebuild -version | head -1 | awk '{print $2}' | tr -d .)" "$APP/Info.plist" || true
+  $PB -c "Add :UIRequiredDeviceCapabilities array" -c "Add :UIRequiredDeviceCapabilities:0 string arm64" "$APP/Info.plist"
+
   plutil -convert binary1 "$APP/Info.plist"
   cp "$JAR" "$APP/Army2Coffee.jar"
   cp "$N/platform/ios/res/AppIcon60x60@2x.png" "$N/platform/ios/res/AppIcon60x60@3x.png" "$APP/"

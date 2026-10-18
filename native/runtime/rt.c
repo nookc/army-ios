@@ -86,7 +86,7 @@ jobj rt_newarr(jctx *t, jclass *ak, int32_t n) {
     if (ak->etype == 'L') {
         a = (jarray *)GC_MALLOC(sz);
     } else {
-        a = (jarray *)(sz > 65536 ? GC_MALLOC_ATOMIC_IGNORE_OFF_PAGE(sz) : GC_MALLOC_ATOMIC(sz));
+        a = (jarray *)GC_MALLOC_ATOMIC(sz);   /* khong dung IGNORE_OFF_PAGE: native giu con tro vao giua mang */
         if (a) memset(a, 0, sz);
     }
     if (UNLIKELY(!a)) {
@@ -629,10 +629,21 @@ typedef struct tstart {
     jctx *ctx;
 } tstart;
 
+#ifdef __APPLE__
+#include <pthread/qos.h>
+#endif
+/* luong Java tren iOS: uu tien tuong tac (khong bi gom hen gio / ha xung nhip nhu luong mac dinh) */
+void rt_thread_qos(void) {
+#ifdef __APPLE__
+    pthread_set_qos_class_self_np(QOS_CLASS_USER_INTERACTIVE, 0);
+#endif
+}
+
 static void *thread_main(void *arg) {
     tstart *st = (tstart *)arg;
     jctx *c = st->ctx;
     free(st);
+    rt_thread_qos();
     tl_ctx = c;
     if (rt_thread_run_hook) rt_thread_run_hook(c, c->thread);
     if (c->exc) {
