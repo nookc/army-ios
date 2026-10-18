@@ -1,0 +1,67 @@
+name: Build Army 2 Coffee iOS
+
+on:
+  workflow_dispatch:
+    inputs:
+      loai:
+        description: "thuong = IPA chua ky (eSign, Scarlet, AltStore, Sideloadly); trollstore = .tipa co JIT"
+        type: choice
+        options: [thuong, trollstore, ca-hai]
+        default: thuong
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: macos-15
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Chon Xcode moi nhat
+        run: |
+          XC=$(ls -d /Applications/Xcode_*.app | grep -vi beta | sort -V | tail -1)
+          echo "Dung $XC"
+          sudo xcode-select -s "$XC/Contents/Developer"
+          xcodebuild -version
+          command -v rg >/dev/null || brew install ripgrep
+
+      - name: Build IPA thuong
+        if: ${{ github.event_name == 'push' || inputs.loai == 'thuong' || inputs.loai == 'ca-hai' }}
+        run: |
+          set -o pipefail
+          xcodebuild -project phoneME.xcodeproj -scheme phoneME -configuration Release \
+            -destination 'generic/platform=iOS' -derivedDataPath .build/device \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY='' \
+            build 2>&1 | tee build-thuong.log | grep -E "error:|\*\* BUILD" || true
+          test "${PIPESTATUS[0]}" = "0"
+          APP=$(find .build/device/Build/Products -type d -path '*-iphoneos/phoneME.app' | head -1)
+          test -n "$APP"
+          test -f "$APP/Army2Coffee.jar"
+          rm -rf out && mkdir -p out/Payload && cp -R "$APP" out/Payload/
+          (cd out && zip -qry ../Army2Coffee.ipa Payload)
+          ls -la Army2Coffee.ipa
+
+      - name: Build TrollStore (.tipa)
+        if: ${{ inputs.loai == 'trollstore' || inputs.loai == 'ca-hai' }}
+        run: |
+          brew install ldid
+          bash Scripts/build-trollstore-tipa.sh --output "$PWD/Army2Coffee-TrollStore.tipa" \
+            --derived-data "$PWD/.build/trollstore" 2>&1 | tail -40
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Army2Coffee-iOS
+          path: |
+            Army2Coffee.ipa
+            Army2Coffee-TrollStore.tipa
+          if-no-files-found: error
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: build-logs
+          path: |
+            build-thuong.log
+            Artifacts/*.log
+          if-no-files-found: ignore

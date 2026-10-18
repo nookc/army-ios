@@ -1,0 +1,50 @@
+{
+  "schema_version": 2,
+  "description": "Pinned real-game corpus for repeatable phoneME performance and thermal A/B runs.",
+  "benchmarks": [
+    {
+      "id": "ninja-school-offline",
+      "category": "2d-offline-rpg",
+      "jar": "jar_test/NinjaSchoolOffline_2.1.7_v1.jar",
+      "sha256": "0de8f92b5a92541298f9e433296196b33526e7c1ae6cf6d87b72db2aab6b7cde",
+      "observe_ms": 10000,
+      "timeout_seconds": 120,
+      "autoplay": true,
+      "width": 240,
+      "height": 320
+    },
+    {
+      "id": "army2-offline",
+      "category": "2d-offline-action",
+      "jar": "jar_test/Army2_Offline_1.6.19.jar",
+      "sha256": "2c648faa6b47a7941af40350bff1168ef517711198f106ba0d5eb59157d3d067",
+      "observe_ms": 10000,
+      "timeout_seconds": 120,
+      "autoplay": true,
+      "width": 240,
+      "height": 320
+    },
+    {
+      "id": "majesty-northern-expansion",
+      "category": "large-landscape-strategy",
+      "jar": "jar_test/[1.4.14][640x360]Majesty_The_Northern_Expansion_vi_Full.jar",
+      "sha256": "5c463ed7c5e36b1ca7b884fdcf23b4a9f450c38910df710d374c010e4c3a9e5c",
+      "observe_ms": 10000,
+      "timeout_seconds": 120,
+      "autoplay": true,
+      "width": 640,
+      "height": 360
+    },
+    {
+      "id": "zombie-infection",
+      "category": "2d-gameloft-action",
+      "jar": "jar_test/Zombie Infection VH By Sykeo99 J2ME loader Only 240x320.jar",
+      "sha256": "5d53c3de01059af051c0e32a08085300bd66c28702d94ed35e05873a47e5e853",
+      "observe_ms": 10000,
+      "timeout_seconds": 120,
+      "autoplay": true,
+      "width": 240,
+      "height": 320
+    }
+  ]
+}
