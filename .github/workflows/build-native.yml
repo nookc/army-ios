@@ -63,6 +63,18 @@ jobs:
           git commit -q -m "Build native ${GITHUB_RUN_NUMBER} (${GITHUB_SHA::7}) ${{ job.status }}"
           git push -q -f "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" ban-build-native
 
+      - name: Tao Release (ban thu) de tai IPA tren dien thoai
+        if: success()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          [ -f native/build/ios/Army2Coffee-Native.ipa ] || exit 0
+          cp native/build/ios/Army2Coffee-Native.ipa Army2Coffee-Native.ipa
+          gh release delete ios-thuan-moi-nhat -y --cleanup-tag || true
+          gh release create ios-thuan-moi-nhat Army2Coffee-Native.ipa --prerelease --latest=false \
+            --title "Army 2 Coffee iOS thuan (ban thu) - build ${GITHUB_RUN_NUMBER}" \
+            --notes "Ban iOS thuan: client dich san sang ma may, khong qua bo thong dich. IPA chua ky: ky bang eSign, Scarlet, AltStore, Sideloadly (TrollStore tu ky). Cai song song voi app cu (ma goi vn.army2coffee.native)."
+
       - uses: actions/upload-artifact@v4
         if: always()
         with:

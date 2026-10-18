@@ -15,6 +15,7 @@
 #include <fcntl.h>
 #include <signal.h>
 #include <time.h>
+#include <mach/mach.h>
 #include "platform.h"
 #import "PadView.h"
 
@@ -374,7 +375,7 @@ static void save_png(NSString *name) {
 static void autotest(void) {
     dispatch_async(dispatch_get_global_queue(QOS_CLASS_USER_INITIATED, 0), ^{
         struct { int ms; int key; const char *shot; } steps[] = {
-            {7000, 0, "t1_cauhinh"}, {300, -5, NULL}, {3500, 0, "t2_amthanh"}, {300, -7, NULL},
+            {7000, 0, "t1_cauhinh"}, {300, -5, NULL}, {3500, 0, "t2_amthanh"}, {300, -6, NULL}, /* Bat am thanh (thu nhac MIDI) */
             {5000, 0, "t3_gioithieu"}, {300, -7, NULL}, {5000, 0, "t4_dangnhap"},
         };
         for (size_t i = 0; i < sizeof steps / sizeof steps[0]; i++) {
@@ -400,7 +401,11 @@ static void autotest(void) {
         int f0 = j2n_frames();
         usleep(10000000);
         int f1 = j2n_frames();
-        NSString *r = [NSString stringWithFormat:@"fps %.1f\n", (f1 - f0) / 10.0];
+        struct mach_task_basic_info ti;
+        mach_msg_type_number_t tn = MACH_TASK_BASIC_INFO_COUNT;
+        long ram = task_info(mach_task_self(), MACH_TASK_BASIC_INFO, (task_info_t)&ti, &tn) == KERN_SUCCESS
+                       ? (long)(ti.resident_size >> 20) : -1;
+        NSString *r = [NSString stringWithFormat:@"fps %.1f\nram %ld MB\n", (f1 - f0) / 10.0, ram];
         [r writeToFile:[gDataDir stringByAppendingPathComponent:@"autotest.txt"] atomically:YES encoding:NSUTF8StringEncoding error:nil];
         NSLog(@"[autotest] toc do %@", r);
         /* cham 2 lan vao o mat khau -> game mo TextBox -> hop nhap chu cua iOS (anh simctl o cuoi) */
