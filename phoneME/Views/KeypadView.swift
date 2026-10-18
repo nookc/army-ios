@@ -1480,7 +1480,6 @@ private struct Army2PadRepresentable: UIViewRepresentable {
 final class Army2PadHostView: UIView {
     private enum Action: Equatable {
         case key(J2MEKey)
-        case lucMax
     }
 
     private struct Cell {
@@ -1489,15 +1488,13 @@ final class Army2PadHostView: UIView {
         let symbol: String?
     }
 
-    /// thoi gian giu phim ban cho LUC MAX (luc toi da = 30 khung hinh ~ 1 giay)
-    static let lucMaxHold: TimeInterval = 1.6
-
     var onKey: ((J2MEKey, Bool) -> Void)?
 
     private let cells: [Cell] = [
         Cell(action: .key(.softLeft), label: Army2KeypadLabels.f1, symbol: nil),
         Cell(action: .key(.up), label: nil, symbol: "chevron.up"),
-        Cell(action: .lucMax, label: Army2KeypadLabels.lucMax, symbol: nil),
+        // LUC MAX: ma phim rieng -40, client mo hop "Luc ban" (giong Menu > LUC MAX trong tran)
+        Cell(action: .key(.lucMax), label: Army2KeypadLabels.lucMax, symbol: nil),
         Cell(action: .key(.softRight), label: Army2KeypadLabels.f2, symbol: nil),
         Cell(action: .key(.left), label: nil, symbol: "chevron.left"),
         Cell(action: .key(.down), label: nil, symbol: "chevron.down"),
@@ -1510,8 +1507,6 @@ final class Army2PadHostView: UIView {
     private var touchCells: [ObjectIdentifier: Int] = [:]
     private var cellTouchCount: [Int] = []
     private var keyOwners: [J2MEKey: Int] = [:]
-    private var lucMaxActive = false
-    private var lucMaxWork: DispatchWorkItem?
     private let haptic = UIImpactFeedbackGenerator(style: .light)
 
     private let normalColor = UIColor.white
@@ -1632,8 +1627,6 @@ final class Army2PadHostView: UIView {
         switch cells[index].action {
         case .key(let key):
             return key == .up || key == .down || key == .left || key == .right
-        case .lucMax:
-            return false
         }
     }
 
@@ -1678,9 +1671,6 @@ final class Army2PadHostView: UIView {
     }
 
     func releaseAll() {
-        lucMaxWork?.cancel()
-        lucMaxWork = nil
-        lucMaxActive = false
         touchCells.removeAll()
         for index in cellTouchCount.indices {
             cellTouchCount[index] = 0
@@ -1705,10 +1695,6 @@ final class Army2PadHostView: UIView {
         switch cells[index].action {
         case .key(let key):
             keyDown(key)
-        case .lucMax:
-            if first {
-                startLucMax(index)
-            }
         }
     }
 
@@ -1719,28 +1705,8 @@ final class Army2PadHostView: UIView {
             keyUp(key)
         }
         if cellTouchCount[index] == 0 {
-            if cells[index].action == .lucMax, lucMaxActive {
-                return
-            }
             setPressed(index, false)
         }
-    }
-
-    private func startLucMax(_ index: Int) {
-        guard !lucMaxActive else { return }
-        lucMaxActive = true
-        keyDown(.fire)
-        let work = DispatchWorkItem { [weak self] in
-            guard let self = self else { return }
-            self.lucMaxActive = false
-            self.lucMaxWork = nil
-            self.keyUp(.fire)
-            if self.cellTouchCount[index] == 0 {
-                self.setPressed(index, false)
-            }
-        }
-        lucMaxWork = work
-        DispatchQueue.main.asyncAfter(deadline: .now() + Self.lucMaxHold, execute: work)
     }
 
     private func keyDown(_ key: J2MEKey) {
