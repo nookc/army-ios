@@ -238,8 +238,10 @@ void plat_exit(void) {
     exit(0);
 }
 
-const char *plat_data_dir(void) { return gDataDir.fileSystemRepresentation; }
-const char *plat_jar_path(void) { return gJar.fileSystemRepresentation; }
+/* duong dan C chep san mot lan (fileSystemRepresentation la bo nho autorelease) */
+static char gDataDirC[1024], gJarC[1024];
+const char *plat_data_dir(void) { return gDataDirC; }
+const char *plat_jar_path(void) { return gJarC[0] ? gJarC : NULL; }
 
 /* nhat ky ra Documents/log.txt (xem trong app Tep: "Tren iPhone" > Army 2 Coffee) */
 static FILE *gLog;
@@ -432,6 +434,8 @@ static void autotest(void) {
     gDataDir = [docs stringByAppendingPathComponent:@"rms"];
     [NSFileManager.defaultManager createDirectoryAtPath:gDataDir withIntermediateDirectories:YES attributes:nil error:nil];
     gJar = [NSBundle.mainBundle pathForResource:@"Army2Coffee" ofType:@"jar"];
+    strlcpy(gDataDirC, gDataDir.fileSystemRepresentation, sizeof gDataDirC);
+    if (gJar) strlcpy(gJarC, gJar.fileSystemRepresentation, sizeof gJarC);
     [AVAudioSession.sharedInstance setCategory:AVAudioSessionCategoryAmbient error:nil];
 
     /* kich thuoc Canvas: rong 320, cao vua phan tren ban phim 4x2 (giong app cu) */
