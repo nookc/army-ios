@@ -77,6 +77,17 @@ CC1
   plutil -convert binary1 "$APP/Info.plist"
   cp "$JAR" "$APP/Army2Coffee.jar"
   cp "$N/platform/ios/res/AppIcon60x60@2x.png" "$N/platform/ios/res/AppIcon60x60@3x.png" "$APP/"
+  # bieu tuong: Assets.car bang actool nhu Xcode (Info.plist co CFBundleIconName=AppIcon); loi thi van con PNG o tren
+  local XA="$OUT/Assets.xcassets"
+  rm -rf "$XA" && mkdir -p "$XA/AppIcon.appiconset"
+  cp "$N/platform/ios/res/AppIcon-1024.png" "$XA/AppIcon.appiconset/icon1024.png"
+  echo '{"info":{"version":1,"author":"xcode"}}' > "$XA/Contents.json"
+  echo '{"images":[{"filename":"icon1024.png","idiom":"universal","platform":"ios","size":"1024x1024"}],"info":{"version":1,"author":"xcode"}}' \
+    > "$XA/AppIcon.appiconset/Contents.json"
+  xcrun actool --compile "$APP" --platform "$SDK" --minimum-deployment-target 15.0 --target-device iphone \
+    --app-icon AppIcon --output-partial-info-plist "$OUT/icon-info.plist" --output-format human-readable-text "$XA" \
+    | tail -5 || echo "actool loi: chi dung PNG"
+  [ -f "$APP/Assets.car" ] && echo "co Assets.car" || echo "KHONG co Assets.car"
   printf 'APPL????' > "$APP/PkgInfo"
   ls -la "$APP"
 }
