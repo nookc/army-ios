@@ -11,6 +11,10 @@
 #import <AudioToolbox/AudioToolbox.h>
 #include <pthread.h>
 #include <unistd.h>
+#include <execinfo.h>
+#include <fcntl.h>
+#include <signal.h>
+#include <time.h>
 #include "platform.h"
 #import "PadView.h"
 
@@ -236,8 +240,63 @@ void plat_exit(void) {
 const char *plat_data_dir(void) { return gDataDir.fileSystemRepresentation; }
 const char *plat_jar_path(void) { return gJar.fileSystemRepresentation; }
 
+/* nhat ky ra Documents/log.txt (xem trong app Tep: "Tren iPhone" > Army 2 Coffee) */
+static FILE *gLog;
+static pthread_mutex_t gLogMu = PTHREAD_MUTEX_INITIALIZER;
+static int gCrashFd = -1;
+
+static void log_open(void) {
+    NSString *docs = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES).firstObject;
+    NSString *p = [docs stringByAppendingPathComponent:@"log.txt"];
+    NSDictionary *at = [NSFileManager.defaultManager attributesOfItemAtPath:p error:nil];
+    if (at && at.fileSize > 2 * 1024 * 1024) {
+        NSString *old = [docs stringByAppendingPathComponent:@"log_cu.txt"];
+        [NSFileManager.defaultManager removeItemAtPath:old error:nil];
+        [NSFileManager.defaultManager moveItemAtPath:p toPath:old error:nil];
+    }
+    gLog = fopen(p.fileSystemRepresentation, "a");
+    NSString *c = [docs stringByAppendingPathComponent:@"crash.txt"];
+    gCrashFd = open(c.fileSystemRepresentation, O_WRONLY | O_CREAT | O_APPEND, 0644);
+}
+
 void plat_log(const char *s) {
-    @autoreleasepool { NSLog(@"%s", s);     }
+    @autoreleasepool { NSLog(@"%s", s); }
+    pthread_mutex_lock(&gLogMu);
+    if (gLog) {
+        time_t now = time(NULL);
+        struct tm tm;
+        localtime_r(&now, &tm);
+        fprintf(gLog, "%02d/%02d %02d:%02d:%02d %s\n", tm.tm_mday, tm.tm_mon + 1, tm.tm_hour, tm.tm_min, tm.tm_sec, s);
+        fflush(gLog);
+    }
+    pthread_mutex_unlock(&gLogMu);
+}
+
+static struct sigaction gOld[32];
+
+static void on_crash(int sig, siginfo_t *si, void *uc) {
+    if (gCrashFd >= 0) {
+        char b[128];
+        time_t now = time(NULL);
+        int n = snprintf(b, sizeof b, "\n=== SAP: tin hieu %d dia chi %p luc %ld\n", sig, si ? si->si_addr : 0, (long)now);
+        write(gCrashFd, b, (size_t)n);
+        void *bt[64];
+        int k = backtrace(bt, 64);
+        backtrace_symbols_fd(bt, k, gCrashFd);
+    }
+    sigaction(sig, &gOld[sig], NULL);
+    raise(sig);
+}
+
+static void crash_install(void) {
+    int sigs[] = {SIGSEGV, SIGBUS, SIGILL, SIGFPE, SIGABRT, SIGTRAP};
+    for (size_t i = 0; i < sizeof sigs / sizeof sigs[0]; i++) {
+        struct sigaction sa;
+        memset(&sa, 0, sizeof sa);
+        sa.sa_sigaction = on_crash;
+        sa.sa_flags = SA_SIGINFO | SA_ONSTACK;
+        sigaction(sigs[i], &sa, &gOld[sigs[i]]);
+    }
 }
 
 /* ---- am thanh: WAV (AVAudioPlayer). MIDI: chua co bo am -> im lang */
@@ -337,6 +396,13 @@ static void autotest(void) {
         }
         usleep(1500000);
         save_png(@"t5_go_ten");
+        /* do toc do khi Canvas dang hien (truoc khi mo hop nhap chu): dem khung trong 10 giay */
+        int f0 = j2n_frames();
+        usleep(10000000);
+        int f1 = j2n_frames();
+        NSString *r = [NSString stringWithFormat:@"fps %.1f\n", (f1 - f0) / 10.0];
+        [r writeToFile:[gDataDir stringByAppendingPathComponent:@"autotest.txt"] atomically:YES encoding:NSUTF8StringEncoding error:nil];
+        NSLog(@"[autotest] toc do %@", r);
         /* cham 2 lan vao o mat khau -> game mo TextBox -> hop nhap chu cua iOS (anh simctl o cuoi) */
         for (int k = 0; k < 2; k++) {
             j2n_post(J2N_POINTER_PRESS, 188, gH - 89);
@@ -346,13 +412,7 @@ static void autotest(void) {
         }
         usleep(1500000);
         save_png(@"t6_cham_mat_khau");
-        /* do toc do: dem khung trong 10 giay */
-        int f0 = j2n_frames();
-        usleep(10000000);
-        int f1 = j2n_frames();
-        NSString *r = [NSString stringWithFormat:@"fps %.1f\n", (f1 - f0) / 10.0];
-        [r writeToFile:[gDataDir stringByAppendingPathComponent:@"autotest.txt"] atomically:YES encoding:NSUTF8StringEncoding error:nil];
-        NSLog(@"[autotest] xong %@", r);
+        NSLog(@"[autotest] xong");
     });
 }
 
@@ -392,7 +452,13 @@ static void autotest(void) {
     self.window.rootViewController = vc;
     [self.window makeKeyAndVisible];
     app.idleTimerDisabled = YES;
+    log_open();
+    plat_log([[NSString stringWithFormat:@"[app] khoi dong %@ (%@), man %dx%d, iOS %@",
+               [NSBundle.mainBundle objectForInfoDictionaryKey:@"CFBundleShortVersionString"],
+               [NSBundle.mainBundle objectForInfoDictionaryKey:@"CFBundleVersion"], gW, gH,
+               UIDevice.currentDevice.systemVersion] UTF8String]);
     j2n_start("coreLG.TerrainMidlet", gW, gH);
+    crash_install();
     if ([NSProcessInfo.processInfo.arguments containsObject:@"-autotest"]) autotest();
     return YES;
 }

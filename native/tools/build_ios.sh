@@ -41,7 +41,7 @@ build_one() {   # $1 = sdk (iphoneos|iphonesimulator), $2 = thu muc ra
   rm -rf "$OUT" && mkdir -p "$OUT/obj"
   echo "== bien dich ($SDK)"
   $CC -O2 -w $DEFS -DALL_INTERIOR_POINTERS -I"$TP/bdwgc/include" -c "$TP/bdwgc/extra/gc.c" -o "$OUT/obj/gc.o" &
-  for f in rt natives_lang gfx disp io; do
+  for f in rt natives_lang gfx disp io midi; do
     $CC -O2 -fwrapv -fno-strict-aliasing $DEFS $INC -c "$N/runtime/$f.c" -o "$OUT/obj/rt_$f.o" &
   done
   wait

@@ -3,3 +3,10 @@ lib/out/
 third_party/
 run/
 __pycache__/
+test/jvm/
+test/nat/
+test/gen/
+test/obj/
+test/out/
+test/suite
+test/*.txt

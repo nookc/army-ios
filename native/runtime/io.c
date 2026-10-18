@@ -428,10 +428,26 @@ int32_t N_j2n_SmsConn_sms(jctx *t, jobj num, jobj text) {
     return plat_sms(num ? rt_str_cstr(num) : "", text ? rt_str_cstr(text) : "");
 }
 
+int midi_to_wav(const uint8_t *m, int n, uint8_t **out, int *outlen);
+
 int32_t N_j2n_SoundPlayer_create(jctx *t, jobj data, jobj type) {
     (void)t;
     if (!data) return -1;
-    return plat_sound_create(AD(data, uint8_t), ALEN(data), type ? rt_str_cstr(type) : "");
+    const char *ty = type ? rt_str_cstr(type) : "";
+    const uint8_t *d = AD(data, uint8_t);
+    int n = ALEN(data);
+    if (strstr(ty, "mid") || (n > 4 && memcmp(d, "MThd", 4) == 0)) {
+        /* MIDI: dung san thanh WAV (nen tang chi can phat PCM) */
+        uint8_t *w = 0;
+        int wl = 0;
+        if (midi_to_wav(d, n, &w, &wl)) {
+            int h = plat_sound_create(w, wl, "audio/x-wav");
+            free(w);
+            return h;
+        }
+        return -1;
+    }
+    return plat_sound_create(d, n, ty);
 }
 
 void N_j2n_SoundPlayer_start0(jctx *t, int32_t h, int32_t loops) { (void)t; plat_sound_start(h, loops); }

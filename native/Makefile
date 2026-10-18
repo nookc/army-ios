@@ -9,7 +9,7 @@ CFLAGS := $(OPT) -fwrapv -fno-strict-aliasing -pthread $(INC) -DGC_THREADS -DTHR
 GCFLAGS := -O2 -pthread -Ithird_party/bdwgc/include -DGC_THREADS -DTHREAD_LOCAL_ALLOC -DGC_BUILTIN_ATOMIC -DNO_EXECUTE_PERMISSION -DALL_INTERIOR_POINTERS -DGC_DISABLE_INCREMENTAL
 
 LIBSRC := $(shell find lib/src -name '*.java')
-RTSRC := runtime/rt.c runtime/natives_lang.c runtime/gfx.c runtime/disp.c runtime/io.c
+RTSRC := runtime/rt.c runtime/natives_lang.c runtime/gfx.c runtime/disp.c runtime/io.c runtime/midi.c
 GENC = $(wildcard $(GEN)/j_*.c) $(GEN)/meta.c
 
 all: build/army2n
