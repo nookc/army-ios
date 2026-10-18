@@ -302,7 +302,7 @@ static void crash_install(void) {
     }
 }
 
-/* ---- am thanh: WAV (AVAudioPlayer). MIDI: chua co bo am -> im lang */
+/* ---- am thanh: WAV (AVAudioPlayer). MIDI da duoc runtime/midi.c tong hop san thanh WAV */
 static NSMutableDictionary<NSNumber *, AVAudioPlayer *> *gSounds;
 static int gSoundNext;
 static pthread_mutex_t gSoundMu = PTHREAD_MUTEX_INITIALIZER;
