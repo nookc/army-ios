@@ -10,6 +10,7 @@
 #import <AVFoundation/AVFoundation.h>
 #import <AudioToolbox/AudioToolbox.h>
 #include <pthread.h>
+#include <unistd.h>
 #include "platform.h"
 #import "PadView.h"
 
@@ -190,6 +191,7 @@ void plat_present(const uint32_t *fb, int w, int h) {
 }
 
 void plat_show_textbox(const char *title, const char *text, int max, int cons) {
+    @autoreleasepool {
     NSString *t = [NSString stringWithUTF8String:title ?: ""] ?: @"";
     NSString *x = [NSString stringWithUTF8String:text ?: ""] ?: @"";
     dispatch_async(dispatch_get_main_queue(), ^{
@@ -197,9 +199,11 @@ void plat_show_textbox(const char *title, const char *text, int max, int cons) {
         if (vc) [vc showTextBox:t text:x max:max cons:cons];
         else j2n_text_done(0, NULL);
     });
+    }
 }
 
 int plat_open_url(const char *url) {
+    @autoreleasepool {
     NSString *s = [NSString stringWithUTF8String:url ?: ""];
     NSURL *u = [NSURL URLWithString:s];
     if (!u) return 0;
@@ -207,13 +211,16 @@ int plat_open_url(const char *url) {
         [UIApplication.sharedApplication openURL:u options:@{} completionHandler:nil];
     });
     return 1;
+    }
 }
 
 int plat_sms(const char *number, const char *text) {
+    @autoreleasepool {
     NSString *n = [NSString stringWithUTF8String:number ?: ""];
     NSString *b = [[NSString stringWithUTF8String:text ?: ""] stringByAddingPercentEncodingWithAllowedCharacters:NSCharacterSet.URLQueryAllowedCharacterSet];
     NSString *u = [NSString stringWithFormat:@"sms:%@&body=%@", n, b ?: @""];
     return plat_open_url(u.UTF8String);
+    }
 }
 
 void plat_vibrate(int ms) {
@@ -229,7 +236,9 @@ void plat_exit(void) {
 const char *plat_data_dir(void) { return gDataDir.fileSystemRepresentation; }
 const char *plat_jar_path(void) { return gJar.fileSystemRepresentation; }
 
-void plat_log(const char *s) { NSLog(@"%s", s); }
+void plat_log(const char *s) {
+    @autoreleasepool { NSLog(@"%s", s);     }
+}
 
 /* ---- am thanh: WAV (AVAudioPlayer). MIDI: chua co bo am -> im lang */
 static NSMutableDictionary<NSNumber *, AVAudioPlayer *> *gSounds;
@@ -237,6 +246,7 @@ static int gSoundNext;
 static pthread_mutex_t gSoundMu = PTHREAD_MUTEX_INITIALIZER;
 
 int plat_sound_create(const uint8_t *data, int len, const char *type) {
+    @autoreleasepool {
     NSData *d = [NSData dataWithBytes:data length:(NSUInteger)len];
     NSError *err = nil;
     AVAudioPlayer *p = [[AVAudioPlayer alloc] initWithData:d error:&err];
@@ -249,6 +259,7 @@ int plat_sound_create(const uint8_t *data, int len, const char *type) {
     }
     pthread_mutex_unlock(&gSoundMu);
     return h;
+    }
 }
 
 static AVAudioPlayer *snd(int h) {
@@ -259,24 +270,32 @@ static AVAudioPlayer *snd(int h) {
 }
 
 void plat_sound_start(int h, int loops) {
+    @autoreleasepool {
     AVAudioPlayer *p = snd(h);
     if (!p) return;
     p.numberOfLoops = loops < 0 ? -1 : MAX(0, loops - 1);
     p.currentTime = 0;
     [p play];
+    }
 }
 
-void plat_sound_stop(int h) { [snd(h) stop]; }
+void plat_sound_stop(int h) {
+    @autoreleasepool { [snd(h) stop];     }
+}
 
 void plat_sound_close(int h) {
+    @autoreleasepool {
     pthread_mutex_lock(&gSoundMu);
     AVAudioPlayer *p = gSounds[@(h)];
     [p stop];
     [gSounds removeObjectForKey:@(h)];
     pthread_mutex_unlock(&gSoundMu);
+    }
 }
 
-void plat_sound_volume(int h, int level) { snd(h).volume = MAX(0, MIN(100, level)) / 100.0f; }
+void plat_sound_volume(int h, int level) {
+    @autoreleasepool { snd(h).volume = MAX(0, MIN(100, level)) / 100.0f;     }
+}
 
 /* ============================================================ tu kiem thu (CI) */
 static void save_png(NSString *name) {

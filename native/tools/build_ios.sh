@@ -45,9 +45,12 @@ build_one() {   # $1 = sdk (iphoneos|iphonesimulator), $2 = thu muc ra
     $CC -O2 -fwrapv -fno-strict-aliasing $DEFS $INC -c "$N/runtime/$f.c" -o "$OUT/obj/rt_$f.o" &
   done
   wait
-  # ma game: nhieu tep lon, chay song song
-  ls "$B/gen"/j_*.c "$B/gen/meta.c" | xargs -P 4 -I{} sh -c \
-    "$CC -O2 -w -fwrapv -fno-strict-aliasing $DEFS $INC -c {} -o $OUT/obj/gen_\$(basename {} .c).o"
+  # ma game: nhieu tep lon, chay song song (xargs -I cua macOS gioi han 255 ky tu -> dung tep lenh)
+  cat > "$OUT/cc1.sh" <<CC1
+#!/bin/sh
+exec $CC -O2 -w -fwrapv -fno-strict-aliasing $DEFS $INC -c "\$1" -o "$OUT/obj/gen_\$(basename "\$1" .c).o"
+CC1
+  ls "$B/gen"/j_*.c "$B/gen/meta.c" | xargs -P 4 -n 1 sh "$OUT/cc1.sh"
   for f in App PadView; do
     $CC -O2 -fobjc-arc $INC -I"$N/platform/ios" -c "$N/platform/ios/$f.m" -o "$OUT/obj/$f.o"
   done
