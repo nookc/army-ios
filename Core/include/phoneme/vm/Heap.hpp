@@ -213,6 +213,7 @@ public:
     [[nodiscard]] Status collect(std::span<const ObjectRef> roots);
     void clear() noexcept;
     [[nodiscard]] usize estimated_bytes() const noexcept;
+    [[nodiscard]] usize maximum_bytes() const noexcept;
     [[nodiscard]] bool automatic_collection_due() const noexcept;
     [[nodiscard]] HeapStats stats() const noexcept;
 

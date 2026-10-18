@@ -2689,6 +2689,11 @@ usize Heap::estimated_bytes() const noexcept {
     return live_bytes_;
 }
 
+usize Heap::maximum_bytes() const noexcept {
+    std::scoped_lock lock(mutex_);
+    return limits_.maximum_bytes;
+}
+
 bool Heap::automatic_collection_due() const noexcept {
     std::scoped_lock lock(mutex_);
     return automatic_collection_threshold_ != 0U &&

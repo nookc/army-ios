@@ -3264,7 +3264,7 @@ void register_core_natives(NativeMethodRegistry& registry) {
             if (!receiver) {
                 return std::unexpected(receiver.error());
             }
-            const usize capacity = machine.heap().stats().maximum_bytes;
+            const usize capacity = machine.heap().maximum_bytes();
             return std::optional<Value>(
                 Value::from_long(static_cast<i64>(capacity)));
         });
@@ -3279,9 +3279,9 @@ void register_core_natives(NativeMethodRegistry& registry) {
             if (!receiver) {
                 return std::unexpected(receiver.error());
             }
-            const auto stats = machine.heap().stats();
-            const usize capacity = stats.maximum_bytes;
-            const usize used = stats.estimated_bytes;
+            // Army 2 Coffee: game goi freeMemory() moi khung hinh; stats() duyet ca heap (~14% CPU)
+            const usize capacity = machine.heap().maximum_bytes();
+            const usize used = machine.heap().estimated_bytes();
             const usize free = used >= capacity ? 0 : capacity - used;
             return std::optional<Value>(
                 Value::from_long(static_cast<i64>(free)));
@@ -3296,7 +3296,7 @@ void register_core_natives(NativeMethodRegistry& registry) {
             auto receiver = require_receiver(arguments);
             if (!receiver) return std::unexpected(receiver.error());
             return std::optional<Value>(Value::from_long(
-                static_cast<i64>(machine.heap().stats().maximum_bytes)));
+                static_cast<i64>(machine.heap().maximum_bytes())));
         });
 
     add(registry,

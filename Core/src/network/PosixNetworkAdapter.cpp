@@ -376,8 +376,11 @@ void configure_stream_descriptor(int descriptor) noexcept {
 }
 
 [[nodiscard]] bool network_trace_enabled() noexcept {
-    const char* value = std::getenv("PHONEME_NETWORK_TRACE");
-    return value != nullptr && std::string_view(value) != "0";
+    static const bool enabled = []() noexcept {
+        const char* value = std::getenv("PHONEME_NETWORK_TRACE");
+        return value != nullptr && std::string_view(value) != "0";
+    }();
+    return enabled;
 }
 
 void trace_network_wait(const char* event,

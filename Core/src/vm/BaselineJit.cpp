@@ -157,7 +157,7 @@ constexpr u64 kMaximumDeviceForegroundCompileIntervalMilliseconds = 10'000U;
            std::string_view(value) != "off";
 }
 
-[[nodiscard]] bool conservative_device_jit_mode() noexcept {
+[[nodiscard]] bool conservative_device_jit_mode_uncached() noexcept {
     // Cross-platform override used by host regression/real-game benchmarks to
     // exercise the same conservative admission policy as a physical iPhone.
     // Leaving it unset preserves the platform default below.
@@ -182,6 +182,13 @@ constexpr u64 kMaximumDeviceForegroundCompileIntervalMilliseconds = 10'000U;
 #else
     return false;
 #endif
+}
+
+// Army 2 Coffee: duoc goi o moi lenh goi ham / moi vong lap (Machine::execute) -> getenv() moi lan
+// ton ~40% CPU trong tran. Doc bien moi truong 1 lan.
+[[nodiscard]] bool conservative_device_jit_mode() noexcept {
+    static const bool mode = conservative_device_jit_mode_uncached();
+    return mode;
 }
 
 [[nodiscard]] bool live_jit_root_walker_enabled() noexcept {
@@ -237,12 +244,15 @@ constexpr u64 kMaximumDeviceForegroundCompileIntervalMilliseconds = 10'000U;
 }
 
 [[nodiscard]] bool quick_compile_tier_enabled() noexcept {
-    if (const char* value = std::getenv("PHONEME_JIT_QUICK_TIER");
-        value != nullptr && *value != '\0') {
-        const std::string_view mode(value);
-        return mode != "0" && mode != "false" && mode != "off";
-    }
-    return conservative_device_jit_mode();
+    static const bool enabled = []() noexcept {
+        if (const char* value = std::getenv("PHONEME_JIT_QUICK_TIER");
+            value != nullptr && *value != '\0') {
+            const std::string_view mode(value);
+            return mode != "0" && mode != "false" && mode != "off";
+        }
+        return conservative_device_jit_mode();
+    }();
+    return enabled;
 }
 
 [[nodiscard]] u32 adaptive_device_hot_threshold(u32 configured) noexcept {

@@ -15098,7 +15098,8 @@ namespace phoneme::vm
         const auto raise_bounds = [&]()
             -> Result<std::optional<ExecutionResult>>
         {
-          if (std::getenv("PHONEME_TRACE_ARRAY_BOUNDS") != nullptr)
+          static const bool trace_array_bounds = std::getenv("PHONEME_TRACE_ARRAY_BOUNDS") != nullptr;
+          if (trace_array_bounds)
           {
             auto info = heap_.vm_array_info(*array);
             std::fprintf(stderr,
@@ -19120,7 +19121,9 @@ namespace phoneme::vm
               nested->native_method.valid() &&
               natives_.jit_policy(nested->native_method) ==
                   NativeJitPolicy::synchronous_bounded;
-          if (std::getenv("PHONEME_TRACE_NETWORK_CALLERS") != nullptr &&
+          // Army 2 Coffee: getenv() o moi lan goi native long nhau -> doc 1 lan
+          static const bool trace_network_callers = std::getenv("PHONEME_TRACE_NETWORK_CALLERS") != nullptr;
+          if (trace_network_callers &&
               nested->method.method != nullptr &&
               (nested->method.method->name == "write" ||
                nested->method.method->name == "flush") &&

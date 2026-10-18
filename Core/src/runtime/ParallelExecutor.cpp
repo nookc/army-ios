@@ -15,7 +15,7 @@ namespace {
 constexpr u32 kMaximumNativeWorkers = 8U;
 thread_local ParallelExecutor* g_active_executor = nullptr;
 
-[[nodiscard]] u32 configured_worker_limit() noexcept {
+[[nodiscard]] u32 configured_worker_limit_uncached() noexcept {
     const char* value = std::getenv("PHONEME_NATIVE_WORKERS");
     if (value != nullptr && *value != '\0') {
         char* end = nullptr;
@@ -45,6 +45,11 @@ thread_local ParallelExecutor* g_active_executor = nullptr;
     // lanes briefly. WorkCoordinator may admit fewer helpers dynamically.
     return std::min<u32>(hardware_threads - 2U, 2U);
 #endif
+}
+
+[[nodiscard]] u32 configured_worker_limit() noexcept {
+    static const u32 limit = configured_worker_limit_uncached();
+    return limit;
 }
 
 } // namespace

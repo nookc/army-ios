@@ -53,7 +53,7 @@ thread_local std::chrono::steady_clock::time_point
 
 namespace {
 
-[[nodiscard]] bool guest_fibers_enabled() noexcept {
+[[nodiscard]] bool guest_fibers_enabled_uncached() noexcept {
     if (const char* value = std::getenv("PHONEME_GREEN_THREADS");
         value != nullptr && *value != '\0') {
         const std::string_view mode(value);
@@ -65,6 +65,11 @@ namespace {
 #else
     return false;
 #endif
+}
+
+[[nodiscard]] bool guest_fibers_enabled() noexcept {
+    static const bool enabled = guest_fibers_enabled_uncached();
+    return enabled;
 }
 
 constexpr auto kExplicitYieldBackoff = std::chrono::milliseconds(1);
