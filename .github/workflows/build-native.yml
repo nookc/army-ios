@@ -1,0 +1,73 @@
+name: Build Army 2 Coffee iOS (thuan)
+
+# App iOS "thuan": ma Java cua client duoc dich san sang C -> ma may ARM64 (khong bo thong dich).
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'native/**'
+      - 'Bundled/Army2Coffee.jar'
+      - '.github/workflows/build-native.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: macos-15
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Chon Xcode moi nhat
+        run: |
+          XC=$(ls -d /Applications/Xcode_*.app | grep -vi beta | sort -V | tail -1)
+          echo "Dung $XC"
+          sudo xcode-select -s "$XC/Contents/Developer"
+          xcodebuild -version
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Dich client + build IPA va ban Simulator
+        env:
+          BUILD_NUMBER: ${{ github.run_number }}
+        run: |
+          set -o pipefail
+          bash native/tools/build_ios.sh ca-hai 2>&1 | tee build-native.log
+
+      - name: Chay thu tren iOS Simulator
+        continue-on-error: true
+        run: |
+          bash native/tools/sim_test.sh 2>&1 | tee sim-test.log
+
+      - name: Day IPA, anh chup, log len nhanh ban-build-native
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          rm -rf /tmp/pub && mkdir -p /tmp/pub/test
+          [ -f native/build/ios/Army2Coffee-Native.ipa ] && cp native/build/ios/Army2Coffee-Native.ipa /tmp/pub/
+          cp native/build/ios/test/* /tmp/pub/test/ 2>/dev/null || true
+          for f in build-native.log sim-test.log; do [ -f "$f" ] && tail -600 "$f" > "/tmp/pub/$f"; done
+          [ -f native/build/gen/stats.txt ] && cp native/build/gen/stats.txt /tmp/pub/
+          echo "run ${GITHUB_RUN_NUMBER} sha ${GITHUB_SHA} status ${{ job.status }}" > /tmp/pub/KET_QUA.txt
+          cd /tmp/pub
+          git init -q -b ban-build-native
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git add -A
+          git commit -q -m "Build native ${GITHUB_RUN_NUMBER} (${GITHUB_SHA::7}) ${{ job.status }}"
+          git push -q -f "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" ban-build-native
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: Army2Coffee-iOS-thuan
+          path: |
+            native/build/ios/Army2Coffee-Native.ipa
+            native/build/ios/test/
+          if-no-files-found: ignore

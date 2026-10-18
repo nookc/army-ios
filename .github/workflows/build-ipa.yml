@@ -10,6 +10,9 @@ on:
         default: ca-hai
   push:
     branches: [main]
+    paths-ignore:
+      - 'native/**'
+      - '.github/workflows/build-native.yml'
 
 permissions:
   contents: write
