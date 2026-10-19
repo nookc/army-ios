@@ -1,0 +1,17 @@
+--------- beginning of main
+--------- beginning of system
+I/Army2Coffee( 2582): [app] activity tao (lan 1, game chua chay)
+I/Army2Coffee( 2582): [app] khoi dong Army 2 Coffee (Android), man 320x456, jar 10101308 byte
+I/Army2Coffee( 2582): [app] luong game bat dau
+I/Army2Coffee( 2582): [Boot] khoi dong coreLG.TerrainMidlet
+I/Army2Coffee( 2582): [am thanh] audio/x-wav 7180 byte: ok
+I/Army2Coffee( 2582): [am thanh] audio/x-wav 1834 byte: ok
+I/Army2Coffee( 2582): [am thanh] audio/x-wav 2934 byte: ok
+I/Army2Coffee( 2582): [bocuc] canvas 0 69 1080 1608 pad 0 1608 1080 2148 game 320 456
+I/Army2Coffee( 2582): [am thanh] audio/x-wav 902214 byte: ok
+I/Army2Coffee( 2582): [app] hop nhap chu (kieu 0, toi da 500)
+I/Army2Coffee( 2582): [app] hop nhap chu kieu 0
+I/Army2Coffee( 2582): [app] hop nhap chu (kieu 65536, toi da 500)
+I/Army2Coffee( 2582): [app] hop nhap chu kieu 65536
+I/Army2Coffee( 2582): [app] hop nhap chu (kieu 0, toi da 500)
+I/Army2Coffee( 2582): [app] hop nhap chu kieu 0

@@ -1,0 +1,90 @@
+Applications Graphics Acceleration Info:
+Uptime: 45447 Realtime: 45447
+
+** Graphics info for pid 2582 [vn.army2coffee.thuan] **
+
+Recent DisplayList operations
+DrawRect
+DrawColor
+DrawBitmapRect
+DrawBitmap
+Save
+DrawRenderNode
+  DrawRenderNode
+    DrawRect
+  DrawRenderNode
+    Save
+    ClipRect
+    DrawRenderNode
+      DrawRenderNode
+        DrawColor
+        DrawBitmapRect
+        Save
+        Translate
+        DrawBitmap
+        RestoreToCount
+    RestoreToCount
+  DrawRenderNode
+  DrawRenderNode
+RestoreToCount
+DrawRect
+DrawColor
+DrawBitmapRect
+DrawBitmap
+Save
+DrawRenderNode
+  DrawRenderNode
+    DrawRect
+  DrawRenderNode
+    Save
+    ClipRect
+    DrawRenderNode
+      DrawRenderNode
+        DrawColor
+        DrawBitmapRect
+        Save
+        Translate
+        DrawBitmap
+        RestoreToCount
+    RestoreToCount
+  DrawRenderNode
+  DrawRenderNode
+RestoreToCount
+DrawRect
+DrawColor
+DrawBitmapRect
+DrawBitmap
+
+Caches:
+Current memory usage / total memory usage (bytes):
+  TextureCache          2916480 / 75497472
+  LayerCache                  0 / 50331648 (numLayers = 0)
+  Garbage layers              0
+  Active layers               0
+  RenderBufferCache           0 /  8388608
+  GradientCache               0 /  1048576
+  PathCache                   0 / 33554432
+  TessellationCache           0 /  1048576
+  TextDropShadowCache         0 /  6291456
+  PatchCache                  0 /   131072
+  FontRenderer 0 A8           0 /        0
+  FontRenderer 0 RGBA         0 /        0
+  FontRenderer 0 total        0 /        0
+Other:
+  FboCache                    0 /        0
+Total memory usage:
+  2916480 bytes, 2.78 MB
+
+Profile data in ms:
+
+	vn.army2coffee.thuan/vn.army2coffee.thuan.MainActivity/android.view.ViewRootImpl@25ed3d69 (visibility=0)
+View hierarchy:
+
+  vn.army2coffee.thuan/vn.army2coffee.thuan.MainActivity/android.view.ViewRootImpl@25ed3d69
+  7 views, 8.73 kB of display lists
+
+
+Total ViewRootImpl: 1
+Total Views:        7
+Total DisplayList:  8.73 kB
+

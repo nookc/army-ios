@@ -1,0 +1,34 @@
+Applications Memory Usage (kB):
+Uptime: 45511 Realtime: 45511
+
+** MEMINFO in pid 2582 [vn.army2coffee.thuan] **
+                   Pss  Private  Private  Swapped     Heap     Heap     Heap
+                 Total    Dirty    Clean    Dirty     Size    Alloc     Free
+                ------   ------   ------   ------   ------   ------   ------
+  Native Heap     8571     8428        0        0    20554    20554     8117
+  Dalvik Heap     4352     4292        0        0     5144     4076     1068
+ Dalvik Other      328      328        0        0                           
+        Stack      212      212        0        0                           
+       Ashmem      472       28        0        0                           
+    Other dev        4        0        4        0                           
+     .so mmap     2720      328     1512        0                           
+    .apk mmap      509        0      436        0                           
+    .dex mmap       76        0       72        0                           
+    code mmap      823        0       52        0                           
+   image mmap      784      368        4        0                           
+   Other mmap       11        4        0        0                           
+      Unknown      189      188        0        0                           
+        TOTAL    19051    14176     2080        0    25698    24630     9185
+ 
+ Objects
+               Views:        7         ViewRootImpl:        1
+         AppContexts:        3           Activities:        1
+              Assets:        3        AssetManagers:        3
+       Local Binders:        7        Proxy Binders:       13
+    Death Recipients:        0
+     OpenSSL Sockets:        0
+ 
+ SQL
+         MEMORY_USED:        0
+  PAGECACHE_OVERFLOW:        0          MALLOC_SIZE:        0
+ 

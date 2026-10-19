@@ -1,0 +1,502 @@
+--------- beginning of main
+D/EGL_emulation( 2096): eglMakeCurrent: 0x7fa51db68200: ver 3 0
+D/AndroidRuntime( 2569): 
+D/AndroidRuntime( 2569): >>>>>> AndroidRuntime START com.android.internal.os.RuntimeInit <<<<<<
+D/AndroidRuntime( 2569): CheckJNI is ON
+E/memtrack( 2569): Couldn't load memtrack module (No such file or directory)
+E/android.os.Debug( 2569): failed to load memtrack module: -2
+D/AndroidRuntime( 2569): Calling main entry com.android.commands.am.Am
+--------- beginning of system
+I/ActivityManager( 1483): START u0 {flg=0x10000000 cmp=vn.army2coffee.thuan/.MainActivity} from uid 0 on display 0
+I/ActivityManager( 1483): Start proc vn.army2coffee.thuan for activity vn.army2coffee.thuan/.MainActivity: pid=2582 uid=10053 gids={50053, 9997, 3003} abi=x86_64
+I/art     ( 1141): Explicit concurrent mark sweep GC freed 704(30KB) AllocSpace objects, 0(0B) LOS objects, 90% free, 110KB/1134KB, paused 405us total 17.642ms
+I/art     ( 1141): Explicit concurrent mark sweep GC freed 5(160B) AllocSpace objects, 0(0B) LOS objects, 90% free, 110KB/1134KB, paused 356us total 3.813ms
+I/art     ( 1141): Explicit concurrent mark sweep GC freed 5(160B) AllocSpace objects, 0(0B) LOS objects, 90% free, 110KB/1134KB, paused 3.526ms total 6.537ms
+D/gralloc_ranchu( 1128): gralloc_alloc: Creating ashmem region of size 9850880
+I/Army2Coffee( 2582): [app] activity tao (lan 1, game chua chay)
+D/OpenGLRenderer( 2582): Render dirty regions requested: true
+D/        ( 2582): HostConnection::get() New Host Connection established 0x7fa51e7faa90, tid 2582
+D/Atlas   ( 2582): Validating map...
+D/EGL_emulation( 2096): eglMakeCurrent: 0x7fa51db68200: ver 3 0
+D/EGL_emulation( 1794): eglMakeCurrent: 0x7fa51e0a8200: ver 3 0
+D/EGL_emulation( 1794): eglMakeCurrent: 0x7fa51e0a8200: ver 3 0
+D/EGL_emulation( 1794): eglMakeCurrent: 0x7fa51e0a8200: ver 3 0
+D/        ( 2582): HostConnection::get() New Host Connection established 0x7fa51e7fae10, tid 2598
+I/OpenGLRenderer( 2582): Initialized EGL, version 1.4
+D/EGL_emulation( 1794): eglMakeCurrent: 0x7fa51e0a8200: ver 3 0
+D/EGL_emulation( 2582): eglCreateContext: 0x7fa51e074200: maj 3 min 0 rcv 3
+D/EGL_emulation( 1794): eglMakeCurrent: 0x7fa51e0a8200: ver 3 0
+D/EGL_emulation( 2582): eglMakeCurrent: 0x7fa51e074200: ver 3 0
+E/eglCodecCommon( 2582): glUtilsParamSize: unknow param 0x00008cdf
+E/eglCodecCommon( 2582): glUtilsParamSize: unknow param 0x00008824
+D/OpenGLRenderer( 2582): Enabling debug mode 0
+D/EGL_emulation( 1794): eglMakeCurrent: 0x7fa51e0a8200: ver 3 0
+D/EGL_emulation( 2582): eglMakeCurrent: 0x7fa51e074200: ver 3 0
+I/Army2Coffee( 2582): [app] khoi dong Army 2 Coffee (Android), man 320x456, jar 10101308 byte
+I/Army2Coffee( 2582): [app] luong game bat dau
+I/Army2Coffee( 2582): [Boot] khoi dong coreLG.TerrainMidlet
+I/Army2Coffee( 2582): [am thanh] audio/x-wav 7180 byte: ok
+I/Army2Coffee( 2582): [am thanh] audio/x-wav 1834 byte: ok
+D/EGL_emulation( 1794): eglMakeCurrent: 0x7fa51e0a8200: ver 3 0
+I/Army2Coffee( 2582): [am thanh] audio/x-wav 2934 byte: ok
+D/EGL_emulation( 1794): eglMakeCurrent: 0x7fa51e0a8200: ver 3 0
+D/EGL_emulation( 1794): eglMakeCurrent: 0x7fa51e0a8200: ver 3 0
+D/EGL_emulation( 1794): eglMakeCurrent: 0x7fa51e0a8200: ver 3 0
+I/Army2Coffee( 2582): [bocuc] canvas 0 69 1080 1608 pad 0 1608 1080 2148 game 320 456
+D/ConnectivityService( 1483): sendStickyBroadcast: action=android.net.conn.CONNECTIVITY_CHANGE
+D/Tethering( 1483): MasterInitialState.processMessage what=3
+I/ActivityManager( 1483): Displayed vn.army2coffee.thuan/.MainActivity: +710ms
+D/AndroidRuntime( 2569): Shutting down VM
+D/GpsLocationProvider( 1483): NTP server returned: 1792404756184 (Mon Oct 19 10:12:36 UTC 2026) reference: 12405 certainty: 9 system time offset: 427
+E/StrictMode( 2307): A resource was acquired at attached stack trace but never released. See java.io.Closeable for information on avoiding resource leaks.
+E/StrictMode( 2307): java.lang.Throwable: Explicit termination method 'close' not called
+E/StrictMode( 2307): 	at dalvik.system.CloseGuard.open(CloseGuard.java:184)
+E/StrictMode( 2307): 	at android.content.ContentResolver$CursorWrapperInner.<init>(ContentResolver.java:2447)
+E/StrictMode( 2307): 	at android.content.ContentResolver.query(ContentResolver.java:502)
+E/StrictMode( 2307): 	at android.content.CursorLoader.loadInBackground(CursorLoader.java:64)
+E/StrictMode( 2307): 	at android.content.CursorLoader.loadInBackground(CursorLoader.java:42)
+E/StrictMode( 2307): 	at android.content.AsyncTaskLoader.onLoadInBackground(AsyncTaskLoader.java:312)
+E/StrictMode( 2307): 	at android.content.AsyncTaskLoader$LoadTask.doInBackground(AsyncTaskLoader.java:69)
+E/StrictMode( 2307): 	at android.content.AsyncTaskLoader$LoadTask.doInBackground(AsyncTaskLoader.java:57)
+E/StrictMode( 2307): 	at android.os.AsyncTask$2.call(AsyncTask.java:288)
+E/StrictMode( 2307): 	at java.util.concurrent.FutureTask.run(FutureTask.java:237)
+E/StrictMode( 2307): 	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1112)
+E/StrictMode( 2307): 	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:587)
+E/StrictMode( 2307): 	at java.lang.Thread.run(Thread.java:818)
+W/CursorWrapperInner( 2307): Cursor finalized without prior close()
+E/SQLiteLog( 2329): (284) automatic index on view_events(_id)
+E/StrictMode( 2373): A resource was acquired at attached stack trace but never released. See java.io.Closeable for information on avoiding resource leaks.
+E/StrictMode( 2373): java.lang.Throwable: Explicit termination method 'release' not called
+E/StrictMode( 2373): 	at dalvik.system.CloseGuard.open(CloseGuard.java:184)
+E/StrictMode( 2373): 	at android.drm.DrmManagerClient.<init>(DrmManagerClient.java:258)
+E/StrictMode( 2373): 	at com.google.android.mms.pdu.PduPersister.<init>(PduPersister.java:288)
+E/StrictMode( 2373): 	at com.google.android.mms.pdu.PduPersister.getPduPersister(PduPersister.java:299)
+E/StrictMode( 2373): 	at com.android.mms.transaction.TransactionService.onNewIntent(TransactionService.java:224)
+E/StrictMode( 2373): 	at com.android.mms.transaction.TransactionService$ServiceHandler.handleMessage(TransactionService.java:626)
+E/StrictMode( 2373): 	at android.os.Handler.dispatchMessage(Handler.java:102)
+E/StrictMode( 2373): 	at android.os.Looper.loop(Looper.java:135)
+E/StrictMode( 2373): 	at android.os.HandlerThread.run(HandlerThread.java:61)
+I/GlobalDismissManager( 2307): no sender configured
+D/AlertService( 2307): Beginning updateAlertNotification
+D/AlertService( 2307): No fired or scheduled alerts
+D/AlertService( 2307): Scheduling next alarm with AlarmScheduler. sEventReminderReceived: null
+D/AlarmScheduler( 2307): No events found starting within 1 week.
+I/InputReader( 1483): Reconfiguring input devices.  changes=0x00000010
+D/BackupManagerService( 1483): Received broadcast Intent { act=android.intent.action.PACKAGE_CHANGED dat=package:com.android.calendar flg=0x4000010 (has extras) }
+I/InputReader( 1483): Reconfiguring input devices.  changes=0x00000010
+I/InputReader( 1483): Reconfiguring input devices.  changes=0x00000010
+D/BackupManagerService( 1483): Received broadcast Intent { act=android.intent.action.PACKAGE_CHANGED dat=package:com.android.email flg=0x4000010 (has extras) }
+D/BackupManagerService( 1483): Received broadcast Intent { act=android.intent.action.PACKAGE_CHANGED dat=package:com.android.settings flg=0x4000010 (has extras) }
+D/BackupManagerService( 1483): Received broadcast Intent { act=android.intent.action.PACKAGE_CHANGED dat=package:com.android.inputmethod.latin flg=0x4000010 (has extras) }
+I/Launcher( 2096): Deferring update until onResume
+I/Launcher( 2096): Deferring update until onResume
+I/Launcher( 2096): Deferring update until onResume
+I/Launcher( 2096): Deferring update until onResume
+D/gralloc_ranchu( 1128): gralloc_alloc: Creating ashmem region of size 9850880
+D/        ( 2621): HostConnection::get() New Host Connection established 0x7fb4b034e320, tid 2621
+E/EGL_emulation( 1128): tid 1128: eglCreateSyncKHR(1865): error 0x3004 (EGL_BAD_ATTRIBUTE)
+D/AndroidRuntime( 2624): 
+D/AndroidRuntime( 2624): >>>>>> AndroidRuntime START com.android.internal.os.RuntimeInit <<<<<<
+D/AndroidRuntime( 2624): CheckJNI is ON
+E/memtrack( 2624): Couldn't load memtrack module (No such file or directory)
+E/android.os.Debug( 2624): failed to load memtrack module: -2
+D/AndroidRuntime( 2624): Calling main entry com.android.commands.input.Input
+I/Input   ( 2624): injectMotionEvent: MotionEvent { action=ACTION_DOWN, id[0]=0, x[0]=945.0, y[0]=2013.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=19970, downTime=19970, deviceId=0, source=0x1002 }
+I/Input   ( 2624): injectMotionEvent: MotionEvent { action=ACTION_MOVE, id[0]=0, x[0]=945.0, y[0]=2013.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=19970, downTime=19970, deviceId=0, source=0x1002 }
+I/Input   ( 2624): injectMotionEvent: MotionEvent { action=ACTION_MOVE, id[0]=0, x[0]=945.0, y[0]=2013.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=20034, downTime=20034, deviceId=0, source=0x1002 }
+I/Input   ( 2624): injectMotionEvent: MotionEvent { action=ACTION_MOVE, id[0]=0, x[0]=945.0, y[0]=2013.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=20050, downTime=20050, deviceId=0, source=0x1002 }
+I/Input   ( 2624): injectMotionEvent: MotionEvent { action=ACTION_MOVE, id[0]=0, x[0]=945.0, y[0]=2013.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=20080, downTime=20080, deviceId=0, source=0x1002 }
+I/Input   ( 2624): injectMotionEvent: MotionEvent { action=ACTION_UP, id[0]=0, x[0]=945.0, y[0]=2013.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=20119, downTime=20119, deviceId=0, source=0x1002 }
+D/AndroidRuntime( 2624): Shutting down VM
+I/ActivityManager( 1483): Waited long enough for: ServiceRecord{1b7c4c5f u0 com.android.music/.MediaPlaybackService}
+D/gralloc_ranchu( 1128): gralloc_alloc: Creating ashmem region of size 9850880
+D/        ( 1128): HostConnection::get() New Host Connection established 0x7f33f3aa1080, tid 2599
+D/        ( 2639): HostConnection::get() New Host Connection established 0x7fb55b04e320, tid 2639
+E/EGL_emulation( 1128): tid 1128: eglCreateSyncKHR(1865): error 0x3004 (EGL_BAD_ATTRIBUTE)
+I/ActivityManager( 1483): Waited long enough for: ServiceRecord{1d2c2dbf u0 com.android.calendar/.alerts.InitAlarmsService}
+D/AndroidRuntime( 2642): 
+D/AndroidRuntime( 2642): >>>>>> AndroidRuntime START com.android.internal.os.RuntimeInit <<<<<<
+D/AndroidRuntime( 2642): CheckJNI is ON
+E/memtrack( 2642): Couldn't load memtrack module (No such file or directory)
+E/android.os.Debug( 2642): failed to load memtrack module: -2
+D/AndroidRuntime( 2642): Calling main entry com.android.commands.input.Input
+I/Input   ( 2642): injectMotionEvent: MotionEvent { action=ACTION_DOWN, id[0]=0, x[0]=135.0, y[0]=1743.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=23782, downTime=23782, deviceId=0, source=0x1002 }
+I/Input   ( 2642): injectMotionEvent: MotionEvent { action=ACTION_MOVE, id[0]=0, x[0]=135.0, y[0]=1743.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=23782, downTime=23782, deviceId=0, source=0x1002 }
+I/Input   ( 2642): injectMotionEvent: MotionEvent { action=ACTION_MOVE, id[0]=0, x[0]=135.0, y[0]=1743.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=23838, downTime=23838, deviceId=0, source=0x1002 }
+I/Input   ( 2642): injectMotionEvent: MotionEvent { action=ACTION_MOVE, id[0]=0, x[0]=135.0, y[0]=1743.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=23857, downTime=23857, deviceId=0, source=0x1002 }
+I/Input   ( 2642): injectMotionEvent: MotionEvent { action=ACTION_MOVE, id[0]=0, x[0]=135.0, y[0]=1743.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=23867, downTime=23867, deviceId=0, source=0x1002 }
+I/Input   ( 2642): injectMotionEvent: MotionEvent { action=ACTION_MOVE, id[0]=0, x[0]=135.0, y[0]=1743.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=23884, downTime=23884, deviceId=0, source=0x1002 }
+I/Input   ( 2642): injectMotionEvent: MotionEvent { action=ACTION_MOVE, id[0]=0, x[0]=135.0, y[0]=1743.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=23900, downTime=23900, deviceId=0, source=0x1002 }
+I/Input   ( 2642): injectMotionEvent: MotionEvent { action=ACTION_UP, id[0]=0, x[0]=135.0, y[0]=1743.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=23917, downTime=23917, deviceId=0, source=0x1002 }
+D/AndroidRuntime( 2642): Shutting down VM
+I/Army2Coffee( 2582): [am thanh] audio/x-wav 902214 byte: ok
+D/AlarmManagerService( 1483): Kernel timezone updated to 0 minutes west of GMT
+D/AlarmManagerService( 1483): Setting time of day to sec=1792404772
+V/AlarmClock( 2152): AlarmInitReceiver android.intent.action.TIME_SET
+V/AlarmClock( 2152): AlarmInitReceiver finished
+D/gralloc_ranchu( 1128): gralloc_alloc: Creating ashmem region of size 9850880
+D/        ( 2659): HostConnection::get() New Host Connection established 0x7f465434e320, tid 2659
+E/EGL_emulation( 1128): tid 1128: eglCreateSyncKHR(1865): error 0x3004 (EGL_BAD_ATTRIBUTE)
+D/AndroidRuntime( 2662): 
+D/AndroidRuntime( 2662): >>>>>> AndroidRuntime START com.android.internal.os.RuntimeInit <<<<<<
+D/AndroidRuntime( 2662): CheckJNI is ON
+E/memtrack( 2662): Couldn't load memtrack module (No such file or directory)
+E/android.os.Debug( 2662): failed to load memtrack module: -2
+D/AndroidRuntime( 2662): Calling main entry com.android.commands.input.Input
+I/Input   ( 2662): injectMotionEvent: MotionEvent { action=ACTION_DOWN, id[0]=0, x[0]=945.0, y[0]=1743.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=29556, downTime=29556, deviceId=0, source=0x1002 }
+I/Input   ( 2662): injectMotionEvent: MotionEvent { action=ACTION_MOVE, id[0]=0, x[0]=945.0, y[0]=1743.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=29556, downTime=29556, deviceId=0, source=0x1002 }
+I/Input   ( 2662): injectMotionEvent: MotionEvent { action=ACTION_MOVE, id[0]=0, x[0]=945.0, y[0]=1743.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=29634, downTime=29634, deviceId=0, source=0x1002 }
+I/Input   ( 2662): injectMotionEvent: MotionEvent { action=ACTION_UP, id[0]=0, x[0]=945.0, y[0]=1743.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=29681, downTime=29681, deviceId=0, source=0x1002 }
+D/AndroidRuntime( 2662): Shutting down VM
+D/gralloc_ranchu( 1128): gralloc_alloc: Creating ashmem region of size 9850880
+D/        ( 2678): HostConnection::get() New Host Connection established 0x7f0eb2a4e320, tid 2678
+E/EGL_emulation( 1128): tid 1128: eglCreateSyncKHR(1865): error 0x3004 (EGL_BAD_ATTRIBUTE)
+D/InitAlarmsService( 2307): Clearing and rescheduling alarms.
+I/art     ( 2582): Explicit concurrent mark sweep GC freed 313(58KB) AllocSpace objects, 3(913KB) LOS objects, 39% free, 3MB/5MB, paused 382us total 7.048ms
+I/art     ( 2582): Explicit concurrent mark sweep GC freed 101(3KB) AllocSpace objects, 0(0B) LOS objects, 39% free, 3MB/5MB, paused 364us total 5.114ms
+I/art     ( 2582): Explicit concurrent mark sweep GC freed 3(96B) AllocSpace objects, 0(0B) LOS objects, 39% free, 3MB/5MB, paused 274us total 4.469ms
+I/art     ( 2582): Explicit concurrent mark sweep GC freed 3(96B) AllocSpace objects, 0(0B) LOS objects, 39% free, 3MB/5MB, paused 361us total 6.887ms
+I/art     ( 2582): Explicit concurrent mark sweep GC freed 3(96B) AllocSpace objects, 0(0B) LOS objects, 39% free, 3MB/5MB, paused 390us total 4.407ms
+D/AndroidRuntime( 2700): 
+D/AndroidRuntime( 2700): >>>>>> AndroidRuntime START com.android.internal.os.RuntimeInit <<<<<<
+D/AndroidRuntime( 2700): CheckJNI is ON
+E/memtrack( 2700): Couldn't load memtrack module (No such file or directory)
+E/android.os.Debug( 2700): failed to load memtrack module: -2
+D/AndroidRuntime( 2700): Calling main entry com.android.commands.input.Input
+I/Input   ( 2700): injectMotionEvent: MotionEvent { action=ACTION_DOWN, id[0]=0, x[0]=634.0, y[0]=1189.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=55855, downTime=55855, deviceId=0, source=0x1002 }
+I/Input   ( 2700): injectMotionEvent: MotionEvent { action=ACTION_MOVE, id[0]=0, x[0]=634.0, y[0]=1189.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=55855, downTime=55855, deviceId=0, source=0x1002 }
+I/Input   ( 2700): injectMotionEvent: MotionEvent { action=ACTION_MOVE, id[0]=0, x[0]=634.0, y[0]=1189.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=55944, downTime=55944, deviceId=0, source=0x1002 }
+I/Input   ( 2700): injectMotionEvent: MotionEvent { action=ACTION_UP, id[0]=0, x[0]=634.0, y[0]=1189.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=55990, downTime=55990, deviceId=0, source=0x1002 }
+D/AndroidRuntime( 2700): Shutting down VM
+I/Army2Coffee( 2582): [app] hop nhap chu (kieu 0, toi da 500)
+I/Army2Coffee( 2582): [app] hop nhap chu kieu 0
+D/EGL_emulation( 2582): eglMakeCurrent: 0x7fa51e074200: ver 3 0
+W/SubtypeSwitcher( 1842): Can't find emoji subtype
+W/SubtypeSwitcher( 1842): No input method subtype found; returning dummy subtype: android.view.inputmethod.InputMethodSubtype@d78b2ed0
+W/ViewPager( 1842): Requested offscreen page limit 0 too small; defaulting to 1
+I/LatinIME( 1842): Starting input. Cursor position = 0,0
+D/OpenGLRenderer( 1842): Render dirty regions requested: true
+D/        ( 1842): HostConnection::get() New Host Connection established 0x7fa51b1fd5c0, tid 1842
+D/Atlas   ( 1842): Validating map...
+D/EGL_emulation( 1794): eglMakeCurrent: 0x7fa51e0a8200: ver 3 0
+D/        ( 1842): HostConnection::get() New Host Connection established 0x7fa51b1fd940, tid 2718
+I/OpenGLRenderer( 1842): Initialized EGL, version 1.4
+D/EGL_emulation( 1842): eglCreateContext: 0x7fa51376b200: maj 3 min 0 rcv 3
+D/EGL_emulation( 1842): eglMakeCurrent: 0x7fa51376b200: ver 3 0
+E/eglCodecCommon( 1842): glUtilsParamSize: unknow param 0x00008cdf
+E/eglCodecCommon( 1842): glUtilsParamSize: unknow param 0x00008824
+D/OpenGLRenderer( 1842): Enabling debug mode 0
+D/EGL_emulation( 1842): eglMakeCurrent: 0x7fa51376b200: ver 3 0
+D/gralloc_ranchu( 1128): gralloc_alloc: Creating ashmem region of size 9850880
+D/        ( 2725): HostConnection::get() New Host Connection established 0x7f8012a4e320, tid 2725
+E/EGL_emulation( 1128): tid 1128: eglCreateSyncKHR(1865): error 0x3004 (EGL_BAD_ATTRIBUTE)
+D/AndroidRuntime( 2728): 
+D/AndroidRuntime( 2728): >>>>>> AndroidRuntime START com.android.internal.os.RuntimeInit <<<<<<
+D/AndroidRuntime( 2728): CheckJNI is ON
+E/memtrack( 2728): Couldn't load memtrack module (No such file or directory)
+E/android.os.Debug( 2728): failed to load memtrack module: -2
+D/AndroidRuntime( 2728): Calling main entry com.android.commands.input.Input
+I/Input   ( 2728): injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_T, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=59597, downTime=59597, deviceId=-1, source=0x101 }
+I/Input   ( 2728): injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_T, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=59597, downTime=59597, deviceId=-1, source=0x101 }
+I/Input   ( 2728): injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_B, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=59597, downTime=59597, deviceId=-1, source=0x101 }
+I/Input   ( 2728): injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_B, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=59597, downTime=59597, deviceId=-1, source=0x101 }
+I/Input   ( 2728): injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_O, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=59597, downTime=59597, deviceId=-1, source=0x101 }
+I/Input   ( 2728): injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_O, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=59597, downTime=59597, deviceId=-1, source=0x101 }
+I/Input   ( 2728): injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_T, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=59597, downTime=59597, deviceId=-1, source=0x101 }
+I/Input   ( 2728): injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_T, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=59597, downTime=59597, deviceId=-1, source=0x101 }
+I/Input   ( 2728): injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_6, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=59597, downTime=59597, deviceId=-1, source=0x101 }
+I/Input   ( 2728): injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_6, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=59597, downTime=59597, deviceId=-1, source=0x101 }
+D/AndroidRuntime( 2728): Shutting down VM
+D/gralloc_ranchu( 1128): gralloc_alloc: Creating ashmem region of size 9850880
+D/        ( 2742): HostConnection::get() New Host Connection established 0x7f977364e320, tid 2742
+E/EGL_emulation( 1128): tid 1128: eglCreateSyncKHR(1865): error 0x3004 (EGL_BAD_ATTRIBUTE)
+D/AndroidRuntime( 2745): 
+D/AndroidRuntime( 2745): >>>>>> AndroidRuntime START com.android.internal.os.RuntimeInit <<<<<<
+D/AndroidRuntime( 2745): CheckJNI is ON
+E/memtrack( 2745): Couldn't load memtrack module (No such file or directory)
+E/android.os.Debug( 2745): failed to load memtrack module: -2
+D/AndroidRuntime( 2745): Calling main entry com.android.commands.input.Input
+I/Input   ( 2745): injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_ENTER, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=61192, downTime=61192, deviceId=-1, source=0x101 }
+I/Input   ( 2745): injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_ENTER, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=61192, downTime=61192, deviceId=-1, source=0x101 }
+W/AudioTrack( 1483): AUDIO_OUTPUT_FLAG_FAST denied by client
+D/AndroidRuntime( 2745): Shutting down VM
+I/LatinIME( 1842): Starting input. Cursor position = -1,-1
+D/OpenGLRenderer( 2582): endAllStagingAnimators on 0x7fa50ffb0400 (InsetDrawable) with handle 0x7fa51def90a0
+I/InputAttributes( 1842): InputType.TYPE_NULL is specified
+D/EGL_emulation( 2582): eglMakeCurrent: 0x7fa51e074200: ver 3 0
+D/EGL_emulation( 1842): eglMakeCurrent: 0x7fa51376b200: ver 3 0
+D/gralloc_ranchu( 1128): gralloc_alloc: Creating ashmem region of size 9850880
+D/        ( 2760): HostConnection::get() New Host Connection established 0x7fb10534e320, tid 2760
+E/EGL_emulation( 1128): tid 1128: eglCreateSyncKHR(1865): error 0x3004 (EGL_BAD_ATTRIBUTE)
+D/AndroidRuntime( 2766): 
+D/AndroidRuntime( 2766): >>>>>> AndroidRuntime START com.android.internal.os.RuntimeInit <<<<<<
+D/AndroidRuntime( 2766): CheckJNI is ON
+E/memtrack( 2766): Couldn't load memtrack module (No such file or directory)
+E/android.os.Debug( 2766): failed to load memtrack module: -2
+D/AndroidRuntime( 2766): Calling main entry com.android.commands.input.Input
+I/Input   ( 2766): injectMotionEvent: MotionEvent { action=ACTION_DOWN, id[0]=0, x[0]=634.0, y[0]=1307.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=64852, downTime=64852, deviceId=0, source=0x1002 }
+I/Input   ( 2766): injectMotionEvent: MotionEvent { action=ACTION_MOVE, id[0]=0, x[0]=634.0, y[0]=1307.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=64852, downTime=64852, deviceId=0, source=0x1002 }
+I/Input   ( 2766): injectMotionEvent: MotionEvent { action=ACTION_MOVE, id[0]=0, x[0]=634.0, y[0]=1307.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=64909, downTime=64909, deviceId=0, source=0x1002 }
+I/Input   ( 2766): injectMotionEvent: MotionEvent { action=ACTION_MOVE, id[0]=0, x[0]=634.0, y[0]=1307.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=64956, downTime=64956, deviceId=0, source=0x1002 }
+I/Input   ( 2766): injectMotionEvent: MotionEvent { action=ACTION_UP, id[0]=0, x[0]=634.0, y[0]=1307.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=65002, downTime=65002, deviceId=0, source=0x1002 }
+D/AndroidRuntime( 2766): Shutting down VM
+I/MediaFocusControl( 1483):  AudioFocus  abandonAudioFocus() from android.media.AudioManager@16ef53eecom.android.music.MediaPlaybackService$3@78d708f
+D/AndroidRuntime( 2781): 
+D/AndroidRuntime( 2781): >>>>>> AndroidRuntime START com.android.internal.os.RuntimeInit <<<<<<
+D/AndroidRuntime( 2781): CheckJNI is ON
+E/memtrack( 2781): Couldn't load memtrack module (No such file or directory)
+E/android.os.Debug( 2781): failed to load memtrack module: -2
+D/AndroidRuntime( 2781): Calling main entry com.android.commands.input.Input
+I/Input   ( 2781): injectMotionEvent: MotionEvent { action=ACTION_DOWN, id[0]=0, x[0]=634.0, y[0]=1307.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=68420, downTime=68420, deviceId=0, source=0x1002 }
+I/Input   ( 2781): injectMotionEvent: MotionEvent { action=ACTION_MOVE, id[0]=0, x[0]=634.0, y[0]=1307.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=68420, downTime=68420, deviceId=0, source=0x1002 }
+I/Input   ( 2781): injectMotionEvent: MotionEvent { action=ACTION_MOVE, id[0]=0, x[0]=634.0, y[0]=1307.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=68503, downTime=68503, deviceId=0, source=0x1002 }
+I/Input   ( 2781): injectMotionEvent: MotionEvent { action=ACTION_UP, id[0]=0, x[0]=634.0, y[0]=1307.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=68548, downTime=68548, deviceId=0, source=0x1002 }
+D/AndroidRuntime( 2781): Shutting down VM
+I/Army2Coffee( 2582): [app] hop nhap chu (kieu 65536, toi da 500)
+I/Army2Coffee( 2582): [app] hop nhap chu kieu 65536
+D/EGL_emulation( 2582): eglMakeCurrent: 0x7fa51e074200: ver 3 0
+I/LatinIME( 1842): Starting input. Cursor position = 0,0
+D/EGL_emulation( 1842): eglMakeCurrent: 0x7fa51376b200: ver 3 0
+D/gralloc_ranchu( 1128): gralloc_alloc: Creating ashmem region of size 9850880
+D/        ( 2795): HostConnection::get() New Host Connection established 0x7fb4fdc4e320, tid 2795
+E/EGL_emulation( 1128): tid 1128: eglCreateSyncKHR(1865): error 0x3004 (EGL_BAD_ATTRIBUTE)
+D/AndroidRuntime( 2798): 
+D/AndroidRuntime( 2798): >>>>>> AndroidRuntime START com.android.internal.os.RuntimeInit <<<<<<
+D/AndroidRuntime( 2798): CheckJNI is ON
+E/memtrack( 2798): Couldn't load memtrack module (No such file or directory)
+E/android.os.Debug( 2798): failed to load memtrack module: -2
+D/AndroidRuntime( 2798): Calling main entry com.android.commands.input.Input
+I/Input   ( 2798): injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_1, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=72067, downTime=72067, deviceId=-1, source=0x101 }
+I/Input   ( 2798): injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_1, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=72067, downTime=72067, deviceId=-1, source=0x101 }
+I/Input   ( 2798): injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_2, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=72067, downTime=72067, deviceId=-1, source=0x101 }
+I/Input   ( 2798): injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_2, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=72067, downTime=72067, deviceId=-1, source=0x101 }
+I/Input   ( 2798): injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_3, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=72067, downTime=72067, deviceId=-1, source=0x101 }
+I/Input   ( 2798): injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_3, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=72067, downTime=72067, deviceId=-1, source=0x101 }
+I/Input   ( 2798): injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_4, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=72067, downTime=72067, deviceId=-1, source=0x101 }
+I/Input   ( 2798): injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_4, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=72067, downTime=72067, deviceId=-1, source=0x101 }
+I/Input   ( 2798): injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_5, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=72067, downTime=72067, deviceId=-1, source=0x101 }
+I/Input   ( 2798): injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_5, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=72067, downTime=72067, deviceId=-1, source=0x101 }
+I/Input   ( 2798): injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_6, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=72067, downTime=72067, deviceId=-1, source=0x101 }
+I/Input   ( 2798): injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_6, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=72067, downTime=72067, deviceId=-1, source=0x101 }
+D/AndroidRuntime( 2798): Shutting down VM
+D/AndroidRuntime( 2810): 
+D/AndroidRuntime( 2810): >>>>>> AndroidRuntime START com.android.internal.os.RuntimeInit <<<<<<
+D/AndroidRuntime( 2810): CheckJNI is ON
+E/memtrack( 2810): Couldn't load memtrack module (No such file or directory)
+E/android.os.Debug( 2810): failed to load memtrack module: -2
+D/AndroidRuntime( 2810): Calling main entry com.android.commands.input.Input
+I/Input   ( 2810): injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_ENTER, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=73514, downTime=73514, deviceId=-1, source=0x101 }
+I/Input   ( 2810): injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_ENTER, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=73514, downTime=73514, deviceId=-1, source=0x101 }
+W/AudioTrack( 1483): AUDIO_OUTPUT_FLAG_FAST denied by client
+D/AndroidRuntime( 2810): Shutting down VM
+W/ViewRootImpl( 2582): Dropping event due to root view being removed: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_ENTER, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=73514, downTime=73514, deviceId=-1, source=0x101 }
+W/InputEventReceiver( 2582): Attempted to finish an input event but the input event receiver has already been disposed.
+D/EGL_emulation( 2582): eglMakeCurrent: 0x7fa51e074200: ver 3 0
+D/gralloc_ranchu( 1128): gralloc_alloc: Creating ashmem region of size 9850880
+D/        ( 2825): HostConnection::get() New Host Connection established 0x7f4e6854e320, tid 2825
+E/EGL_emulation( 1128): tid 1128: eglCreateSyncKHR(1865): error 0x3004 (EGL_BAD_ATTRIBUTE)
+D/AndroidRuntime( 2828): 
+D/AndroidRuntime( 2828): >>>>>> AndroidRuntime START com.android.internal.os.RuntimeInit <<<<<<
+D/AndroidRuntime( 2828): CheckJNI is ON
+E/memtrack( 2828): Couldn't load memtrack module (No such file or directory)
+E/android.os.Debug( 2828): failed to load memtrack module: -2
+D/AndroidRuntime( 2828): Calling main entry com.android.commands.settings.SettingsCmd
+D/AndroidRuntime( 2828): Shutting down VM
+D/EGL_emulation( 1842): eglMakeCurrent: 0x7fa51376b200: ver 3 0
+D/SettingsProvider( 1483): User 0 external modification to /data/data/com.android.providers.settings/databases/settings.db; event=2
+D/SettingsProvider( 1483): User 0 updating our caches for /data/data/com.android.providers.settings/databases/settings.db
+D/AndroidRuntime( 2841): 
+D/AndroidRuntime( 2841): >>>>>> AndroidRuntime START com.android.internal.os.RuntimeInit <<<<<<
+D/AndroidRuntime( 2841): CheckJNI is ON
+E/memtrack( 2841): Couldn't load memtrack module (No such file or directory)
+E/android.os.Debug( 2841): failed to load memtrack module: -2
+D/AndroidRuntime( 2841): Calling main entry com.android.commands.input.Input
+I/Input   ( 2841): injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_HOME, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=78514, downTime=78514, deviceId=-1, source=0x101 }
+I/Input   ( 2841): injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_HOME, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=78514, downTime=78514, deviceId=-1, source=0x101 }
+I/ActivityManager( 1483): START u0 {act=android.intent.action.MAIN cat=[android.intent.category.HOME] flg=0x10200000 cmp=com.android.launcher/com.android.launcher2.Launcher} from uid 1000 on display 0
+D/gralloc_ranchu( 1128): gralloc_alloc: Creating ashmem region of size 1118208
+D/        ( 1483): HostConnection::get() New Host Connection established 0x7fa51e0c1b00, tid 1579
+E/EGL_emulation( 1128): tid 1128: eglCreateSyncKHR(1865): error 0x3004 (EGL_BAD_ATTRIBUTE)
+D/AndroidRuntime( 2841): Shutting down VM
+D/EGL_emulation( 1794): eglMakeCurrent: 0x7fa51e0a8200: ver 3 0
+D/EGL_emulation( 2096): eglMakeCurrent: 0x7fa51db68200: ver 3 0
+D/EGL_emulation( 2582): eglMakeCurrent: 0x7fa51e074200: ver 3 0
+D/EGL_emulation( 1794): eglMakeCurrent: 0x7fa51e0a8200: ver 3 0
+D/EGL_emulation( 1794): eglMakeCurrent: 0x7fa51e0a8200: ver 3 0
+D/EGL_emulation( 1794): eglMakeCurrent: 0x7fa51e0a8200: ver 3 0
+D/EGL_emulation( 1794): eglMakeCurrent: 0x7fa51e0a8200: ver 3 0
+D/EGL_emulation( 1794): eglMakeCurrent: 0x7fa51e0a8200: ver 3 0
+D/EGL_emulation( 1794): eglMakeCurrent: 0x7fa51e0a8200: ver 3 0
+D/EGL_emulation( 1794): eglMakeCurrent: 0x7fa51e0a8200: ver 3 0
+D/EGL_emulation( 1794): eglMakeCurrent: 0x7fa51e0a8200: ver 3 0
+D/EGL_emulation( 1794): eglMakeCurrent: 0x7fa51e0a8200: ver 3 0
+D/EGL_emulation( 1794): eglMakeCurrent: 0x7fa51e0a8200: ver 3 0
+D/EGL_emulation( 1794): eglMakeCurrent: 0x7fa51e0a8200: ver 3 0
+D/EGL_emulation( 1794): eglMakeCurrent: 0x7fa51e0a8200: ver 3 0
+W/OpenGLRenderer( 2096): Incorrectly called buildLayer on View: ShortcutAndWidgetContainer, destroying layer...
+W/OpenGLRenderer( 2096): Incorrectly called buildLayer on View: ShortcutAndWidgetContainer, destroying layer...
+W/OpenGLRenderer( 2096): Incorrectly called buildLayer on View: ShortcutAndWidgetContainer, destroying layer...
+D/AndroidRuntime( 2853): 
+D/AndroidRuntime( 2853): >>>>>> AndroidRuntime START com.android.internal.os.RuntimeInit <<<<<<
+D/AndroidRuntime( 2853): CheckJNI is ON
+E/memtrack( 2853): Couldn't load memtrack module (No such file or directory)
+E/android.os.Debug( 2853): failed to load memtrack module: -2
+D/AndroidRuntime( 2853): Calling main entry com.android.commands.am.Am
+I/ActivityManager( 1483): START u0 {flg=0x10000000 cmp=vn.army2coffee.thuan/.MainActivity} from uid 0 on display 0
+D/EGL_emulation( 2582): eglMakeCurrent: 0x7fa51e074200: ver 3 0
+D/EGL_emulation( 1794): eglMakeCurrent: 0x7fa51e0a8200: ver 3 0
+D/EGL_emulation( 1794): eglMakeCurrent: 0x7fa51e0a8200: ver 3 0
+D/AndroidRuntime( 2853): Shutting down VM
+D/EGL_emulation( 1794): eglMakeCurrent: 0x7fa51e0a8200: ver 3 0
+D/EGL_emulation( 1794): eglMakeCurrent: 0x7fa51e0a8200: ver 3 0
+D/EGL_emulation( 1794): eglMakeCurrent: 0x7fa51e0a8200: ver 3 0
+D/EGL_emulation( 1794): eglMakeCurrent: 0x7fa51e0a8200: ver 3 0
+D/EGL_emulation( 1794): eglMakeCurrent: 0x7fa51e0a8200: ver 3 0
+D/EGL_emulation( 1794): eglMakeCurrent: 0x7fa51e0a8200: ver 3 0
+D/EGL_emulation( 1794): eglMakeCurrent: 0x7fa51e0a8200: ver 3 0
+D/EGL_emulation( 1794): eglMakeCurrent: 0x7fa51e0a8200: ver 3 0
+D/EGL_emulation( 1794): eglMakeCurrent: 0x7fa51e0a8200: ver 3 0
+D/EGL_emulation( 1794): eglMakeCurrent: 0x7fa51e0a8200: ver 3 0
+D/EGL_emulation( 1794): eglMakeCurrent: 0x7fa51e0a8200: ver 3 0
+D/EGL_emulation( 1794): eglMakeCurrent: 0x7fa51e0a8200: ver 3 0
+D/EGL_emulation( 2096): eglMakeCurrent: 0x7fa51db68200: ver 3 0
+D/gralloc_ranchu( 1128): gralloc_alloc: Creating ashmem region of size 9850880
+D/        ( 2867): HostConnection::get() New Host Connection established 0x7fe3b304e320, tid 2867
+E/EGL_emulation( 1128): tid 1128: eglCreateSyncKHR(1865): error 0x3004 (EGL_BAD_ATTRIBUTE)
+D/AndroidRuntime( 2873): 
+D/AndroidRuntime( 2873): >>>>>> AndroidRuntime START com.android.internal.os.RuntimeInit <<<<<<
+D/AndroidRuntime( 2873): CheckJNI is ON
+E/memtrack( 2873): Couldn't load memtrack module (No such file or directory)
+E/android.os.Debug( 2873): failed to load memtrack module: -2
+D/AndroidRuntime( 2873): Calling main entry com.android.commands.input.Input
+I/Input   ( 2873): injectMotionEvent: MotionEvent { action=ACTION_DOWN, id[0]=0, x[0]=634.0, y[0]=1189.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=86783, downTime=86783, deviceId=0, source=0x1002 }
+I/Input   ( 2873): injectMotionEvent: MotionEvent { action=ACTION_MOVE, id[0]=0, x[0]=634.0, y[0]=1189.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=86783, downTime=86783, deviceId=0, source=0x1002 }
+I/Input   ( 2873): injectMotionEvent: MotionEvent { action=ACTION_MOVE, id[0]=0, x[0]=634.0, y[0]=1189.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=86837, downTime=86837, deviceId=0, source=0x1002 }
+I/Input   ( 2873): injectMotionEvent: MotionEvent { action=ACTION_MOVE, id[0]=0, x[0]=634.0, y[0]=1189.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=86888, downTime=86888, deviceId=0, source=0x1002 }
+I/Input   ( 2873): injectMotionEvent: MotionEvent { action=ACTION_UP, id[0]=0, x[0]=634.0, y[0]=1189.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=86929, downTime=86929, deviceId=0, source=0x1002 }
+D/AndroidRuntime( 2873): Shutting down VM
+D/AndroidRuntime( 2888): 
+D/AndroidRuntime( 2888): >>>>>> AndroidRuntime START com.android.internal.os.RuntimeInit <<<<<<
+D/AndroidRuntime( 2888): CheckJNI is ON
+E/memtrack( 2888): Couldn't load memtrack module (No such file or directory)
+E/android.os.Debug( 2888): failed to load memtrack module: -2
+D/AndroidRuntime( 2888): Calling main entry com.android.commands.input.Input
+I/Input   ( 2888): injectMotionEvent: MotionEvent { action=ACTION_DOWN, id[0]=0, x[0]=634.0, y[0]=1189.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=90343, downTime=90343, deviceId=0, source=0x1002 }
+I/Input   ( 2888): injectMotionEvent: MotionEvent { action=ACTION_MOVE, id[0]=0, x[0]=634.0, y[0]=1189.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=90343, downTime=90343, deviceId=0, source=0x1002 }
+I/Input   ( 2888): injectMotionEvent: MotionEvent { action=ACTION_MOVE, id[0]=0, x[0]=634.0, y[0]=1189.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=90421, downTime=90421, deviceId=0, source=0x1002 }
+I/Input   ( 2888): injectMotionEvent: MotionEvent { action=ACTION_UP, id[0]=0, x[0]=634.0, y[0]=1189.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=90465, downTime=90465, deviceId=0, source=0x1002 }
+D/AndroidRuntime( 2888): Shutting down VM
+I/Army2Coffee( 2582): [app] hop nhap chu (kieu 0, toi da 500)
+I/Army2Coffee( 2582): [app] hop nhap chu kieu 0
+D/EGL_emulation( 2582): eglMakeCurrent: 0x7fa51e074200: ver 3 0
+I/LatinIME( 1842): Starting input. Cursor position = 0,5
+D/EGL_emulation( 1794): eglMakeCurrent: 0x7fa51e0a8200: ver 3 0
+D/EGL_emulation( 1842): eglMakeCurrent: 0x7fa51376b200: ver 3 0
+D/AndroidRuntime( 2901): 
+D/AndroidRuntime( 2901): >>>>>> AndroidRuntime START com.android.internal.os.RuntimeInit <<<<<<
+D/AndroidRuntime( 2901): CheckJNI is ON
+E/memtrack( 2901): Couldn't load memtrack module (No such file or directory)
+E/android.os.Debug( 2901): failed to load memtrack module: -2
+D/AndroidRuntime( 2901): Calling main entry com.android.commands.input.Input
+I/Input   ( 2901): injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_A, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=93789, downTime=93789, deviceId=-1, source=0x101 }
+I/Input   ( 2901): injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_A, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=93789, downTime=93789, deviceId=-1, source=0x101 }
+I/Input   ( 2901): injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_B, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=93789, downTime=93789, deviceId=-1, source=0x101 }
+I/Input   ( 2901): injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_B, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=93789, downTime=93789, deviceId=-1, source=0x101 }
+I/Input   ( 2901): injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_C, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=93789, downTime=93789, deviceId=-1, source=0x101 }
+I/Input   ( 2901): injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_C, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=93789, downTime=93789, deviceId=-1, source=0x101 }
+D/AndroidRuntime( 2901): Shutting down VM
+D/AndroidRuntime( 2913): 
+D/AndroidRuntime( 2913): >>>>>> AndroidRuntime START com.android.internal.os.RuntimeInit <<<<<<
+D/AndroidRuntime( 2913): CheckJNI is ON
+E/memtrack( 2913): Couldn't load memtrack module (No such file or directory)
+E/android.os.Debug( 2913): failed to load memtrack module: -2
+D/AndroidRuntime( 2913): Calling main entry com.android.commands.input.Input
+I/Input   ( 2913): injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_HOME, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=95132, downTime=95132, deviceId=-1, source=0x101 }
+I/Input   ( 2913): injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_HOME, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=95132, downTime=95132, deviceId=-1, source=0x101 }
+I/ActivityManager( 1483): START u0 {act=android.intent.action.MAIN cat=[android.intent.category.HOME] flg=0x10200000 cmp=com.android.launcher/com.android.launcher2.Launcher} from uid 1000 on display 0
+D/gralloc_ranchu( 1128): gralloc_alloc: Creating ashmem region of size 1118208
+E/EGL_emulation( 1128): tid 1128: eglCreateSyncKHR(1865): error 0x3004 (EGL_BAD_ATTRIBUTE)
+D/EGL_emulation( 2582): eglMakeCurrent: 0x7fa51e074200: ver 3 0
+D/AndroidRuntime( 2913): Shutting down VM
+D/EGL_emulation( 1794): eglMakeCurrent: 0x7fa51e0a8200: ver 3 0
+D/EGL_emulation( 2096): eglMakeCurrent: 0x7fa51db68200: ver 3 0
+D/EGL_emulation( 1794): eglMakeCurrent: 0x7fa51e0a8200: ver 3 0
+W/IInputConnectionWrapper( 2582): showStatusIcon on inactive InputConnection
+D/EGL_emulation( 1842): eglMakeCurrent: 0x7fa51376b200: ver 3 0
+D/EGL_emulation( 1794): eglMakeCurrent: 0x7fa51e0a8200: ver 3 0
+D/EGL_emulation( 2582): eglMakeCurrent: 0x7fa51e074200: ver 3 0
+D/EGL_emulation( 1794): eglMakeCurrent: 0x7fa51e0a8200: ver 3 0
+D/EGL_emulation( 1794): eglMakeCurrent: 0x7fa51e0a8200: ver 3 0
+D/EGL_emulation( 1794): eglMakeCurrent: 0x7fa51e0a8200: ver 3 0
+D/EGL_emulation( 1794): eglMakeCurrent: 0x7fa51e0a8200: ver 3 0
+D/EGL_emulation( 1794): eglMakeCurrent: 0x7fa51e0a8200: ver 3 0
+D/EGL_emulation( 1794): eglMakeCurrent: 0x7fa51e0a8200: ver 3 0
+D/EGL_emulation( 1794): eglMakeCurrent: 0x7fa51e0a8200: ver 3 0
+D/EGL_emulation( 1794): eglMakeCurrent: 0x7fa51e0a8200: ver 3 0
+D/EGL_emulation( 1794): eglMakeCurrent: 0x7fa51e0a8200: ver 3 0
+D/EGL_emulation( 1794): eglMakeCurrent: 0x7fa51e0a8200: ver 3 0
+W/OpenGLRenderer( 2096): Incorrectly called buildLayer on View: ShortcutAndWidgetContainer, destroying layer...
+W/OpenGLRenderer( 2096): Incorrectly called buildLayer on View: ShortcutAndWidgetContainer, destroying layer...
+W/OpenGLRenderer( 2096): Incorrectly called buildLayer on View: ShortcutAndWidgetContainer, destroying layer...
+D/AndroidRuntime( 2925): 
+D/AndroidRuntime( 2925): >>>>>> AndroidRuntime START com.android.internal.os.RuntimeInit <<<<<<
+D/AndroidRuntime( 2925): CheckJNI is ON
+E/memtrack( 2925): Couldn't load memtrack module (No such file or directory)
+E/android.os.Debug( 2925): failed to load memtrack module: -2
+D/AndroidRuntime( 2925): Calling main entry com.android.commands.am.Am
+I/ActivityManager( 1483): START u0 {flg=0x10000000 cmp=vn.army2coffee.thuan/.MainActivity} from uid 0 on display 0
+D/EGL_emulation( 2582): eglMakeCurrent: 0x7fa51e074200: ver 3 0
+I/LatinIME( 1842): Starting input. Cursor position = 3,3
+D/EGL_emulation( 2582): eglMakeCurrent: 0x7fa51e074200: ver 3 0
+D/EGL_emulation( 1794): eglMakeCurrent: 0x7fa51e0a8200: ver 3 0
+D/EGL_emulation( 1794): eglMakeCurrent: 0x7fa51e0a8200: ver 3 0
+D/AndroidRuntime( 2925): Shutting down VM
+D/EGL_emulation( 1794): eglMakeCurrent: 0x7fa51e0a8200: ver 3 0
+D/EGL_emulation( 1794): eglMakeCurrent: 0x7fa51e0a8200: ver 3 0
+D/EGL_emulation( 1794): eglMakeCurrent: 0x7fa51e0a8200: ver 3 0
+D/EGL_emulation( 1794): eglMakeCurrent: 0x7fa51e0a8200: ver 3 0
+D/EGL_emulation( 1842): eglMakeCurrent: 0x7fa51376b200: ver 3 0
+D/EGL_emulation( 1794): eglMakeCurrent: 0x7fa51e0a8200: ver 3 0
+D/EGL_emulation( 1794): eglMakeCurrent: 0x7fa51e0a8200: ver 3 0
+D/EGL_emulation( 1794): eglMakeCurrent: 0x7fa51e0a8200: ver 3 0
+D/EGL_emulation( 2582): eglMakeCurrent: 0x7fa51e074200: ver 3 0
+D/EGL_emulation( 1794): eglMakeCurrent: 0x7fa51e0a8200: ver 3 0
+D/EGL_emulation( 2096): eglMakeCurrent: 0x7fa51db68200: ver 3 0
+D/gralloc_ranchu( 1128): gralloc_alloc: Creating ashmem region of size 9850880
+D/        ( 2941): HostConnection::get() New Host Connection established 0x7f729db4e320, tid 2941
+E/EGL_emulation( 1128): tid 1128: eglCreateSyncKHR(1865): error 0x3004 (EGL_BAD_ATTRIBUTE)
+D/AndroidRuntime( 2944): 
+D/AndroidRuntime( 2944): >>>>>> AndroidRuntime START com.android.internal.os.RuntimeInit <<<<<<
+D/AndroidRuntime( 2944): CheckJNI is ON
+E/memtrack( 2944): Couldn't load memtrack module (No such file or directory)
+E/android.os.Debug( 2944): failed to load memtrack module: -2
+D/AndroidRuntime( 2944): Calling main entry com.android.commands.input.Input
+I/Input   ( 2944): injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_BACK, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=103270, downTime=103270, deviceId=-1, source=0x101 }
+I/Input   ( 2944): injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_BACK, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=103270, downTime=103270, deviceId=-1, source=0x101 }
+D/AndroidRuntime( 2944): Shutting down VM
+D/EGL_emulation( 1794): eglMakeCurrent: 0x7fa51e0a8200: ver 3 0
+D/gralloc_ranchu( 1128): gralloc_alloc: Creating ashmem region of size 9850880
+D/        ( 2958): HostConnection::get() New Host Connection established 0x7f872f34e320, tid 2958
+E/EGL_emulation( 1128): tid 1128: eglCreateSyncKHR(1865): error 0x3004 (EGL_BAD_ATTRIBUTE)
+D/AndroidRuntime( 2961): 
+D/AndroidRuntime( 2961): >>>>>> AndroidRuntime START com.android.internal.os.RuntimeInit <<<<<<
+D/AndroidRuntime( 2961): CheckJNI is ON
+E/memtrack( 2961): Couldn't load memtrack module (No such file or directory)
+E/android.os.Debug( 2961): failed to load memtrack module: -2
+D/AndroidRuntime( 2961): Calling main entry com.android.commands.input.Input
+I/Input   ( 2961): injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_BACK, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=105757, downTime=105757, deviceId=-1, source=0x101 }
+I/Input   ( 2961): injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_BACK, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=105757, downTime=105757, deviceId=-1, source=0x101 }
+D/AndroidRuntime( 2961): Shutting down VM
+W/InputEventReceiver( 2582): Attempted to finish an input event but the input event receiver has already been disposed.
+D/EGL_emulation( 2582): eglMakeCurrent: 0x7fa51e074200: ver 3 0
+D/gralloc_ranchu( 1128): gralloc_alloc: Creating ashmem region of size 9850880
+D/        ( 2975): HostConnection::get() New Host Connection established 0x7f1371d4e320, tid 2975
+E/EGL_emulation( 1128): tid 1128: eglCreateSyncKHR(1865): error 0x3004 (EGL_BAD_ATTRIBUTE)
+D/AndroidRuntime( 2978): 
+D/AndroidRuntime( 2978): >>>>>> AndroidRuntime START com.android.internal.os.RuntimeInit <<<<<<
+D/AndroidRuntime( 2978): CheckJNI is ON
+E/memtrack( 2978): Couldn't load memtrack module (No such file or directory)
+E/android.os.Debug( 2978): failed to load memtrack module: -2
+D/AndroidRuntime( 2978): Calling main entry com.android.commands.settings.SettingsCmd
+D/AndroidRuntime( 2978): Shutting down VM
+D/EGL_emulation( 1842): eglMakeCurrent: 0x7fa51376b200: ver 3 0

@@ -1,0 +1,4 @@
+  PID PR CPU% S  #THR     VSS     RSS PCY UID      Name
+ 2582  0   6% S    19 1314336K  49712K  fg u0_a53   vn.army2coffee.thuan
+  PID PR CPU% S  #THR     VSS     RSS PCY UID      Name
+ 2582  1   6% S    19 1314336K  49712K  fg u0_a53   vn.army2coffee.thuan
