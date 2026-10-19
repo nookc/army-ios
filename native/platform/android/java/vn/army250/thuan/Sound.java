@@ -1,4 +1,4 @@
-package vn.army2coffee.thuan;
+package vn.army250.thuan;
 
 import android.media.AudioFormat;
 import android.media.AudioManager;
@@ -25,7 +25,7 @@ final class Sound {
     static synchronized int create(byte[] d, String type) {
         try {
             if (d == null || d.length < 44 || d[0] != 'R' || d[1] != 'I' || d[2] != 'F' || d[3] != 'F') {
-                Log.w("Army2Coffee", "[am thanh] khong phai WAV: " + type);
+                Log.w("Army250", "[am thanh] khong phai WAV: " + type);
                 return -1;
             }
             int fmt = 0, ch = 1, rate = 8000, bits = 8, off = -1, len = 0;
@@ -47,7 +47,7 @@ final class Sound {
                 p += 8 + cl + (cl & 1);
             }
             if (fmt != 1 || off < 0 || len <= 0 || (bits != 8 && bits != 16) || (ch != 1 && ch != 2)) {
-                Log.w("Army2Coffee", "[am thanh] WAV khong ho tro: fmt " + fmt + " bit " + bits + " kenh " + ch);
+                Log.w("Army250", "[am thanh] WAV khong ho tro: fmt " + fmt + " bit " + bits + " kenh " + ch);
                 return -1;
             }
             int frameBytes = ch * bits / 8;
@@ -73,10 +73,10 @@ final class Sound {
             t.write(d, off, len);
             tracks[h] = t;
             frames[h] = len / frameBytes;
-            Log.i("Army2Coffee", "[am thanh] " + type + " " + d.length + " byte: ok");
+            Log.i("Army250", "[am thanh] " + type + " " + d.length + " byte: ok");
             return h;
         } catch (Throwable e) {
-            Log.w("Army2Coffee", "[am thanh] loi " + e);
+            Log.w("Army250", "[am thanh] loi " + e);
             return -1;
         }
     }
@@ -98,7 +98,7 @@ final class Sound {
             }
             t.play();
         } catch (Throwable e) {
-            Log.w("Army2Coffee", "[am thanh] phat loi " + e);
+            Log.w("Army250", "[am thanh] phat loi " + e);
         }
     }
 

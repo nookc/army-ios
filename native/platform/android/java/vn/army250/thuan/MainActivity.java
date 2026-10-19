@@ -1,4 +1,4 @@
-package vn.army2coffee.thuan;
+package vn.army250.thuan;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -37,11 +37,11 @@ import android.widget.TextView;
 import java.io.File;
 
 /**
- * Army 2 Coffee - ban Android "thuan": client J2ME dich san sang ma may (libarmy2.so), khong gia lap.
+ * Army2.5.0 - ban Android "thuan": client J2ME dich san sang ma may (libarmy2.so), khong gia lap.
  * Man hinh: khung game 320 x gH phong to (diem anh net) + ban phim ao 4x2 giong ban iOS.
  */
 public final class MainActivity extends Activity {
-    static final String TAG = "Army2Coffee";
+    static final String TAG = "Army250";
     static boolean started;
     static int gW = 320, gH = 466;
     static int created;

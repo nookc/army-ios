@@ -19121,7 +19121,7 @@ namespace phoneme::vm
               nested->native_method.valid() &&
               natives_.jit_policy(nested->native_method) ==
                   NativeJitPolicy::synchronous_bounded;
-          // Army 2 Coffee: getenv() o moi lan goi native long nhau -> doc 1 lan
+          // Army2.5.0: getenv() o moi lan goi native long nhau -> doc 1 lan
           static const bool trace_network_callers = std::getenv("PHONEME_TRACE_NETWORK_CALLERS") != nullptr;
           if (trace_network_callers &&
               nested->method.method != nullptr &&

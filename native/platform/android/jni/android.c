@@ -1,5 +1,5 @@
 /*
- * android.c - lop nen tang Android cho client Army 2 Coffee dich san (JNI <-> runtime C).
+ * android.c - lop nen tang Android cho client Army2.5.0 dich san (JNI <-> runtime C).
  *
  * Luong:
  *  - luong UI Android: ve khung (copyFrame), cham/phim (post), hop nhap chu (textDone) - KHONG dung GC
@@ -27,7 +27,7 @@
 #include <unwind.h>
 #include "platform.h"
 
-#define TAG "Army2Coffee"
+#define TAG "Army250"
 
 #if defined(__arm__) || defined(__i386__)
 /* Boehm GC dung tkill() tren Android 32 bit API < 23 (USE_TKILL_ON_ANDROID) nhung libc API 21 cua NDK
@@ -37,7 +37,7 @@ int tkill(int tid, int sig) { return (int)syscall(__NR_tkill, tid, sig); }
 #endif
 
 static JavaVM *gVm;
-static jclass gBridge;                 /* vn/army2coffee/thuan/Native */
+static jclass gBridge;                 /* vn/army250/thuan/Native */
 static jmethodID mShowText, mSndCreate, mSndStart, mSndStop, mSndClose, mSndVolume, mOpenUrl, mSms, mVibrate, mExit;
 static pthread_key_t gEnvKey;
 static AAsset *gJarAsset;
@@ -111,7 +111,7 @@ jint JNI_OnLoad(JavaVM *vm, void *reserved) {
     pthread_key_create(&gEnvKey, env_detach);
     JNIEnv *e = 0;
     if ((*vm)->GetEnv(vm, (void *)&e, JNI_VERSION_1_6) != JNI_OK) return -1;
-    jclass c = (*e)->FindClass(e, "vn/army2coffee/thuan/Native");
+    jclass c = (*e)->FindClass(e, "vn/army250/thuan/Native");
     if (!c) return -1;
     gBridge = (jclass)(*e)->NewGlobalRef(e, c);
     mShowText = (*e)->GetStaticMethodID(e, c, "showTextBox", "(Ljava/lang/String;Ljava/lang/String;II)V");
@@ -338,7 +338,7 @@ static void *game_main(void *arg) {
     return 0;
 }
 
-JNIEXPORT jboolean JNICALL Java_vn_army2coffee_thuan_Native_start(JNIEnv *e, jclass cls, jobject assets, jstring dataDir,
+JNIEXPORT jboolean JNICALL Java_vn_army250_thuan_Native_start(JNIEnv *e, jclass cls, jobject assets, jstring dataDir,
                                                                    jint w, jint h) {
     (void)cls;
     if (gStarted) return JNI_TRUE;
@@ -352,19 +352,19 @@ JNIEXPORT jboolean JNICALL Java_vn_army2coffee_thuan_Native_start(JNIEnv *e, jcl
     snprintf(p, sizeof p, "%s/../crash.txt", gDataDir);
     gCrashFd = open(p, O_WRONLY | O_CREAT | O_APPEND, 0644);
     AAssetManager *am = AAssetManager_fromJava(e, assets);
-    gJarAsset = am ? AAssetManager_open(am, "Army2Coffee.jar", AASSET_MODE_BUFFER) : 0;
+    gJarAsset = am ? AAssetManager_open(am, "Army250.jar", AASSET_MODE_BUFFER) : 0;
     if (gJarAsset) {
         gJar = (const uint8_t *)AAsset_getBuffer(gJarAsset);
         gJarLen = (size_t)AAsset_getLength(gJarAsset);
     }
     if (!gJar) {
-        plat_log("[app] khong doc duoc Army2Coffee.jar trong apk");
+        plat_log("[app] khong doc duoc Army250.jar trong apk");
         return JNI_FALSE;
     }
     gW = w;
     gH = h;
     char b[200];
-    snprintf(b, sizeof b, "[app] khoi dong Army 2 Coffee (Android), man %dx%d, jar %zu byte", gW, gH, gJarLen);
+    snprintf(b, sizeof b, "[app] khoi dong Army2.5.0 (Android), man %dx%d, jar %zu byte", gW, gH, gJarLen);
     plat_log(b);
     crash_install();
     pthread_attr_t at;
@@ -379,13 +379,13 @@ JNIEXPORT jboolean JNICALL Java_vn_army2coffee_thuan_Native_start(JNIEnv *e, jcl
     return JNI_TRUE;
 }
 
-JNIEXPORT void JNICALL Java_vn_army2coffee_thuan_Native_post(JNIEnv *e, jclass cls, jint type, jint a, jint b) {
+JNIEXPORT void JNICALL Java_vn_army250_thuan_Native_post(JNIEnv *e, jclass cls, jint type, jint a, jint b) {
     (void)e;
     (void)cls;
     j2n_post(type, a, b);
 }
 
-JNIEXPORT void JNICALL Java_vn_army2coffee_thuan_Native_textDone(JNIEnv *e, jclass cls, jboolean ok, jstring text) {
+JNIEXPORT void JNICALL Java_vn_army250_thuan_Native_textDone(JNIEnv *e, jclass cls, jboolean ok, jstring text) {
     (void)cls;
     if (!ok || !text) {
         j2n_text_done(0, 0);
@@ -425,7 +425,7 @@ JNIEXPORT void JNICALL Java_vn_army2coffee_thuan_Native_textDone(JNIEnv *e, jcla
 }
 
 /* chep khung moi nhat vao Bitmap ARGB_8888 (bo nho RGBA) neu co khung moi; tra ve so khung */
-JNIEXPORT jint JNICALL Java_vn_army2coffee_thuan_Native_copyFrame(JNIEnv *e, jclass cls, jobject bmp, jint last) {
+JNIEXPORT jint JNICALL Java_vn_army250_thuan_Native_copyFrame(JNIEnv *e, jclass cls, jobject bmp, jint last) {
     (void)cls;
     int f = __atomic_load_n(&gFrameNo, __ATOMIC_ACQUIRE);
     if (f == last || !gFront) return f;
@@ -448,13 +448,13 @@ JNIEXPORT jint JNICALL Java_vn_army2coffee_thuan_Native_copyFrame(JNIEnv *e, jcl
     return f;
 }
 
-JNIEXPORT jint JNICALL Java_vn_army2coffee_thuan_Native_frames(JNIEnv *e, jclass cls) {
+JNIEXPORT jint JNICALL Java_vn_army250_thuan_Native_frames(JNIEnv *e, jclass cls) {
     (void)e;
     (void)cls;
     return __atomic_load_n(&gFrameNo, __ATOMIC_ACQUIRE);
 }
 
-JNIEXPORT jstring JNICALL Java_vn_army2coffee_thuan_Native_gcStats(JNIEnv *e, jclass cls) {
+JNIEXPORT jstring JNICALL Java_vn_army250_thuan_Native_gcStats(JNIEnv *e, jclass cls) {
     (void)cls;
     unsigned seen = 0, kept = 0;
     rt_gc_roots_stats(&seen, &kept);

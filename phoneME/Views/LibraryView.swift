@@ -51,9 +51,9 @@ private final class LibraryDebugAutolaunchGate {
 }
 #endif
 
-/// Army 2 Coffee: tu vao game 1 lan moi lan chay app.
-private final class Army2CoffeeAutolaunchGate {
-    static let shared = Army2CoffeeAutolaunchGate()
+/// Army2.5.0: tu vao game 1 lan moi lan chay app.
+private final class Army250AutolaunchGate {
+    static let shared = Army250AutolaunchGate()
 
     private var hasHandledRequest = false
 
@@ -251,18 +251,18 @@ struct LibraryView: View {
             }
         }
         .task {
-            // Army 2 Coffee: nhap client goi kem roi vao game ngay khi mo app (1 lan moi lan chay app).
-            // Thoat game thi ve thu vien, bam "Army 2 Coffee" de vao lai.
+            // Army2.5.0: nhap client goi kem roi vao game ngay khi mo app (1 lan moi lan chay app).
+            // Thoat game thi ve thu vien, bam "Army2.5.0" de vao lai.
             guard activeGame == nil,
-                  Army2CoffeeAutolaunchGate.shared.claimRequest(),
+                  Army250AutolaunchGate.shared.claimRequest(),
                   let game = library.seedBundledGame() else {
                 return
             }
             let defaults = UserDefaults.standard
             if !profiles.hasProfile(for: game) ||
-                defaults.integer(forKey: Self.army2CoffeeProfileVersionKey) < Self.army2CoffeeProfileVersion {
-                profiles.save(army2CoffeeProfile(), for: game)
-                defaults.set(Self.army2CoffeeProfileVersion, forKey: Self.army2CoffeeProfileVersionKey)
+                defaults.integer(forKey: Self.army250ProfileVersionKey) < Self.army250ProfileVersion {
+                profiles.save(army250Profile(), for: game)
+                defaults.set(Self.army250ProfileVersion, forKey: Self.army250ProfileVersionKey)
             }
             activeGame = game
         }
@@ -682,14 +682,14 @@ struct LibraryView: View {
         return String(baseName.prefix(80)) + "-RMS"
     }
 
-    /// Phien ban cau hinh Army 2 Coffee. Tang so nay de app ghi de cau hinh cu 1 lan khi cap nhat.
+    /// Phien ban cau hinh Army2.5.0. Tang so nay de app ghi de cau hinh cu 1 lan khi cap nhat.
     /// 1: man ngang (ban dau). 2: man doc + ban phim 4x2 duoi man hinh.
-    static let army2CoffeeProfileVersion = 2
-    static let army2CoffeeProfileVersionKey = "army2coffee.profileVersion"
+    static let army250ProfileVersion = 2
+    static let army250ProfileVersionKey = "army250.profileVersion"
 
-    /// Cau hinh mac dinh cho Army 2 Coffee: man doc, rong 320, cao vua phan tren ban phim 4x2
+    /// Cau hinh mac dinh cho Army2.5.0: man doc, rong 320, cao vua phan tren ban phim 4x2
     /// (o vuong, chiem nua be rong man hinh), dung cam ung + vuot cuon.
-    private func army2CoffeeProfile() -> GameProfile {
+    private func army250Profile() -> GameProfile {
         var profile = GameProfile()
         let width = 320
         var height = 460

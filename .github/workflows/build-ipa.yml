@@ -1,4 +1,4 @@
-name: Build Army 2 Coffee iOS
+name: Build Army2.5.0 iOS
 
 on:
   workflow_dispatch:
@@ -43,16 +43,16 @@ jobs:
           test "${PIPESTATUS[0]}" = "0"
           APP=$(find .build/device/Build/Products -type d -path '*-iphoneos/phoneME.app' | head -1)
           test -n "$APP"
-          test -f "$APP/Army2Coffee.jar"
+          test -f "$APP/Army250.jar"
           rm -rf out && mkdir -p out/Payload && cp -R "$APP" out/Payload/
-          (cd out && zip -qry ../Army2Coffee.ipa Payload)
-          ls -la Army2Coffee.ipa
+          (cd out && zip -qry ../Army250.ipa Payload)
+          ls -la Army250.ipa
 
       - name: Build TrollStore (.tipa)
         if: ${{ github.event_name == 'push' || inputs.loai == 'trollstore' || inputs.loai == 'ca-hai' }}
         run: |
           brew install ldid
-          bash Scripts/build-trollstore-tipa.sh --output "$PWD/Army2Coffee-TrollStore.tipa" \
+          bash Scripts/build-trollstore-tipa.sh --output "$PWD/Army250-TrollStore.tipa" \
             --derived-data "$PWD/.build/trollstore" 2>&1 | tail -40
 
       - name: Day IPA va log len nhanh ban-build
@@ -61,7 +61,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           rm -rf /tmp/pub && mkdir -p /tmp/pub
-          for f in Army2Coffee.ipa Army2Coffee-TrollStore.tipa; do [ -f "$f" ] && cp "$f" /tmp/pub/; done
+          for f in Army250.ipa Army250-TrollStore.tipa; do [ -f "$f" ] && cp "$f" /tmp/pub/; done
           for f in build-thuong.log Artifacts/*.log; do
             [ -f "$f" ] || continue
             grep -E "error:|warning: unable|BUILD (SUCCEEDED|FAILED)|\*\* " "$f" | tail -200 > "/tmp/pub/$(basename "$f" .log)-loi.txt" || true
@@ -82,17 +82,17 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           FILES=""
-          for f in Army2Coffee.ipa Army2Coffee-TrollStore.tipa; do [ -f "$f" ] && FILES="$FILES $f"; done
+          for f in Army250.ipa Army250-TrollStore.tipa; do [ -f "$f" ] && FILES="$FILES $f"; done
           gh release delete ios-moi-nhat -y --cleanup-tag || true
-          gh release create ios-moi-nhat $FILES --title "Army 2 Coffee iOS - build ${GITHUB_RUN_NUMBER}" \
+          gh release create ios-moi-nhat $FILES --title "Army2.5.0 iOS - build ${GITHUB_RUN_NUMBER}" \
             --notes "IPA chua ky: ky bang eSign, Scarlet, AltStore hoac Sideloadly. File .tipa (neu co): cai bang TrollStore." --latest
 
       - uses: actions/upload-artifact@v4
         with:
-          name: Army2Coffee-iOS
+          name: Army250-iOS
           path: |
-            Army2Coffee.ipa
-            Army2Coffee-TrollStore.tipa
+            Army250.ipa
+            Army250-TrollStore.tipa
           if-no-files-found: error
 
       - uses: actions/upload-artifact@v4

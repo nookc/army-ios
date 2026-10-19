@@ -1,4 +1,4 @@
-package vn.army2coffee.thuan;
+package vn.army250.thuan;
 
 import android.content.Context;
 import android.content.Intent;

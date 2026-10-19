@@ -1,5 +1,5 @@
 /*
- * App.m - vo app iOS cho client Army 2 Coffee dich san (khong bo thong dich).
+ * App.m - vo app iOS cho client Army2.5.0 dich san (khong bo thong dich).
  *   - man hinh game: Canvas 320 x H (H vua phan tren ban phim), phong to giu ti le, diem anh net
  *   - ban phim 4x2 (PadView), cham man hinh = con tro MIDP
  *   - hop nhap chu (TextBox) = UIAlertController voi ban phim iPhone
@@ -251,7 +251,7 @@ const char *plat_data_dir(void) { return gDataDirC; }
 const char *plat_jar_path(void) { return gJarC[0] ? gJarC : NULL; }
 const uint8_t *plat_jar_mem(size_t *len) { (void)len; return NULL; }
 
-/* nhat ky ra Documents/log.txt, loi sap ra Documents/crash.txt (xem trong app Tep: "Tren iPhone" > Army2 Thuan) */
+/* nhat ky ra Documents/log.txt, loi sap ra Documents/crash.txt (xem trong app Tep: "Tren iPhone" > Army2.5.0) */
 static FILE *gLog;
 static pthread_mutex_t gLogMu = PTHREAD_MUTEX_INITIALIZER;
 static int gCrashFd = -1, gLogFd = -1;
@@ -556,7 +556,7 @@ static void autotest(void) {
     NSString *docs = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES).firstObject;
     gDataDir = [docs stringByAppendingPathComponent:@"rms"];
     [NSFileManager.defaultManager createDirectoryAtPath:gDataDir withIntermediateDirectories:YES attributes:nil error:nil];
-    gJar = [NSBundle.mainBundle pathForResource:@"Army2Coffee" ofType:@"jar"];
+    gJar = [NSBundle.mainBundle pathForResource:@"Army250" ofType:@"jar"];
     strlcpy(gDataDirC, gDataDir.fileSystemRepresentation, sizeof gDataDirC);
     if (gJar) strlcpy(gJarC, gJar.fileSystemRepresentation, sizeof gJarC);
     [AVAudioSession.sharedInstance setCategory:AVAudioSessionCategoryAmbient error:nil];

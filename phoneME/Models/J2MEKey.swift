@@ -21,7 +21,7 @@ enum J2MEKey: Int32, CaseIterable, Identifiable {
     case nine = 57
     case star = 42
     case pound = 35
-    /// Army 2 Coffee: nut ao "LUC MAX" -> client mo hop "Luc ban" trong tran (ma rieng, khong phai phim MIDP)
+    /// Army2.5.0: nut ao "LUC MAX" -> client mo hop "Luc ban" trong tran (ma rieng, khong phai phim MIDP)
     case lucMax = -40
 
     var id: Int32 { rawValue }

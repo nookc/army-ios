@@ -240,16 +240,16 @@ final class GameLibrary: ObservableObject {
         try? saveRetainedData()
     }
 
-    // MARK: - Army 2 Coffee: client J2ME goi kem trong app
+    // MARK: - Army2.5.0: client J2ME goi kem trong app
 
-    static let bundledGameTitle = "Army 2 Coffee"
-    private static let bundledStampKey = "army2coffee.bundledJarStamp"
+    static let bundledGameTitle = "Army2.5.0"
+    private static let bundledStampKey = "army250.bundledJarStamp"
 
-    /// Nhap Army2Coffee.jar goi kem trong app vao thu vien (lan dau mo app),
+    /// Nhap Army250.jar goi kem trong app vao thu vien (lan dau mo app),
     /// hoac cap nhat khi ban app moi chua client moi hon. RMS (luu dang nhap) giu nguyen.
     @discardableResult
     func seedBundledGame() -> Game? {
-        guard let url = Bundle.main.url(forResource: "Army2Coffee", withExtension: "jar") else {
+        guard let url = Bundle.main.url(forResource: "Army250", withExtension: "jar") else {
             return nil
         }
         let attributes = try? fileManager.attributesOfItem(atPath: url.path)

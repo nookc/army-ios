@@ -404,7 +404,7 @@ enum KeyboardLayoutCatalog {
         )
     }
 
-    /// Army 2 Coffee: 2 phim mem hai ben (OK = phim mem trai, Back = phim mem
+    /// Army2.5.0: 2 phim mem hai ben (OK = phim mem trai, Back = phim mem
     /// phai), 4 phim huong va nut Ban o giua (giu de tang luc, tha ra la ban).
     /// Moi nut gui nhan khi cham va nha khi buong, giong phim that.
     private static func arrowsOnly() -> KeyboardLayoutDefinition {
@@ -1412,7 +1412,7 @@ private extension Color {
 }
 
 
-// MARK: - Army 2 Coffee: ban phim 4x2 duoi man hinh doc
+// MARK: - Army2.5.0: ban phim 4x2 duoi man hinh doc
 //
 //   F1 (phim mem trai) | ▲ | LUC MAX | F2 (phim mem phai)
 //   ◀                  | ▼ |    ▶    | OK (ban / chon)

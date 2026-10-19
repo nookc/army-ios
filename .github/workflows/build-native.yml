@@ -1,4 +1,4 @@
-name: Build Army 2 Coffee iOS (thuan)
+name: Build Army2.5.0 iOS (thuan)
 
 # App iOS "thuan": ma Java cua client duoc dich san sang C -> ma may ARM64 (khong bo thong dich).
 on:
@@ -7,7 +7,7 @@ on:
     branches: [main]
     paths:
       - 'native/**'
-      - 'Bundled/Army2Coffee.jar'
+      - 'Bundled/Army250.jar'
       - '.github/workflows/build-native.yml'
 
 permissions:
@@ -50,7 +50,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           rm -rf /tmp/pub && mkdir -p /tmp/pub/test
-          [ -f native/build/ios/Army2Coffee-Native.ipa ] && cp native/build/ios/Army2Coffee-Native.ipa /tmp/pub/
+          [ -f native/build/ios/Army250-Native.ipa ] && cp native/build/ios/Army250-Native.ipa /tmp/pub/
           cp native/build/ios/test/* /tmp/pub/test/ 2>/dev/null || true
           for f in build-native.log sim-test.log; do [ -f "$f" ] && tail -600 "$f" > "/tmp/pub/$f"; done
           [ -f native/build/gen/stats.txt ] && cp native/build/gen/stats.txt /tmp/pub/
@@ -68,18 +68,18 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          [ -f native/build/ios/Army2Coffee-Native.ipa ] || exit 0
-          cp native/build/ios/Army2Coffee-Native.ipa Army2Coffee-Native.ipa
+          [ -f native/build/ios/Army250-Native.ipa ] || exit 0
+          cp native/build/ios/Army250-Native.ipa Army250-Native.ipa
           gh release delete ios-thuan-moi-nhat -y --cleanup-tag || true
-          gh release create ios-thuan-moi-nhat Army2Coffee-Native.ipa --prerelease --latest=false \
-            --title "Army 2 Coffee iOS thuan (ban thu) - build ${GITHUB_RUN_NUMBER}" \
-            --notes "Ban iOS thuan: client dich san sang ma may, khong qua bo thong dich. IPA chua ky: ky bang eSign, Scarlet, AltStore, Sideloadly (TrollStore tu ky). Cai song song voi app cu (ma goi vn.army2coffee.native)."
+          gh release create ios-thuan-moi-nhat Army250-Native.ipa --prerelease --latest=false \
+            --title "Army2.5.0 iOS thuan (ban thu) - build ${GITHUB_RUN_NUMBER}" \
+            --notes "Ban iOS thuan: client dich san sang ma may, khong qua bo thong dich. IPA chua ky: ky bang eSign, Scarlet, AltStore, Sideloadly (TrollStore tu ky). Cai song song voi app cu (ma goi vn.army250.native)."
 
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: Army2Coffee-iOS-thuan
+          name: Army250-iOS-thuan
           path: |
-            native/build/ios/Army2Coffee-Native.ipa
+            native/build/ios/Army250-Native.ipa
             native/build/ios/test/
           if-no-files-found: ignore

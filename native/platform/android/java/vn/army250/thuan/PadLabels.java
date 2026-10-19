@@ -1,4 +1,4 @@
-package vn.army2coffee.thuan;
+package vn.army250.thuan;
 
 /** nhan ban phim ao (anh pixel cua app cu, giong ban iOS) - sinh tu platform/ios/PadView.h */
 final class PadLabels {

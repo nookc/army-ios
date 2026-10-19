@@ -1,12 +1,12 @@
 #!/bin/bash
 # Build ban Windows "thuan" (client dich san sang C -> ma may x86-64, khong gia lap) bang MinGW-w64 (cross tu Linux).
 #   bash native/tools/build_win.sh
-# Ket qua: native/build/win/Army2Coffee.exe (mot tep: jar + bieu tuong nam trong exe)
-#          native/build/win/Army2Coffee-debug.exe (con ky hieu, de doc crash)
+# Ket qua: native/build/win/Army250.exe (mot tep: jar + bieu tuong nam trong exe)
+#          native/build/win/Army250-debug.exe (con ky hieu, de doc crash)
 set -euo pipefail
 N=$(cd "$(dirname "$0")/.." && pwd)
 REPO=$(cd "$N/.." && pwd)
-JAR=${JAR:-$REPO/Bundled/Army2Coffee.jar}
+JAR=${JAR:-$REPO/Bundled/Army250.jar}
 B=$N/build/win
 TP=$N/third_party
 CC=${CC_WIN:-x86_64-w64-mingw32-gcc-posix}
@@ -51,12 +51,12 @@ ls "$B/gen"/j_*.c "$B/gen/meta.c" | xargs -P "$(nproc 2>/dev/null || echo 4)" -n
 
 # ---- tai nguyen: bieu tuong, manifest, jar, thong tin phien ban
 cp "$N/platform/win/army2.ico" "$N/platform/win/app.manifest" "$B/"
-cp "$JAR" "$B/Army2Coffee.jar"
-sed -e "s#@JAR@#Army2Coffee.jar#" -e "s#@BUILD@#${BUILD_NUMBER:-1}#g" "$N/platform/win/res.rc.in" > "$B/res.rc"
+cp "$JAR" "$B/Army250.jar"
+sed -e "s#@JAR@#Army250.jar#" -e "s#@BUILD@#${BUILD_NUMBER:-1}#g" "$N/platform/win/res.rc.in" > "$B/res.rc"
 (cd "$B" && $WR -O coff res.rc -o obj/res.o)
 
 echo "== lien ket"
-$CC -municode -mwindows -static -o "$B/Army2Coffee-debug.exe" "$B"/obj/*.o \
+$CC -municode -mwindows -static -o "$B/Army250-debug.exe" "$B"/obj/*.o \
   -lws2_32 -lwinmm -lgdi32 -luser32 -lshell32 -lcomctl32 -lole32 -lpthread
-$STRIP -o "$B/Army2Coffee.exe" "$B/Army2Coffee-debug.exe"
+$STRIP -o "$B/Army250.exe" "$B/Army250-debug.exe"
 ls -la "$B"/*.exe

@@ -1,4 +1,4 @@
-/* PadView - ban phim 4x2 cua Army 2 Coffee (chuyen tu Army2PadHostView cua app cu)
+/* PadView - ban phim 4x2 cua Army2.5.0 (chuyen tu Army2PadHostView cua app cu)
  *   F1 (phim mem trai) | ^ | LUC MAX | F2 (phim mem phai)
  *   <                  | v |    >    | OK
  * Nhan khi cham, nha khi buong; truot giua cac phim huong doi phim ngay.

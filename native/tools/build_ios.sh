@@ -1,12 +1,12 @@
 #!/bin/bash
 # Build app iOS "thuan" (client dich san sang C) tren macOS (CI GitHub Actions).
 #   bash native/tools/build_ios.sh [device|sim|ca-hai]
-# Ket qua: native/build/ios/Army2Coffee-Native.ipa (chua ky), native/build/ios/sim/Army2Coffee.app (simulator)
+# Ket qua: native/build/ios/Army250-Native.ipa (chua ky), native/build/ios/sim/Army250.app (simulator)
 set -euo pipefail
 MODE=${1:-ca-hai}
 N=$(cd "$(dirname "$0")/.." && pwd)
 REPO=$(cd "$N/.." && pwd)
-JAR=${JAR:-$REPO/Bundled/Army2Coffee.jar}
+JAR=${JAR:-$REPO/Bundled/Army250.jar}
 B=$N/build
 TP=$N/third_party
 mkdir -p "$B" "$TP"
@@ -55,11 +55,11 @@ CC1
     $CC -O2 -fobjc-arc $INC -I"$N/platform/ios" -c "$N/platform/ios/$f.m" -o "$OUT/obj/$f.o"
   done
   echo "== lien ket"
-  $CC -o "$OUT/Army2Coffee" "$OUT"/obj/*.o -framework UIKit -framework Foundation -framework CoreGraphics \
+  $CC -o "$OUT/Army250" "$OUT"/obj/*.o -framework UIKit -framework Foundation -framework CoreGraphics \
     -framework QuartzCore -framework AVFoundation -framework AudioToolbox -lz -dead_strip
-  local APP="$OUT/Army2Coffee.app"
+  local APP="$OUT/Army250.app"
   mkdir -p "$APP"
-  cp "$OUT/Army2Coffee" "$APP/"
+  cp "$OUT/Army250" "$APP/"
   sed "s/BUILD_NUMBER/${BUILD_NUMBER:-1}/" "$N/platform/ios/Info.plist" > "$APP/Info.plist"
   if [ "$SDK" = iphonesimulator ]; then
     /usr/libexec/PlistBuddy -c "Set :CFBundleSupportedPlatforms:0 iPhoneSimulator" "$APP/Info.plist"
@@ -75,7 +75,7 @@ CC1
   $PB -c "Add :UIRequiredDeviceCapabilities array" -c "Add :UIRequiredDeviceCapabilities:0 string arm64" "$APP/Info.plist"
 
   plutil -convert binary1 "$APP/Info.plist"
-  cp "$JAR" "$APP/Army2Coffee.jar"
+  cp "$JAR" "$APP/Army250.jar"
   cp "$N/platform/ios/res/AppIcon60x60@2x.png" "$N/platform/ios/res/AppIcon60x60@3x.png" "$APP/"
   # bieu tuong: Assets.car bang actool nhu Xcode (Info.plist co CFBundleIconName=AppIcon); loi thi van con PNG o tren
   local XA="$OUT/Assets.xcassets"
@@ -95,11 +95,11 @@ CC1
 if [ "$MODE" = device ] || [ "$MODE" = ca-hai ]; then
   build_one iphoneos "$B/ios/dev"
   rm -rf "$B/ios/ipa" && mkdir -p "$B/ios/ipa/Payload"
-  cp -R "$B/ios/dev/Army2Coffee.app" "$B/ios/ipa/Payload/"
-  (cd "$B/ios/ipa" && zip -qry ../Army2Coffee-Native.ipa Payload)
-  ls -la "$B/ios/Army2Coffee-Native.ipa"
+  cp -R "$B/ios/dev/Army250.app" "$B/ios/ipa/Payload/"
+  (cd "$B/ios/ipa" && zip -qry ../Army250-Native.ipa Payload)
+  ls -la "$B/ios/Army250-Native.ipa"
 fi
 if [ "$MODE" = sim ] || [ "$MODE" = ca-hai ]; then
   build_one iphonesimulator "$B/ios/sim"
-  codesign -s - --force "$B/ios/sim/Army2Coffee.app" || true
+  codesign -s - --force "$B/ios/sim/Army250.app" || true
 fi

@@ -1,4 +1,4 @@
-name: Build Army 2 Coffee Android + Windows (thuan)
+name: Build Army2.5.0 Android + Windows (thuan)
 
 # APK Android va EXE Windows "thuan": cung bo dich san client J2ME -> C -> ma may nhu ban iOS (khong gia lap).
 on:
@@ -7,7 +7,7 @@ on:
     branches: [main]
     paths:
       - 'native/**'
-      - 'Bundled/Army2Coffee.jar'
+      - 'Bundled/Army250.jar'
       - '.github/workflows/build-native-khac.yml'
 
 permissions:
@@ -92,10 +92,10 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: Army2Coffee-Windows
+          name: Army250-Windows
           path: |
-            native/build/win/Army2Coffee.exe
-            native/build/win/Army2Coffee-debug.exe
+            native/build/win/Army250.exe
+            native/build/win/Army250-debug.exe
             build-win.log
 
   windows-test:
@@ -105,7 +105,7 @@ jobs:
     steps:
       - uses: actions/download-artifact@v4
         with:
-          name: Army2Coffee-Windows
+          name: Army250-Windows
           path: dl
 
       - name: Chay thu tren Windows that (che do tu kiem thu)
@@ -113,7 +113,7 @@ jobs:
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Force -Path test, test\du_lieu | Out-Null
-          $exe = (Get-ChildItem -Recurse dl -Filter Army2Coffee.exe | Select-Object -First 1).FullName
+          $exe = (Get-ChildItem -Recurse dl -Filter Army250.exe | Select-Object -First 1).FullName
           Set-Content -Path test\lenh.txt -Value "" -Encoding ascii
           $p = Start-Process -FilePath $exe -ArgumentList "--lenh", "$PWD\test\lenh.txt", "--ra", "$PWD\test", "--du-lieu", "$PWD\test\du_lieu" -PassThru -RedirectStandardError test\stderr.txt
           $cmds = @("sleep 7000", "shot t1_cauhinh", "key -5", "sleep 3000", "shot t2_amthanh", "key -6", "sleep 5000", "shot t3_gioithieu", "key -7", "sleep 5000", "shot t4_dangnhap", "tap 188 276", "sleep 1500", "text:tbot6", "sleep 1500", "shot t5_da_nhap_ten", "sleep 10000", "shot t6_10giay")

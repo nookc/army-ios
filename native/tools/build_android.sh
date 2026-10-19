@@ -3,12 +3,12 @@
 # Can: ANDROID_HOME (build-tools, platforms), NDK (ANDROID_NDK_HOME / ANDROID_NDK_LATEST_HOME), JDK 17.
 #   bash native/tools/build_android.sh
 # Ket qua (native/build/android):
-#   Army2Coffee-unsigned.apk   - da zipalign, CHUA ky (ky ban phat hanh bang khoa rieng, ngoai CI)
-#   Army2Coffee-test.apk       - ky bang khoa thu tam thoi (chi de chay thu tren emulator CI)
+#   Army250-unsigned.apk   - da zipalign, CHUA ky (ky ban phat hanh bang khoa rieng, ngoai CI)
+#   Army250-test.apk       - ky bang khoa thu tam thoi (chi de chay thu tren emulator CI)
 set -euo pipefail
 N=$(cd "$(dirname "$0")/.." && pwd)
 REPO=$(cd "$N/.." && pwd)
-JAR=${JAR:-$REPO/Bundled/Army2Coffee.jar}
+JAR=${JAR:-$REPO/Bundled/Army250.jar}
 B=$N/build/android
 TP=$N/third_party
 A=$N/platform/android
@@ -81,26 +81,26 @@ echo "== java"
 mkdir -p "$B/classes" "$B/dex"
 javac -source 8 -target 8 -nowarn -Xlint:-options -bootclasspath "$PLAT/android.jar" -d "$B/classes" \
   $(find "$A/java" -name '*.java') 2>&1 | grep -v "JAVA_TOOL_OPTIONS" || true
-ls "$B/classes/vn/army2coffee/thuan/"
+ls "$B/classes/vn/army250/thuan/"
 "$BT/d8" --release --min-api $API --lib "$PLAT/android.jar" --output "$B/dex" $(find "$B/classes" -name '*.class')
 cp "$B/dex/classes.dex" "$B/stage/"
 
 # ---- tai nguyen + manifest + jar game (khong nen de doc thang tu apk)
 echo "== apk"
 mkdir -p "$B/assets"
-cp "$JAR" "$B/assets/Army2Coffee.jar"
+cp "$JAR" "$B/assets/Army250.jar"
 "$BT/aapt2" compile --dir "$A/res" -o "$B/res.zip"
 "$BT/aapt2" link -o "$B/base.apk" -I "$PLAT/android.jar" --manifest "$A/AndroidManifest.xml" \
-  --min-sdk-version $API --target-sdk-version 34 --version-code "$VCODE" --version-name "2.3.0" \
+  --min-sdk-version $API --target-sdk-version 34 --version-code "$VCODE" --version-name "2.5.0" \
   -A "$B/assets" -0 jar --auto-add-overlay "$B/res.zip"
 (cd "$B/stage" && zip -q -r "$B/base.apk" classes.dex lib)
-"$BT/zipalign" -f -p 4 "$B/base.apk" "$B/Army2Coffee-unsigned.apk"
-unzip -l "$B/Army2Coffee-unsigned.apk" | tail -12
+"$BT/zipalign" -f -p 4 "$B/base.apk" "$B/Army250-unsigned.apk"
+unzip -l "$B/Army250-unsigned.apk" | tail -12
 
 # ---- ban thu cho emulator CI (khoa tam thoi, khong dung de phat hanh)
 keytool -genkeypair -keystore "$B/thu.keystore" -storepass thuthu -keypass thuthu -alias thu -keyalg RSA \
-  -keysize 2048 -validity 30 -dname "CN=Army2Coffee Test" > /dev/null 2>&1
+  -keysize 2048 -validity 30 -dname "CN=Army250 Test" > /dev/null 2>&1
 "$BT/apksigner" sign --ks "$B/thu.keystore" --ks-pass pass:thuthu --key-pass pass:thuthu \
-  --out "$B/Army2Coffee-test.apk" "$B/Army2Coffee-unsigned.apk"
-"$BT/apksigner" verify --print-certs "$B/Army2Coffee-test.apk" | head -3
+  --out "$B/Army250-test.apk" "$B/Army250-unsigned.apk"
+"$BT/apksigner" verify --print-certs "$B/Army250-test.apk" | head -3
 ls -la "$B"/*.apk

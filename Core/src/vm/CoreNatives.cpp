@@ -3279,7 +3279,7 @@ void register_core_natives(NativeMethodRegistry& registry) {
             if (!receiver) {
                 return std::unexpected(receiver.error());
             }
-            // Army 2 Coffee: game goi freeMemory() moi khung hinh; stats() duyet ca heap (~14% CPU)
+            // Army2.5.0: game goi freeMemory() moi khung hinh; stats() duyet ca heap (~14% CPU)
             const usize capacity = machine.heap().maximum_bytes();
             const usize used = machine.heap().estimated_bytes();
             const usize free = used >= capacity ? 0 : capacity - used;

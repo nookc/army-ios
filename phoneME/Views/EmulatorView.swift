@@ -214,7 +214,7 @@ struct EmulatorView: View {
                                     .environmentObject(session)
                             }
 
-                            // Army 2 Coffee: ban phim 4x2 nam duoi man hinh game
+                            // Army2.5.0: ban phim 4x2 nam duoi man hinh game
                             // (khong de len hinh), man doc.
                             if runtimeProfile.army2Keypad == true,
                                keyboardAdjustmentMode == .none {
@@ -248,7 +248,7 @@ struct EmulatorView: View {
                     ? .all
                     : (isAppBarTemporarilyVisible && !isAppBarVisible ? .top : [])
             )
-            // Army 2 Coffee: DragGesture gan tren ca man hinh (ke ca dang
+            // Army2.5.0: DragGesture gan tren ca man hinh (ke ca dang
             // simultaneous) lam UIKit huy cham (touchesCancelled) cua canvas
             // ngay khi ngon tay di qua 12 pt -> game chi nhan nhan + nha, khong
             // vuot cuon duoc. Chi gan cu vuot mo thanh cong cu vao dai mong o

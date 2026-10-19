@@ -1,5 +1,5 @@
 /*
- * main.c - ban Windows "thuan" cua Army 2 Coffee: client J2ME da dich san sang ma may (khong gia lap).
+ * main.c - ban Windows "thuan" cua Army2.5.0: client J2ME da dich san sang ma may (khong gia lap).
  *
  *  - cua so Win32 + GDI: khung game 320 x 400 phong to (giu ti le, diem anh net), ban phim ao 4x2 ben duoi
  *    (bam chuot) giong ban iOS/Android
@@ -7,8 +7,8 @@
  *    F3 = LUC MAX, go chu/so truc tiep; chuot = cham; con lan = len/xuong
  *  - hop nhap chu: hop thoai Windows (Unicode, mat khau an)
  *  - am thanh: tron WAV (va MIDI da tong hop san) qua waveOut
- *  - du lieu (RMS), log.txt, crash.txt: %LOCALAPPDATA%\Army2Coffee
- *  - kiem thu tu dong (Wine/CI): Army2Coffee.exe --lenh <tep lenh> --ra <thu muc anh> [--du-lieu <thu muc>]
+ *  - du lieu (RMS), log.txt, crash.txt: %LOCALAPPDATA%\Army250
+ *  - kiem thu tu dong (Wine/CI): Army250.exe --lenh <tep lenh> --ra <thu muc anh> [--du-lieu <thu muc>]
  */
 #ifndef _WIN32_WINNT
 #define _WIN32_WINNT 0x0601
@@ -170,9 +170,14 @@ static void find_paths(void) {
     if (!gDataDir[0]) {
         wchar_t base[MAX_PATH];
         if (SUCCEEDED(SHGetFolderPathW(0, CSIDL_LOCAL_APPDATA | CSIDL_FLAG_CREATE, 0, 0, base))) {
-            wchar_t d[MAX_PATH + 32];
-            _snwprintf(d, MAX_PATH + 31, L"%ls\\Army2Coffee", base);
+            wchar_t d[MAX_PATH + 32], cu[MAX_PATH + 32];
+            _snwprintf(d, MAX_PATH + 31, L"%ls\\Army250", base);
             d[MAX_PATH + 31] = 0;
+            /* ban dau tien luu o ...\\Army2Coffee (ten cu): chuyen sang ten moi, giu dang nhap da luu */
+            _snwprintf(cu, MAX_PATH + 31, L"%ls\\Army2Coffee", base);
+            cu[MAX_PATH + 31] = 0;
+            if (GetFileAttributesW(d) == INVALID_FILE_ATTRIBUTES && GetFileAttributesW(cu) != INVALID_FILE_ATTRIBUTES)
+                MoveFileW(cu, d);
             CreateDirectoryW(d, 0);
             char *u = wu8(d);
             snprintf(gDataDir, sizeof gDataDir, "%s", u);
@@ -188,7 +193,7 @@ static void find_paths(void) {
         }
     }
     mkdir_u8(gDataDir);
-    /* jar trong exe (tai nguyen RCDATA 101); khong co thi tim Army2Coffee.jar canh exe */
+    /* jar trong exe (tai nguyen RCDATA 101); khong co thi tim Army250.jar canh exe */
     HRSRC r = FindResourceW(0, MAKEINTRESOURCEW(101), (LPCWSTR)RT_RCDATA);
     if (r) {
         HGLOBAL g = LoadResource(0, r);
@@ -199,7 +204,7 @@ static void find_paths(void) {
     }
     if (!gJarMem) {
         char *u = wu8(exe);
-        snprintf(gJarPath, sizeof gJarPath, "%s\\Army2Coffee.jar", u);
+        snprintf(gJarPath, sizeof gJarPath, "%s\\Army250.jar", u);
         free(u);
     }
 }
@@ -488,7 +493,7 @@ static void show_tbox(tbox *t) {
     put16(&p, 74);
     put16(&p, 0);                        /* khong menu */
     put16(&p, 0);                        /* lop mac dinh */
-    putws(&p, L"Army 2 Coffee");
+    putws(&p, L"Army2.5.0");
     put16(&p, 10);
     putws(&p, L"Segoe UI");
     dlg_item(&p, buf, SS_LEFT, 8, 7, 204, 10, 101, 0x0082, t->title[0] ? t->title : L"Nhập:");
@@ -810,7 +815,7 @@ static LRESULT CALLBACK wnd_proc(HWND h, UINT msg, WPARAM wp, LPARAM lp) {
         return 0;
     case WM_APP_MSG: {
         wchar_t *w = u8w((char *)lp);
-        MessageBoxW(h, w, L"Army 2 Coffee", MB_OK | MB_ICONINFORMATION);
+        MessageBoxW(h, w, L"Army2.5.0", MB_OK | MB_ICONINFORMATION);
         free(w);
         free((char *)lp);
         return 0;
@@ -1060,7 +1065,7 @@ int WINAPI wWinMain(HINSTANCE inst, HINSTANCE prev, PWSTR cmd, int show) {
     SetUnhandledExceptionFilter(on_crash);
     {
         char b[300];
-        snprintf(b, sizeof b, "[app] khoi dong Army 2 Coffee (Windows), man %dx%d, jar %s", gW, gH,
+        snprintf(b, sizeof b, "[app] khoi dong Army2.5.0 (Windows), man %dx%d, jar %s", gW, gH,
                  gJarMem ? "trong exe" : gJarPath);
         plat_log(b);
     }
@@ -1079,7 +1084,7 @@ int WINAPI wWinMain(HINSTANCE inst, HINSTANCE prev, PWSTR cmd, int show) {
     wc.hIcon = LoadIconW(inst, MAKEINTRESOURCEW(1));
     wc.hIconSm = wc.hIcon;
     wc.hCursor = LoadCursorW(0, (LPCWSTR)IDC_ARROW);
-    wc.lpszClassName = L"Army2CoffeeWnd";
+    wc.lpszClassName = L"Army250Wnd";
     RegisterClassExW(&wc);
 
     /* kich thuoc: khung 320 x gH + ban phim ao (0,3 chieu rong), phong to vua man hinh lam viec */
@@ -1093,14 +1098,14 @@ int WINAPI wWinMain(HINSTANCE inst, HINSTANCE prev, PWSTR cmd, int show) {
     RECT r = {0, 0, cw, ch};
     DWORD style = WS_OVERLAPPEDWINDOW;
     AdjustWindowRect(&r, style, FALSE);
-    gWnd = CreateWindowExW(0, wc.lpszClassName, L"Army 2 Coffee", style, CW_USEDEFAULT, CW_USEDEFAULT, r.right - r.left,
+    gWnd = CreateWindowExW(0, wc.lpszClassName, L"Army2.5.0", style, CW_USEDEFAULT, CW_USEDEFAULT, r.right - r.left,
                            r.bottom - r.top, 0, 0, inst, 0);
     layout(cw, ch);
     ShowWindow(gWnd, show);
     UpdateWindow(gWnd);
 
     if (!j2n_start("coreLG.TerrainMidlet", gW, gH)) {
-        MessageBoxW(gWnd, L"Không khởi động được game.", L"Army 2 Coffee", MB_ICONERROR);
+        MessageBoxW(gWnd, L"Không khởi động được game.", L"Army2.5.0", MB_ICONERROR);
         return 1;
     }
     if (gTest) CloseHandle(CreateThread(0, 0, test_thread, 0, 0, 0));

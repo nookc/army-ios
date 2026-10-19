@@ -184,7 +184,7 @@ constexpr u64 kMaximumDeviceForegroundCompileIntervalMilliseconds = 10'000U;
 #endif
 }
 
-// Army 2 Coffee: duoc goi o moi lenh goi ham / moi vong lap (Machine::execute) -> getenv() moi lan
+// Army2.5.0: duoc goi o moi lenh goi ham / moi vong lap (Machine::execute) -> getenv() moi lan
 // ton ~40% CPU trong tran. Doc bien moi truong 1 lan.
 [[nodiscard]] bool conservative_device_jit_mode() noexcept {
     static const bool mode = conservative_device_jit_mode_uncached();

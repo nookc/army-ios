@@ -4,9 +4,9 @@
 #  - sau khi chay: kiem tra app con song, chep log.txt / crash.txt / bao cao sap cua he thong
 set -uo pipefail
 N=$(cd "$(dirname "$0")/.." && pwd)
-APP=$N/build/ios/sim/Army2Coffee.app
+APP=$N/build/ios/sim/Army250.app
 OUT=$N/build/ios/test
-BID=vn.army2coffee.native
+BID=vn.army250.native
 mkdir -p "$OUT"
 DEV=$(xcrun simctl list devices available -j | python3 -c "
 import json,re,sys
@@ -43,7 +43,7 @@ for i in $(seq 1 110); do
 done
 sleep 3
 xcrun simctl io "$DEV" screenshot "$OUT/man_hinh_simulator.png" || true
-if pgrep -f "Army2Coffee.app/Army2Coffee" >/dev/null 2>&1; then
+if pgrep -f "Army250.app/Army250" >/dev/null 2>&1; then
   echo "app con chay" > "$OUT/trang_thai_app.txt"
 else
   echo "APP DA SAP / THOAT" > "$OUT/trang_thai_app.txt"
@@ -56,7 +56,7 @@ if [ -n "$C" ]; then
   cp "$C"/Documents/crash.txt "$OUT/crash_app.txt" 2>/dev/null || true
 fi
 # bao cao sap cua he thong (neu co)
-for f in "$HOME"/Library/Logs/DiagnosticReports/Army2Coffee*; do
+for f in "$HOME"/Library/Logs/DiagnosticReports/Army250*; do
   [ -f "$f" ] && cp "$f" "$OUT/" || true
 done
 kill $LP 2>/dev/null || true

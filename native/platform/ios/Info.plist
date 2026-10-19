@@ -5,19 +5,19 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>vi</string>
 	<key>CFBundleDisplayName</key>
-	<string>Army2 Thuần</string>
+	<string>Army2.5.0</string>
 	<key>CFBundleExecutable</key>
-	<string>Army2Coffee</string>
+	<string>Army250</string>
 	<key>CFBundleIdentifier</key>
-	<string>vn.army2coffee.native</string>
+	<string>vn.army250.native</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>Army2Coffee</string>
+	<string>Army250</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>2.0</string>
+	<string>2.5.0</string>
 	<key>CFBundleVersion</key>
 	<string>BUILD_NUMBER</string>
 	<key>CFBundleSupportedPlatforms</key>
