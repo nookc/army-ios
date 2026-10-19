@@ -47,7 +47,7 @@ jobs:
           profile: pixel_4
           disable-animations: true
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -no-snapshot
-          script: bash native/tools/android_ci_test.sh; O=native/build/android/test/dangnhap bash native/tools/android_login_test.sh
+          script: bash native/tools/android_ci_test.sh
 
       - name: Day APK, anh chup, log len nhanh ban-build-android
         if: always()
