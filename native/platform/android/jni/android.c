@@ -29,6 +29,13 @@
 
 #define TAG "Army2Coffee"
 
+#if defined(__arm__) || defined(__i386__)
+/* Boehm GC dung tkill() tren Android 32 bit API < 23 (USE_TKILL_ON_ANDROID) nhung libc API 21 cua NDK
+   moi khong con xuat ham nay: tu cung cap bang syscall */
+#include <sys/syscall.h>
+int tkill(int tid, int sig) { return (int)syscall(__NR_tkill, tid, sig); }
+#endif
+
 static JavaVM *gVm;
 static jclass gBridge;                 /* vn/army2coffee/thuan/Native */
 static jmethodID mShowText, mSndCreate, mSndStart, mSndStop, mSndClose, mSndVolume, mOpenUrl, mSms, mVibrate, mExit;
