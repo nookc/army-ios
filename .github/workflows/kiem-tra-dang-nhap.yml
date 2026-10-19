@@ -1,0 +1,72 @@
+name: Kiem tra dang nhap Android (cai moi, lay danh sach may chu, ket noi)
+
+# Cai APK phat hanh len emulator, xoa du lieu (nhu vua cai), go ten / mat khau, bam Dang nhap,
+# chup man hinh lien tuc: xem app co ket "Xin cho..." khong. Ghi ca kiem tra mang tu may CI.
+on:
+  push:
+    branches: [kiem-tra-dang-nhap]
+
+permissions:
+  contents: write
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - api: 34
+            target: google_apis
+            abi: ''
+            ten: x86_64-34
+          - api: 30
+            target: google_apis
+            abi: arm64-v8a
+            ten: arm64-30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Kiem tra mang tu may CI (http danh sach may chu, cong game)
+        run: |
+          mkdir -p native/build/android/test
+          F=native/build/android/test/mang_may_ci.txt
+          { echo "== GET http://62.238.126.219/s"; curl -sS -v --max-time 15 http://62.238.126.219/s 2>&1 | grep -v "^\* *Trying\|^{ \|^} " | head -40;
+            echo; echo "== TCP 62.238.126.219:8122";
+            if timeout 8 bash -c 'exec 3<>/dev/tcp/62.238.126.219/8122'; then echo "mo"; else echo "khong ket noi duoc"; fi; } > "$F" 2>&1
+          cat "$F"
+
+      - name: Bat KVM cho emulator
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Dang nhap thu tren Android API ${{ matrix.api }} ${{ matrix.abi }}
+        continue-on-error: true
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: ${{ matrix.api }}
+          target: ${{ matrix.target }}
+          arch: x86_64
+          profile: pixel_4
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -no-snapshot
+          script: APK=ky/Army250.apk ABI=${{ matrix.abi }} bash native/tools/android_login_test.sh
+
+      - name: Day ket qua len nhanh kq-dang-nhap-${{ matrix.ten }}
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          rm -rf /tmp/pub && mkdir -p /tmp/pub
+          cp -r native/build/android/test/* /tmp/pub/ 2>/dev/null || true
+          echo "api ${{ matrix.api }} abi ${{ matrix.abi }} run ${GITHUB_RUN_NUMBER} sha ${GITHUB_SHA} status ${{ job.status }}" > /tmp/pub/KET_QUA.txt
+          cd /tmp/pub
+          git init -q -b kq-dang-nhap-${{ matrix.ten }}
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git add -A
+          git commit -q -m "Kiem tra dang nhap ${{ matrix.ten }} ${{ job.status }}"
+          git push -q -f "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" kq-dang-nhap-${{ matrix.ten }}
