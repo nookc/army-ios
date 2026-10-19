@@ -8,7 +8,7 @@ O=native/build/android/test
 mkdir -p "$O"
 say() { echo "== $*"; }
 cap() { adb exec-out screencap -p > "$O/$1.png"; say "chup $1"; }
-alog() { adb logcat -d -s Army250:I Army250:W Army250:E Army250:F | tr -d '\r'; }
+alog() { adb logcat -d -s Army250:V | tr -d '\r'; }
 
 APK=${APK:-native/build/android/Army250-test.apk}
 TEN=${TEN:-kiemtra$RANDOM}
