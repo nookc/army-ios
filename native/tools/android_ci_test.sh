@@ -3,14 +3,14 @@
 # go chu vao hop nhap Android, chup man hinh; do toc do khung hinh, RAM, CPU;
 # thu ca truong hop Android tao lai activity (game van chay, hop nhap chu hien lai).
 #   bash native/tools/android_ci_test.sh      (chay tu goc repo, emulator da bat)
-PKG=vn.army2coffee.thuan
+PKG=vn.army250.thuan
 O=native/build/android/test
 mkdir -p "$O"
 say() { echo "== $*"; }
 cap() { adb exec-out screencap -p > "$O/$1.png"; say "chup $1"; }
-alog() { adb logcat -d -s Army2Coffee:I | tr -d '\r'; }   # Android cu: adb tra ve CRLF
+alog() { adb logcat -d -s Army250:I | tr -d '\r'; }   # Android cu: adb tra ve CRLF
 
-APK=${APK:-native/build/android/Army2Coffee-test.apk}
+APK=${APK:-native/build/android/Army250-test.apk}
 adb shell getprop ro.build.version.release > "$O/android.txt"
 if ! adb install -r "$APK" > "$O/cai_apk.txt" 2>&1; then
   echo "CAI APK LOI: $(tail -2 "$O/cai_apk.txt")" > "$O/trang_thai_app.txt"
