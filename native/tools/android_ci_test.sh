@@ -10,7 +10,12 @@ say() { echo "== $*"; }
 cap() { adb exec-out screencap -p > "$O/$1.png"; say "chup $1"; }
 alog() { adb logcat -d -s Army2Coffee:I; }
 
-adb install -r native/build/android/Army2Coffee-test.apk || { echo "CAI APK LOI" > "$O/trang_thai_app.txt"; exit 0; }
+APK=${APK:-native/build/android/Army2Coffee-test.apk}
+adb shell getprop ro.build.version.release > "$O/android.txt"
+if ! adb install -r "$APK" > "$O/cai_apk.txt" 2>&1; then
+  echo "CAI APK LOI: $(tail -2 "$O/cai_apk.txt")" > "$O/trang_thai_app.txt"
+  exit 0
+fi
 adb shell getprop ro.product.cpu.abi > "$O/abi.txt"
 adb logcat -c
 adb shell am start -W -n $PKG/.MainActivity
@@ -42,6 +47,12 @@ tapg() {
   adb shell input swipe $x $y $x $y 120
 }
 hop() { alog | grep -c "hop nhap chu kieu"; }
+pid_of() {
+  local p
+  p=$(adb shell pidof $PKG 2>/dev/null | tr -d '\r')
+  [ -z "$p" ] && p=$(adb shell ps 2>/dev/null | tr -d '\r' | awk -v k=$PKG '$NF == k {print $2}' | head -1)
+  echo "$p"
+}
 
 sleep 7
 cap a1_cauhinh
@@ -50,7 +61,7 @@ pad 0 0; sleep 5; cap a3_gioithieu
 pad 3 0; sleep 5; cap a4_dangnhap
 
 # toc do ve (10 giay o man dang nhap), RAM, CPU
-PID=$(adb shell pidof $PKG | tr -d '\r')
+PID=$(pid_of)
 adb shell dumpsys gfxinfo $PKG reset > /dev/null
 sleep 10
 adb shell dumpsys gfxinfo $PKG > "$O/gfxinfo.txt"
@@ -93,7 +104,7 @@ adb shell input keyevent 4; sleep 3     # Back lan 2: Huy hop, ban phim Android 
 cap b4_huy_hop
 adb shell settings put global always_finish_activities 0
 
-PID2=$(adb shell pidof $PKG | tr -d '\r')
+PID2=$(pid_of)
 if [ -n "$PID2" ]; then
   echo "app con chay (pid $PID2, luc dau $PID)" > "$O/trang_thai_app.txt"
 else
