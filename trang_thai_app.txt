@@ -1,0 +1,1 @@
+app con chay (pid 2379, luc dau 2379)

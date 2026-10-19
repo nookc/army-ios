@@ -1,0 +1,15 @@
+Tasks: 1 total,   0 running,   1 sleeping,   0 stopped,   0 zombie
+  Mem:  2028600K total,  1840748K used,   187852K free,  16482304 buffers
+ Swap:  1521444K total,         0 used,  1521444K free,  1033816K cached
+200%cpu   0%user   0%nice  56%sys  84%idle   0%iow   0%irq   0%sirq  60%host
+   PID USER         PR  NI VIRT  RES  SHR S[%CPU] %MEM     TIME+ ARGS
+  2379 u0_a130      10 -10  13G 144M  88M S 64.0   7.2   0:21.56 vn.army2coffee.thuan
+
+
+
+Tasks: 1 total,   0 running,   1 sleeping,   0 stopped,   0 zombie
+  Mem:  2028600K total,  1840324K used,   188276K free,  16723968 buffers
+ Swap:  1521444K total,         0 used,  1521444K free,  1033684K cached
+200%cpu   4%user   0%nice  75%sys  60%idle   0%iow   0%irq   1%sirq  60%host
+   PID USER         PR  NI VIRT  RES  SHR S[%CPU] %MEM     TIME+ ARGS
+  2379 u0_a130      10 -10  13G 144M  88M S 60.0   7.2   0:21.72 vn.army2coffee.thuan
