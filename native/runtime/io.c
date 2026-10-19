@@ -369,6 +369,30 @@ static void wsa_init(void) {
 #define SOCK_CLOSE close
 #endif
 
+/* loi mang gan nhat cua luong nay: dua vao thong bao ngoai le (Net.error) + nhat ky */
+static __thread char net_err[200];
+
+static void net_seterr(const char *what, const char *h, int port, int code, const char *desc) {
+    if (desc && *desc) {
+        snprintf(net_err, sizeof net_err, "%s %s:%d (loi %d: %s)", what, h, port, code, desc);
+    } else {
+        snprintf(net_err, sizeof net_err, "%s %s:%d (loi %d)", what, h, port, code);
+    }
+    rt_log("[net] %s", net_err);
+}
+
+#define NET_CONNECT_MS 15000
+
+static int64_t net_now_ms(void) {
+#ifdef _WIN32
+    return (int64_t)GetTickCount64();
+#else
+    struct timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    return (int64_t)ts.tv_sec * 1000 + ts.tv_nsec / 1000000;
+#endif
+}
+
 int32_t N_j2n_Net_connect(jctx *t, jobj host, int32_t port) {
     (void)t;
 #ifdef _WIN32
@@ -384,15 +408,32 @@ int32_t N_j2n_Net_connect(jctx *t, jobj host, int32_t port) {
 #ifdef AI_DEFAULT
     hints.ai_flags = AI_DEFAULT;     /* iOS: tu tong hop dia chi IPv6 tren mang NAT64 */
 #endif
-    if (getaddrinfo(h, ps, &hints, &res) != 0 || !res) {
-        rt_log("[net] khong phan giai duoc %s", h);
+    int gr = EAI_AGAIN;
+    for (int k = 0; k < 3; k++) {        /* EAI_AGAIN (DNS tam loi / bi ngat): thu lai */
+        gr = getaddrinfo(h, ps, &hints, &res);
+        if (gr == 0 && res) break;
+        if (res) {
+            freeaddrinfo(res);
+            res = 0;
+        }
+        if (gr != EAI_AGAIN) break;
+    }
+    if (gr != 0 || !res) {
+#ifdef _WIN32
+        net_seterr("khong phan giai duoc", h, port, gr, 0);
+#else
+        net_seterr("khong phan giai duoc", h, port, gr, gai_strerror(gr));
+#endif
         return -1;
     }
-    int fd = -1;
+    int fd = -1, err = 0;
     for (struct addrinfo *a = res; a; a = a->ai_next) {
 #ifdef _WIN32
         SOCKET sk = socket(a->ai_family, a->ai_socktype, a->ai_protocol);
-        if (sk == INVALID_SOCKET) continue;
+        if (sk == INVALID_SOCKET) {
+            err = WSAGetLastError();
+            continue;
+        }
         fd = (int)sk;
         u_long nb = 1;
         ioctlsocket(sk, FIONBIO, &nb);
@@ -403,16 +444,27 @@ int32_t N_j2n_Net_connect(jctx *t, jobj host, int32_t port) {
             FD_ZERO(&ef);
             FD_SET(sk, &wf);
             FD_SET(sk, &ef);
-            struct timeval tv = {15, 0};
+            struct timeval tv = {NET_CONNECT_MS / 1000, 0};
             r = select(0, 0, &wf, &ef, &tv);
             if (r == 1 && FD_ISSET(sk, &wf)) {
-                int err = 0;
-                int el = sizeof err;
-                getsockopt(sk, SOL_SOCKET, SO_ERROR, (char *)&err, &el);
-                r = err == 0 ? 0 : -1;
+                int e2 = 0;
+                int el = sizeof e2;
+                getsockopt(sk, SOL_SOCKET, SO_ERROR, (char *)&e2, &el);
+                r = e2 == 0 ? 0 : -1;
+                if (e2) err = e2;
             } else {
+                if (r == 0) {
+                    err = WSAETIMEDOUT;
+                } else {
+                    int e2 = 0;
+                    int el = sizeof e2;
+                    getsockopt(sk, SOL_SOCKET, SO_ERROR, (char *)&e2, &el);
+                    err = e2 ? e2 : WSAGetLastError();
+                }
                 r = -1;
             }
+        } else if (r != 0) {
+            err = WSAGetLastError();
         }
         if (r == 0) {
             nb = 0;
@@ -426,21 +478,37 @@ int32_t N_j2n_Net_connect(jctx *t, jobj host, int32_t port) {
         fd = -1;
 #else
         fd = socket(a->ai_family, a->ai_socktype, a->ai_protocol);
-        if (fd < 0) continue;
+        if (fd < 0) {
+            err = errno;
+            continue;
+        }
         int fl = fcntl(fd, F_GETFL, 0);
         fcntl(fd, F_SETFL, fl | O_NONBLOCK);
         int r = connect(fd, a->ai_addr, a->ai_addrlen);
-        if (r != 0 && errno == EINPROGRESS) {
-            struct pollfd pf = {fd, POLLOUT, 0};
-            r = poll(&pf, 1, 15000);
+        if (r != 0 && (errno == EINPROGRESS || errno == EINTR || errno == EAGAIN)) {
+            /* Boehm GC dung cac luong bang tin hieu (Linux / Android): poll bi ngat (EINTR) thi doi tiep
+               phan thoi gian con lai, khong coi la ket noi hong */
+            int64_t end = net_now_ms() + NET_CONNECT_MS;
+            for (;;) {
+                int64_t left = end - net_now_ms();
+                if (left < 0) left = 0;
+                struct pollfd pf = {fd, POLLOUT, 0};
+                r = poll(&pf, 1, (int)left);
+                if (r < 0 && errno == EINTR) continue;
+                break;
+            }
             if (r == 1) {
-                int err = 0;
-                socklen_t el = sizeof err;
-                getsockopt(fd, SOL_SOCKET, SO_ERROR, &err, &el);
-                r = err == 0 ? 0 : -1;
+                int e2 = 0;
+                socklen_t el = sizeof e2;
+                getsockopt(fd, SOL_SOCKET, SO_ERROR, &e2, &el);
+                r = e2 == 0 ? 0 : -1;
+                if (e2) err = e2;
             } else {
+                err = r == 0 ? ETIMEDOUT : errno;
                 r = -1;
             }
+        } else if (r != 0) {
+            err = errno;
         }
         if (r == 0) {
             fcntl(fd, F_SETFL, fl & ~O_NONBLOCK);
@@ -457,8 +525,33 @@ int32_t N_j2n_Net_connect(jctx *t, jobj host, int32_t port) {
 #endif
     }
     freeaddrinfo(res);
-    if (fd < 0) rt_log("[net] khong ket noi duoc %s:%d", h, port);
+    if (fd < 0) {
+#ifdef _WIN32
+        net_seterr("khong ket noi duoc", h, port, err, 0);
+#else
+        net_seterr("khong ket noi duoc", h, port, err, strerror(err));
+#endif
+    }
     return fd;
+}
+
+jobj N_j2n_Net_error(jctx *t) { return rt_str_utf8(t, net_err[0] ? net_err : "loi mang"); }
+
+/* thoi gian cho toi da moi lan doc / ghi (ms); 0 = cho mai (mac dinh) */
+void N_j2n_Net_timeout(jctx *t, int32_t fd, int32_t ms) {
+    (void)t;
+    if (ms < 0) ms = 0;
+#ifdef _WIN32
+    DWORD v = (DWORD)ms;
+    setsockopt((SOCKET)fd, SOL_SOCKET, SO_RCVTIMEO, (const char *)&v, sizeof v);
+    setsockopt((SOCKET)fd, SOL_SOCKET, SO_SNDTIMEO, (const char *)&v, sizeof v);
+#else
+    struct timeval tv;
+    tv.tv_sec = ms / 1000;
+    tv.tv_usec = (ms % 1000) * 1000;
+    setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof tv);
+    setsockopt(fd, SOL_SOCKET, SO_SNDTIMEO, &tv, sizeof tv);
+#endif
 }
 
 int32_t N_j2n_Net_read(jctx *t, int32_t fd, jobj b, int32_t off, int32_t len) {
@@ -471,13 +564,17 @@ int32_t N_j2n_Net_read(jctx *t, int32_t fd, jobj b, int32_t off, int32_t len) {
         int n = recv((SOCKET)fd, (char *)AD(b, uint8_t) + off, len, 0);
         if (n > 0) return n;
         if (n == 0) return -1;
-        if (WSAGetLastError() == WSAEINTR) continue;
+        int we = WSAGetLastError();
+        if (we == WSAEINTR) continue;
+        snprintf(net_err, sizeof net_err, "loi doc mang (loi %d%s)", we, we == WSAETIMEDOUT ? ": het thoi gian cho" : "");
         return -2;
 #else
         ssize_t n = recv(fd, AD(b, uint8_t) + off, (size_t)len, 0);
         if (n > 0) return (int32_t)n;
         if (n == 0) return -1;
         if (errno == EINTR) continue;
+        snprintf(net_err, sizeof net_err, "loi doc mang (loi %d: %s)", errno,
+                 errno == EAGAIN || errno == EWOULDBLOCK ? "het thoi gian cho" : strerror(errno));
         return -2;
 #endif
     }

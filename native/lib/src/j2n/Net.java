@@ -23,6 +23,12 @@ public final class Net {
 
     public static native String localAddress(int fd);
 
+    /** thoi gian cho toi da moi lan doc / ghi (ms), 0 = cho mai */
+    public static native void timeout(int fd, int ms);
+
+    /** mo ta loi mang gan nhat cua luong nay (de dua vao thong bao loi) */
+    public static native String error();
+
     public static native int localPort(int fd);
 
     public static void check(int r, String what) throws IOException {

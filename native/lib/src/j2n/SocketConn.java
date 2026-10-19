@@ -35,7 +35,7 @@ public final class SocketConn implements SocketConnection {
         }
         int fd = Net.connect(h, p);
         if (fd < 0) {
-            throw new javax.microedition.io.ConnectionNotFoundException("khong ket noi duoc " + hp);
+            throw new javax.microedition.io.ConnectionNotFoundException(Net.error());
         }
         return new SocketConn(fd, h, p);
     }
