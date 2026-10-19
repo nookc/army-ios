@@ -1,0 +1,47 @@
+Applications Memory Usage (kB):
+Uptime: 55259 Realtime: 55259
+
+** MEMINFO in pid 2656 [vn.army2coffee.thuan] **
+                   Pss  Private  Private  Swapped     Heap     Heap     Heap
+                 Total    Dirty    Clean    Dirty     Size    Alloc     Free
+                ------   ------   ------   ------   ------   ------   ------
+  Native Heap     7336     7216        0        0    18560    17149     1410
+  Dalvik Heap     4373     4332        0        0     6940     4332     2608
+ Dalvik Other      129      128        0        0                           
+        Stack      228      228        0        0                           
+       Ashmem      464       20        0        0                           
+    Other dev        5        0        4        0                           
+     .so mmap     2746      328     1576        0                           
+    .apk mmap      533        0      436        0                           
+    .dex mmap       76        4       72        0                           
+    .oat mmap      776        0       52        0                           
+    .art mmap      876      332        4        0                           
+   Other mmap       16        8        0        0                           
+      Unknown      237      236        0        0                           
+        TOTAL    17795    12832     2144        0    25500    21481     4018
+ 
+ App Summary
+                       Pss(KB)
+                        ------
+           Java Heap:     4668
+         Native Heap:     7216
+                Code:     2468
+               Stack:      228
+            Graphics:        0
+       Private Other:      396
+              System:     2819
+ 
+               TOTAL:    17795      TOTAL SWAP (KB):        0
+ 
+ Objects
+               Views:        7         ViewRootImpl:        1
+         AppContexts:        2           Activities:        1
+              Assets:        3        AssetManagers:        2
+       Local Binders:        8        Proxy Binders:       12
+       Parcel memory:        4         Parcel count:       16
+    Death Recipients:        0      OpenSSL Sockets:        0
+ 
+ SQL
+         MEMORY_USED:        0
+  PAGECACHE_OVERFLOW:        0          MALLOC_SIZE:        0
+ 

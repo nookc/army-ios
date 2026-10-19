@@ -1,0 +1,556 @@
+--------- beginning of system
+10-19 10:12:22.474  1563  1576 W VoiceInteractionManagerService: no available voice recognition services found for user 0
+--------- beginning of main
+10-19 10:12:22.646  2647  2647 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 0 <<<<<<
+10-19 10:12:22.647  2647  2647 D AndroidRuntime: CheckJNI is OFF
+10-19 10:12:22.657  2647  2647 D ICU     : No timezone override file found: /data/misc/zoneinfo/current/icu/icu_tzdata.dat
+10-19 10:12:22.672  2647  2647 E memtrack: Couldn't load memtrack module (No such file or directory)
+10-19 10:12:22.672  2647  2647 E android.os.Debug: failed to load memtrack module: -2
+10-19 10:12:22.673  2647  2647 I Radio-JNI: register_android_hardware_Radio DONE
+10-19 10:12:22.678  2647  2647 D AndroidRuntime: Calling main entry com.android.commands.am.Am
+10-19 10:12:22.681  1563  1720 I ActivityManager: START u0 {flg=0x10000000 cmp=vn.army2coffee.thuan/.MainActivity} from uid 0 on display 0
+10-19 10:12:22.705  1563  1722 I ActivityManager: Start proc 2656:vn.army2coffee.thuan/u0a55 for activity vn.army2coffee.thuan/.MainActivity
+10-19 10:12:22.760  1253  1937 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 9850880
+10-19 10:12:22.780  2656  2656 I Army2Coffee: [app] activity tao (lan 1, game chua chay)
+10-19 10:12:22.783  1253  2000 E SurfaceFlinger: ro.sf.lcd_density must be defined as a build property
+10-19 10:12:22.784  2656  2669 D OpenGLRenderer: Use EGL_SWAP_BEHAVIOR_PRESERVED: true
+10-19 10:12:22.786  2656  2656 D         : HostConnection::get() New Host Connection established 0x7fb069a60a20, tid 2656
+10-19 10:12:22.867  2656  2669 D         : HostConnection::get() New Host Connection established 0x7fb06dac7360, tid 2669
+10-19 10:12:22.900  2656  2669 I OpenGLRenderer: Initialized EGL, version 1.4
+10-19 10:12:22.904  2441  2504 D EGL_emulation: eglMakeCurrent: 0x7fb06ba69580: ver 3 0 (tinfo 0x7fb06ba85fe0)
+10-19 10:12:22.905  2656  2669 D EGL_emulation: eglCreateContext: 0x7fb06dae6820: maj 3 min 0 rcv 3
+10-19 10:12:22.906  2441  2504 E Surface : getSlotFromBufferLocked: unknown buffer: 0x7fb06ba6a0c0
+10-19 10:12:22.909  2656  2669 D EGL_emulation: eglMakeCurrent: 0x7fb06dae6820: ver 3 0 (tinfo 0x7fb06dac2ca0)
+10-19 10:12:22.928  2656  2669 E eglCodecCommon: glUtilsParamSize: unknow param 0x00008cdf
+10-19 10:12:22.928  2656  2669 E eglCodecCommon: glUtilsParamSize: unknow param 0x00008824
+10-19 10:12:22.957  2656  2669 D EGL_emulation: eglMakeCurrent: 0x7fb06dae6820: ver 3 0 (tinfo 0x7fb06dac2ca0)
+10-19 10:12:22.963  2656  2656 I Army2Coffee: [app] khoi dong Army 2 Coffee (Android), man 320x456, jar 10101308 byte
+10-19 10:12:22.964  2656  2670 I Army2Coffee: [app] luong game bat dau
+10-19 10:12:22.980  2656  2670 I Army2Coffee: [Boot] khoi dong coreLG.TerrainMidlet
+10-19 10:12:22.993  2656  2670 I Army2Coffee: [am thanh] audio/x-wav 7180 byte: ok
+10-19 10:12:22.993  2656  2670 I Army2Coffee: [am thanh] audio/x-wav 1834 byte: ok
+10-19 10:12:22.996  2656  2670 I Army2Coffee: [am thanh] audio/x-wav 2934 byte: ok
+10-19 10:12:23.035  2130  2532 W MediaScanner: Error opening directory '/oem/media/', skipping: No such file or directory.
+10-19 10:12:23.036  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ui; assuming invalid
+10-19 10:12:23.039  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/Andromeda.ogg; assuming invalid
+10-19 10:12:23.040  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/Aquila.ogg; assuming invalid
+10-19 10:12:23.041  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/ArgoNavis.ogg; assuming invalid
+10-19 10:12:23.042  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/Atria.ogg; assuming invalid
+10-19 10:12:23.043  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/BOOTES.ogg; assuming invalid
+10-19 10:12:23.045  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/Backroad.ogg; assuming invalid
+10-19 10:12:23.046  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/BeatPlucker.ogg; assuming invalid
+10-19 10:12:23.046  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/BentleyDubs.ogg; assuming invalid
+10-19 10:12:23.047  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/Big_Easy.ogg; assuming invalid
+10-19 10:12:23.048  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/BirdLoop.ogg; assuming invalid
+10-19 10:12:23.049  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/Bollywood.ogg; assuming invalid
+10-19 10:12:23.050  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/BussaMove.ogg; assuming invalid
+10-19 10:12:23.051  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/CANISMAJOR.ogg; assuming invalid
+10-19 10:12:23.052  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/CASSIOPEIA.ogg; assuming invalid
+10-19 10:12:23.053  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/Cairo.ogg; assuming invalid
+10-19 10:12:23.054  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/Calypso_Steel.ogg; assuming invalid
+10-19 10:12:23.056  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/CanisMajor.ogg; assuming invalid
+10-19 10:12:23.057  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/CaribbeanIce.ogg; assuming invalid
+10-19 10:12:23.058  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/Carina.ogg; assuming invalid
+10-19 10:12:23.059  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/Centaurus.ogg; assuming invalid
+10-19 10:12:23.060  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/Champagne_Edition.ogg; assuming invalid
+10-19 10:12:23.062  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/Club_Cubano.ogg; assuming invalid
+10-19 10:12:23.063  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/CrayonRock.ogg; assuming invalid
+10-19 10:12:23.064  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/CrazyDream.ogg; assuming invalid
+10-19 10:12:23.065  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/CurveBall.ogg; assuming invalid
+10-19 10:12:23.066  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/Cygnus.ogg; assuming invalid
+10-19 10:12:23.072  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/DancinFool.ogg; assuming invalid
+10-19 10:12:23.076  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/Ding.ogg; assuming invalid
+10-19 10:12:23.080  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/DonMessWivIt.ogg; assuming invalid
+10-19 10:12:23.082  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/Draco.ogg; assuming invalid
+10-19 10:12:23.082  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/DreamTheme.ogg; assuming invalid
+10-19 10:12:23.083  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/Eastern_Sky.ogg; assuming invalid
+10-19 10:12:23.083  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/Enter_the_Nexus.ogg; assuming invalid
+10-19 10:12:23.087  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/Eridani.ogg; assuming invalid
+10-19 10:12:23.088  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/EtherShake.ogg; assuming invalid
+10-19 10:12:23.089  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/FreeFlight.ogg; assuming invalid
+10-19 10:12:23.090  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/FriendlyGhost.ogg; assuming invalid
+10-19 10:12:23.091  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/Funk_Yall.ogg; assuming invalid
+10-19 10:12:23.101  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/GameOverGuitar.ogg; assuming invalid
+10-19 10:12:23.107  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/Gimme_Mo_Town.ogg; assuming invalid
+10-19 10:12:23.110  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/Girtab.ogg; assuming invalid
+10-19 10:12:23.111  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/Glacial_Groove.ogg; assuming invalid
+10-19 10:12:23.112  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/Growl.ogg; assuming invalid
+10-19 10:12:23.112  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/HalfwayHome.ogg; assuming invalid
+10-19 10:12:23.115  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/Hydra.ogg; assuming invalid
+10-19 10:12:23.116  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/InsertCoin.ogg; assuming invalid
+10-19 10:12:23.118  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/Kuma.ogg; assuming invalid
+10-19 10:12:23.121  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/LoopyLounge.ogg; assuming invalid
+10-19 10:12:23.123  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/LoveFlute.ogg; assuming invalid
+10-19 10:12:23.125  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/Lyra.ogg; assuming invalid
+10-19 10:12:23.126  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/Machina.ogg; assuming invalid
+10-19 10:12:23.127  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/MidEvilJaunt.ogg; assuming invalid
+10-19 10:12:23.127  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/MildlyAlarming.ogg; assuming invalid
+10-19 10:12:23.128  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/Nairobi.ogg; assuming invalid
+10-19 10:12:23.128  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/Nassau.ogg; assuming invalid
+10-19 10:12:23.136  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/NewPlayer.ogg; assuming invalid
+10-19 10:12:23.137  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/No_Limits.ogg; assuming invalid
+10-19 10:12:23.138  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/Noises1.ogg; assuming invalid
+10-19 10:12:23.139  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/Noises2.ogg; assuming invalid
+10-19 10:12:23.140  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/Noises3.ogg; assuming invalid
+10-19 10:12:23.141  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/OrganDub.ogg; assuming invalid
+10-19 10:12:23.142  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/Orion.ogg; assuming invalid
+10-19 10:12:23.144  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/PERSEUS.ogg; assuming invalid
+10-19 10:12:23.145  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/Paradise_Island.ogg; assuming invalid
+10-19 10:12:23.146  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/Pegasus.ogg; assuming invalid
+10-19 10:12:23.147  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/Perseus.ogg; assuming invalid
+10-19 10:12:23.148  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/Playa.ogg; assuming invalid
+10-19 10:12:23.150  1268  1268 E MetadataRetrieverClient: failed to extract an album art
+10-19 10:12:23.150  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/Pyxis.ogg; assuming invalid
+10-19 10:12:23.151  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/Rasalas.ogg; assuming invalid
+10-19 10:12:23.152  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/Revelation.ogg; assuming invalid
+10-19 10:12:23.153  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/Rigel.ogg; assuming invalid
+10-19 10:12:23.155  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/Ring_Classic_02.ogg; assuming invalid
+10-19 10:12:23.156  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/Ring_Digital_02.ogg; assuming invalid
+10-19 10:12:23.157  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/Ring_Synth_02.ogg; assuming invalid
+10-19 10:12:23.159  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/Ring_Synth_04.ogg; assuming invalid
+10-19 10:12:23.160  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/Road_Trip.ogg; assuming invalid
+10-19 10:12:23.161  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/RomancingTheTone.ogg; assuming invalid
+10-19 10:12:23.162  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/Safari.ogg; assuming invalid
+10-19 10:12:23.163  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/Savannah.ogg; assuming invalid
+10-19 10:12:23.164  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/Scarabaeus.ogg; assuming invalid
+10-19 10:12:23.165  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/Sceptrum.ogg; assuming invalid
+10-19 10:12:23.166  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/Seville.ogg; assuming invalid
+10-19 10:12:23.167  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/Shes_All_That.ogg; assuming invalid
+10-19 10:12:23.168  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/SilkyWay.ogg; assuming invalid
+10-19 10:12:23.169  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/SitarVsSitar.ogg; assuming invalid
+10-19 10:12:23.170  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/Solarium.ogg; assuming invalid
+10-19 10:12:23.171  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/SpringyJalopy.ogg; assuming invalid
+10-19 10:12:23.172  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/Steppin_Out.ogg; assuming invalid
+10-19 10:12:23.173  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/Terminated.ogg; assuming invalid
+10-19 10:12:23.175  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/Testudo.ogg; assuming invalid
+10-19 10:12:23.177  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/Themos.ogg; assuming invalid
+10-19 10:12:23.178  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/Third_Eye.ogg; assuming invalid
+10-19 10:12:23.178  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/Thunderfoot.ogg; assuming invalid
+10-19 10:12:23.179  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/TwirlAway.ogg; assuming invalid
+10-19 10:12:23.180  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/URSAMINOR.ogg; assuming invalid
+10-19 10:12:23.182  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/UrsaMinor.ogg; assuming invalid
+10-19 10:12:23.183  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/VeryAlarmed.ogg; assuming invalid
+10-19 10:12:23.184  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/Vespa.ogg; assuming invalid
+10-19 10:12:23.185  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/World.ogg; assuming invalid
+10-19 10:12:23.186  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/Zeta.ogg; assuming invalid
+10-19 10:12:23.187  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ringtones/hydra.ogg; assuming invalid
+10-19 10:12:23.188  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ui/Dock.ogg; assuming invalid
+10-19 10:12:23.190  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ui/Effect_Tick.ogg; assuming invalid
+10-19 10:12:23.190  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ui/KeypressDelete.ogg; assuming invalid
+10-19 10:12:23.191  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ui/KeypressInvalid.ogg; assuming invalid
+10-19 10:12:23.192  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ui/KeypressReturn.ogg; assuming invalid
+10-19 10:12:23.193  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ui/KeypressSpacebar.ogg; assuming invalid
+10-19 10:12:23.194  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ui/KeypressStandard.ogg; assuming invalid
+10-19 10:12:23.194  1268  1946 E MetadataRetrieverClient: failed to extract an album art
+10-19 10:12:23.195  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ui/Lock.ogg; assuming invalid
+10-19 10:12:23.196  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ui/LowBattery.ogg; assuming invalid
+10-19 10:12:23.197  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ui/Trusted.ogg; assuming invalid
+10-19 10:12:23.198  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ui/Undock.ogg; assuming invalid
+10-19 10:12:23.199  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ui/Unlock.ogg; assuming invalid
+10-19 10:12:23.200  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ui/VideoRecord.ogg; assuming invalid
+10-19 10:12:23.202  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ui/WirelessChargingStarted.ogg; assuming invalid
+10-19 10:12:23.203  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ui/camera_click.ogg; assuming invalid
+10-19 10:12:23.204  2130  2532 W MediaProvider: Missing volume for /system/media/audio/ui/camera_focus.ogg; assuming invalid
+10-19 10:12:23.258  2130  2532 V MediaScanner: pruneDeadThumbnailFiles... android.database.sqlite.SQLiteCursor@a7934d8
+10-19 10:12:23.259  2130  2532 V MediaScanner: /pruneDeadThumbnailFiles... android.database.sqlite.SQLiteCursor@a7934d8
+10-19 10:12:23.263  1563  1751 I ActivityManager: Killing 2044:com.android.externalstorage/u0a7 (adj 15): empty #17
+10-19 10:12:23.501  2656  2656 I Army2Coffee: [bocuc] canvas 0 67 1080 1606 pad 0 1608 1080 2148 game 320 456
+10-19 10:12:23.501  2656  2656 I Choreographer: Skipped 31 frames!  The application may be doing too much work on its main thread.
+10-19 10:12:23.553  1563  1582 I ActivityManager: Displayed vn.army2coffee.thuan/.MainActivity: +859ms
+10-19 10:12:23.554  2647  2647 D AndroidRuntime: Shutting down VM
+10-19 10:12:30.137  1563  1600 I InputReader: Reconfiguring input devices.  changes=0x00000010
+10-19 10:12:30.557  1563  1574 D AlarmManagerService: Kernel timezone updated to 0 minutes west of GMT
+10-19 10:12:30.558  1563  1680 D AlarmManagerService: Setting time of day to sec=1792404751
+10-19 10:12:31.003  1563  1680 W AlarmManagerService: Unable to set rtc to 1792404751: No such device
+10-19 10:12:31.301  1253  1258 E SurfaceFlinger: ro.sf.lcd_density must be defined as a build property
+10-19 10:12:31.313  1253  1258 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 9850880
+10-19 10:12:31.317  2682  2682 D         : HostConnection::get() New Host Connection established 0x7f8a21a92480, tid 2682
+10-19 10:12:31.764  2685  2685 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 0 <<<<<<
+10-19 10:12:31.768  2685  2685 D AndroidRuntime: CheckJNI is OFF
+10-19 10:12:31.778  2685  2685 D ICU     : No timezone override file found: /data/misc/zoneinfo/current/icu/icu_tzdata.dat
+10-19 10:12:31.817  2685  2685 E memtrack: Couldn't load memtrack module (No such file or directory)
+10-19 10:12:31.817  2685  2685 E android.os.Debug: failed to load memtrack module: -2
+10-19 10:12:31.818  2685  2685 I Radio-JNI: register_android_hardware_Radio DONE
+10-19 10:12:31.823  2685  2685 D AndroidRuntime: Calling main entry com.android.commands.input.Input
+10-19 10:12:31.824  2685  2685 I Input   : injectMotionEvent: MotionEvent { action=ACTION_DOWN, actionButton=0, id[0]=0, x[0]=945.0, y[0]=2013.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=29208, downTime=29208, deviceId=0, source=0x1002 }
+10-19 10:12:31.838  2685  2685 I Input   : injectMotionEvent: MotionEvent { action=ACTION_MOVE, actionButton=0, id[0]=0, x[0]=945.0, y[0]=2013.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=29208, downTime=29208, deviceId=0, source=0x1002 }
+10-19 10:12:31.886  2685  2685 I Input   : injectMotionEvent: MotionEvent { action=ACTION_MOVE, actionButton=0, id[0]=0, x[0]=945.0, y[0]=2013.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=29271, downTime=29271, deviceId=0, source=0x1002 }
+10-19 10:12:31.916  2685  2685 I Input   : injectMotionEvent: MotionEvent { action=ACTION_MOVE, actionButton=0, id[0]=0, x[0]=945.0, y[0]=2013.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=29300, downTime=29300, deviceId=0, source=0x1002 }
+10-19 10:12:31.957  2685  2685 I Input   : injectMotionEvent: MotionEvent { action=ACTION_UP, actionButton=0, id[0]=0, x[0]=945.0, y[0]=2013.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=29341, downTime=29341, deviceId=0, source=0x1002 }
+10-19 10:12:31.991  2685  2685 D AndroidRuntime: Shutting down VM
+10-19 10:12:32.758  1563  1751 I ActivityManager: Killing 2308:com.android.carrierconfig/u0a3 (adj 15): empty #17
+10-19 10:12:35.258  1253  1260 E SurfaceFlinger: ro.sf.lcd_density must be defined as a build property
+10-19 10:12:35.261  1253  2000 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 9850880
+10-19 10:12:35.286  2697  2697 D         : HostConnection::get() New Host Connection established 0x7f970bdd2480, tid 2697
+10-19 10:12:35.739  2700  2700 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 0 <<<<<<
+10-19 10:12:35.742  2700  2700 D AndroidRuntime: CheckJNI is OFF
+10-19 10:12:35.756  2700  2700 D ICU     : No timezone override file found: /data/misc/zoneinfo/current/icu/icu_tzdata.dat
+10-19 10:12:35.785  2700  2700 E memtrack: Couldn't load memtrack module (No such file or directory)
+10-19 10:12:35.785  2700  2700 E android.os.Debug: failed to load memtrack module: -2
+10-19 10:12:35.786  2700  2700 I Radio-JNI: register_android_hardware_Radio DONE
+10-19 10:12:35.795  2700  2700 D AndroidRuntime: Calling main entry com.android.commands.input.Input
+10-19 10:12:35.795  2700  2700 I Input   : injectMotionEvent: MotionEvent { action=ACTION_DOWN, actionButton=0, id[0]=0, x[0]=135.0, y[0]=1743.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=33179, downTime=33179, deviceId=0, source=0x1002 }
+10-19 10:12:35.837  2700  2700 I Input   : injectMotionEvent: MotionEvent { action=ACTION_MOVE, actionButton=0, id[0]=0, x[0]=135.0, y[0]=1743.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=33179, downTime=33179, deviceId=0, source=0x1002 }
+10-19 10:12:35.866  2700  2700 I Input   : injectMotionEvent: MotionEvent { action=ACTION_MOVE, actionButton=0, id[0]=0, x[0]=135.0, y[0]=1743.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=33251, downTime=33251, deviceId=0, source=0x1002 }
+10-19 10:12:35.906  2700  2700 I Input   : injectMotionEvent: MotionEvent { action=ACTION_MOVE, actionButton=0, id[0]=0, x[0]=135.0, y[0]=1743.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=33290, downTime=33290, deviceId=0, source=0x1002 }
+10-19 10:12:35.926  2700  2700 I Input   : injectMotionEvent: MotionEvent { action=ACTION_UP, actionButton=0, id[0]=0, x[0]=135.0, y[0]=1743.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=33310, downTime=33310, deviceId=0, source=0x1002 }
+10-19 10:12:35.927  2700  2700 D AndroidRuntime: Shutting down VM
+10-19 10:12:36.063  2656  2674 I Army2Coffee: [am thanh] audio/x-wav 902214 byte: ok
+10-19 10:12:36.269  1563  1577 I ActivityManager: Waited long enough for: ServiceRecord{d28484f u0 com.android.calendar/.alerts.InitAlarmsService}
+10-19 10:12:41.188  1253  2000 E SurfaceFlinger: ro.sf.lcd_density must be defined as a build property
+10-19 10:12:41.232  1253  1686 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 9850880
+10-19 10:12:41.235  2713  2713 D         : HostConnection::get() New Host Connection established 0x7f36eb212480, tid 2713
+10-19 10:12:41.758  2716  2716 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 0 <<<<<<
+10-19 10:12:41.759  2716  2716 D AndroidRuntime: CheckJNI is OFF
+10-19 10:12:41.769  2716  2716 D ICU     : No timezone override file found: /data/misc/zoneinfo/current/icu/icu_tzdata.dat
+10-19 10:12:41.800  2716  2716 E memtrack: Couldn't load memtrack module (No such file or directory)
+10-19 10:12:41.800  2716  2716 E android.os.Debug: failed to load memtrack module: -2
+10-19 10:12:41.801  2716  2716 I Radio-JNI: register_android_hardware_Radio DONE
+10-19 10:12:41.807  2716  2716 D AndroidRuntime: Calling main entry com.android.commands.input.Input
+10-19 10:12:41.811  2716  2716 I Input   : injectMotionEvent: MotionEvent { action=ACTION_DOWN, actionButton=0, id[0]=0, x[0]=945.0, y[0]=1743.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=39194, downTime=39194, deviceId=0, source=0x1002 }
+10-19 10:12:41.834  2716  2716 I Input   : injectMotionEvent: MotionEvent { action=ACTION_MOVE, actionButton=0, id[0]=0, x[0]=945.0, y[0]=1743.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=39194, downTime=39194, deviceId=0, source=0x1002 }
+10-19 10:12:41.871  2716  2716 I Input   : injectMotionEvent: MotionEvent { action=ACTION_MOVE, actionButton=0, id[0]=0, x[0]=945.0, y[0]=1743.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=39256, downTime=39256, deviceId=0, source=0x1002 }
+10-19 10:12:41.912  2716  2716 I Input   : injectMotionEvent: MotionEvent { action=ACTION_MOVE, actionButton=0, id[0]=0, x[0]=945.0, y[0]=1743.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=39296, downTime=39296, deviceId=0, source=0x1002 }
+10-19 10:12:41.953  2716  2716 I Input   : injectMotionEvent: MotionEvent { action=ACTION_UP, actionButton=0, id[0]=0, x[0]=945.0, y[0]=1743.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=39338, downTime=39338, deviceId=0, source=0x1002 }
+10-19 10:12:41.991  2716  2716 D AndroidRuntime: Shutting down VM
+10-19 10:12:42.476  1268  1617 D AudioFlinger: mixer(0xf4340000) throttle end: throttle time(5)
+10-19 10:12:47.258  1253  1937 E SurfaceFlinger: ro.sf.lcd_density must be defined as a build property
+10-19 10:12:47.298  1253  1686 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 9850880
+10-19 10:12:47.302  2728  2728 D         : HostConnection::get() New Host Connection established 0x7fabf1dd2480, tid 2728
+10-19 10:12:51.367  2234  2536 D InitAlarmsService: Clearing and rescheduling alarms.
+10-19 10:12:51.390  1563  1575 I ActivityManager: Killing 2199:com.android.settings/1000 (adj 15): empty #17
+10-19 10:12:55.378  1268  1616 W audio_hw_generic: Hardware backing HAL too slow, could only write 0 of 661 frames
+10-19 10:12:57.896  2656  2667 I art     : Starting a blocking GC Explicit
+10-19 10:12:57.910  2656  2667 I art     : Explicit concurrent mark sweep GC freed 226(47KB) AllocSpace objects, 3(924KB) LOS objects, 39% free, 3MB/5MB, paused 374us total 9.195ms
+10-19 10:12:57.916  2656  2667 I art     : Starting a blocking GC Explicit
+10-19 10:12:57.930  2656  2667 I art     : Explicit concurrent mark sweep GC freed 61(2176B) AllocSpace objects, 0(0B) LOS objects, 39% free, 3MB/5MB, paused 1.219ms total 13.731ms
+10-19 10:12:57.934  2656  2667 I art     : Starting a blocking GC Explicit
+10-19 10:12:57.943  2656  2667 I art     : Explicit concurrent mark sweep GC freed 3(96B) AllocSpace objects, 0(0B) LOS objects, 39% free, 3MB/5MB, paused 5.216ms total 9.229ms
+10-19 10:12:57.949  2656  2667 I art     : Starting a blocking GC Explicit
+10-19 10:12:57.953  2656  2667 I art     : Explicit concurrent mark sweep GC freed 3(96B) AllocSpace objects, 0(0B) LOS objects, 39% free, 3MB/5MB, paused 803us total 3.441ms
+10-19 10:12:57.956  2656  2667 I art     : Starting a blocking GC Explicit
+10-19 10:12:57.961  2656  2667 I art     : Explicit concurrent mark sweep GC freed 3(96B) AllocSpace objects, 0(0B) LOS objects, 39% free, 3MB/5MB, paused 534us total 4.782ms
+10-19 10:12:59.231  1268  1616 W audio_hw_generic: Hardware backing HAL too slow, could only write 0 of 661 frames
+10-19 10:12:59.591  1268  1617 W audio_hw_generic: Not supplying enough data to HAL, expected position 2070963 , only wrote 1036448
+10-19 10:13:03.628  1253  1290 D hwcomposer: hw_composer sent 2284 syncs in 60s
+10-19 10:13:08.305  2750  2750 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 0 <<<<<<
+10-19 10:13:08.308  2750  2750 D AndroidRuntime: CheckJNI is OFF
+10-19 10:13:08.326  2750  2750 D ICU     : No timezone override file found: /data/misc/zoneinfo/current/icu/icu_tzdata.dat
+10-19 10:13:08.354  2750  2750 E memtrack: Couldn't load memtrack module (No such file or directory)
+10-19 10:13:08.354  2750  2750 E android.os.Debug: failed to load memtrack module: -2
+10-19 10:13:08.355  2750  2750 I Radio-JNI: register_android_hardware_Radio DONE
+10-19 10:13:08.370  2750  2750 D AndroidRuntime: Calling main entry com.android.commands.input.Input
+10-19 10:13:08.371  2750  2750 I Input   : injectMotionEvent: MotionEvent { action=ACTION_DOWN, actionButton=0, id[0]=0, x[0]=634.0, y[0]=1187.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=65755, downTime=65755, deviceId=0, source=0x1002 }
+10-19 10:13:08.412  2750  2750 I Input   : injectMotionEvent: MotionEvent { action=ACTION_MOVE, actionButton=0, id[0]=0, x[0]=634.0, y[0]=1187.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=65755, downTime=65755, deviceId=0, source=0x1002 }
+10-19 10:13:08.441  2750  2750 I Input   : injectMotionEvent: MotionEvent { action=ACTION_MOVE, actionButton=0, id[0]=0, x[0]=634.0, y[0]=1187.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=65825, downTime=65825, deviceId=0, source=0x1002 }
+10-19 10:13:08.485  2750  2750 I Input   : injectMotionEvent: MotionEvent { action=ACTION_MOVE, actionButton=0, id[0]=0, x[0]=634.0, y[0]=1187.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=65870, downTime=65870, deviceId=0, source=0x1002 }
+10-19 10:13:08.529  2750  2750 I Input   : injectMotionEvent: MotionEvent { action=ACTION_UP, actionButton=0, id[0]=0, x[0]=634.0, y[0]=1187.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=65914, downTime=65914, deviceId=0, source=0x1002 }
+10-19 10:13:08.568  2750  2750 D AndroidRuntime: Shutting down VM
+10-19 10:13:08.596  2656  2674 I Army2Coffee: [app] hop nhap chu (kieu 0, toi da 500)
+10-19 10:13:08.645  2656  2656 I Army2Coffee: [app] hop nhap chu kieu 0
+10-19 10:13:08.734  2656  2669 D EGL_emulation: eglMakeCurrent: 0x7fb06dae6820: ver 3 0 (tinfo 0x7fb06dac2ca0)
+10-19 10:13:08.771  1986  1986 W RichInputMethodSubtype: Can't find emoji subtype
+10-19 10:13:08.771  1986  1986 W RichInputMethodSubtype: No input method subtype found; returning dummy subtype: Multi-lingual subtype: android.view.inputmethod.InputMethodSubtype@d78b2ed0, zz
+10-19 10:13:08.799  1986  1986 W ViewPager: Requested offscreen page limit 0 too small; defaulting to 1
+10-19 10:13:08.804  1986  1986 I LatinIME: Starting input. Cursor position = 0,0
+10-19 10:13:09.046  1986  1986 W RichInputConnection: Slow InputConnection: GET_TEXT_BEFORE_CURSOR took 243 ms.
+10-19 10:13:09.220  1786  2099 D EGL_emulation: eglMakeCurrent: 0x7fb06dae6fa0: ver 3 0 (tinfo 0x7fb061fff300)
+10-19 10:13:09.250  1253  1686 E SurfaceFlinger: ro.sf.lcd_density must be defined as a build property
+10-19 10:13:09.251  1986  2766 D OpenGLRenderer: Use EGL_SWAP_BEHAVIOR_PRESERVED: true
+10-19 10:13:09.255  1986  1986 D         : HostConnection::get() New Host Connection established 0x7fb069a628e0, tid 1986
+10-19 10:13:09.325  1986  2766 D         : HostConnection::get() New Host Connection established 0x7fb06dad74e0, tid 2766
+10-19 10:13:09.345  1986  2766 I OpenGLRenderer: Initialized EGL, version 1.4
+10-19 10:13:09.347  1986  2766 D EGL_emulation: eglCreateContext: 0x7fb06dae6780: maj 3 min 0 rcv 3
+10-19 10:13:09.369  1986  2766 D EGL_emulation: eglMakeCurrent: 0x7fb06dae6780: ver 3 0 (tinfo 0x7fb06dac2a80)
+10-19 10:13:09.369  1986  2766 E eglCodecCommon: glUtilsParamSize: unknow param 0x00008cdf
+10-19 10:13:09.369  1986  2766 E eglCodecCommon: glUtilsParamSize: unknow param 0x00008824
+10-19 10:13:09.373  1986  2766 D EGL_emulation: eglMakeCurrent: 0x7fb06dae6780: ver 3 0 (tinfo 0x7fb06dac2a80)
+10-19 10:13:10.957  1563  1574 I MediaFocusControl:  AudioFocus  abandonAudioFocus() from android.media.AudioManager@ba1589acom.android.music.MediaPlaybackService$3@dcdd5cb
+10-19 10:13:10.958  1563  1680 I ActivityManager: Killing 2111:com.android.music/u0a36 (adj 15): empty #17
+10-19 10:13:11.837  1253  1258 E SurfaceFlinger: ro.sf.lcd_density must be defined as a build property
+10-19 10:13:11.838  1253  1260 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 9850880
+10-19 10:13:11.840  2774  2774 D         : HostConnection::get() New Host Connection established 0x7f7626412480, tid 2774
+10-19 10:13:12.081  2777  2777 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 0 <<<<<<
+10-19 10:13:12.082  2777  2777 D AndroidRuntime: CheckJNI is OFF
+10-19 10:13:12.090  2777  2777 D ICU     : No timezone override file found: /data/misc/zoneinfo/current/icu/icu_tzdata.dat
+10-19 10:13:12.101  2777  2777 E memtrack: Couldn't load memtrack module (No such file or directory)
+10-19 10:13:12.101  2777  2777 E android.os.Debug: failed to load memtrack module: -2
+10-19 10:13:12.102  2777  2777 I Radio-JNI: register_android_hardware_Radio DONE
+10-19 10:13:12.106  2777  2777 D AndroidRuntime: Calling main entry com.android.commands.input.Input
+10-19 10:13:12.108  2777  2777 I Input   : injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_T, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=69492, downTime=69492, deviceId=-1, source=0x101 }
+10-19 10:13:12.114  2777  2777 I Input   : injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_T, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=69492, downTime=69492, deviceId=-1, source=0x101 }
+10-19 10:13:12.118  2777  2777 I Input   : injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_B, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=69492, downTime=69492, deviceId=-1, source=0x101 }
+10-19 10:13:12.122  2777  2777 I Input   : injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_B, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=69492, downTime=69492, deviceId=-1, source=0x101 }
+10-19 10:13:12.139  2777  2777 I Input   : injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_O, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=69492, downTime=69492, deviceId=-1, source=0x101 }
+10-19 10:13:12.146  2777  2777 I Input   : injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_O, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=69492, downTime=69492, deviceId=-1, source=0x101 }
+10-19 10:13:12.157  2777  2777 I Input   : injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_T, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=69492, downTime=69492, deviceId=-1, source=0x101 }
+10-19 10:13:12.158  2777  2777 I Input   : injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_T, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=69492, downTime=69492, deviceId=-1, source=0x101 }
+10-19 10:13:12.183  2777  2777 I Input   : injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_6, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=69492, downTime=69492, deviceId=-1, source=0x101 }
+10-19 10:13:12.185  2777  2777 I Input   : injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_6, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=69492, downTime=69492, deviceId=-1, source=0x101 }
+10-19 10:13:12.211  2777  2777 D AndroidRuntime: Shutting down VM
+10-19 10:13:13.440  1253  1260 E SurfaceFlinger: ro.sf.lcd_density must be defined as a build property
+10-19 10:13:13.441  1253  2000 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 9850880
+10-19 10:13:13.445  2788  2788 D         : HostConnection::get() New Host Connection established 0x7f7df6f52480, tid 2788
+10-19 10:13:13.687  2791  2791 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 0 <<<<<<
+10-19 10:13:13.687  2791  2791 D AndroidRuntime: CheckJNI is OFF
+10-19 10:13:13.695  2791  2791 D ICU     : No timezone override file found: /data/misc/zoneinfo/current/icu/icu_tzdata.dat
+10-19 10:13:13.711  2791  2791 E memtrack: Couldn't load memtrack module (No such file or directory)
+10-19 10:13:13.711  2791  2791 E android.os.Debug: failed to load memtrack module: -2
+10-19 10:13:13.712  2791  2791 I Radio-JNI: register_android_hardware_Radio DONE
+10-19 10:13:13.719  2791  2791 D AndroidRuntime: Calling main entry com.android.commands.input.Input
+10-19 10:13:13.729  2791  2791 I Input   : injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_ENTER, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=71113, downTime=71113, deviceId=-1, source=0x101 }
+10-19 10:13:13.736  2791  2791 I Input   : injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_ENTER, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=71113, downTime=71113, deviceId=-1, source=0x101 }
+10-19 10:13:13.736  1563  1649 W AudioTrack: AUDIO_OUTPUT_FLAG_FAST denied by client; transfer 4, track 48000 Hz, output 44100 Hz
+10-19 10:13:13.744  2656  2669 D EGL_emulation: eglMakeCurrent: 0x7fb06dae6820: ver 3 0 (tinfo 0x7fb06dac2ca0)
+10-19 10:13:13.745  2656  2669 E Surface : getSlotFromBufferLocked: unknown buffer: 0x7fb06dae93e0
+10-19 10:13:13.747  2791  2791 D AndroidRuntime: Shutting down VM
+10-19 10:13:13.750  1986  2766 D EGL_emulation: eglMakeCurrent: 0x7fb06dae6780: ver 3 0 (tinfo 0x7fb06dac2a80)
+10-19 10:13:13.751  1986  2766 E Surface : getSlotFromBufferLocked: unknown buffer: 0x7fb06dae7040
+10-19 10:13:13.753  2656  2669 D EGL_emulation: eglMakeCurrent: 0x7fb06dae6820: ver 3 0 (tinfo 0x7fb06dac2ca0)
+10-19 10:13:16.901  1268  1617 W audio_hw_generic: Not supplying enough data to HAL, expected position 1312248 , only wrote 1175258
+10-19 10:13:17.012  1253  1260 E SurfaceFlinger: ro.sf.lcd_density must be defined as a build property
+10-19 10:13:17.024  1253  1258 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 9850880
+10-19 10:13:17.029  2803  2803 D         : HostConnection::get() New Host Connection established 0x7f597b892480, tid 2803
+10-19 10:13:17.504  2809  2809 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 0 <<<<<<
+10-19 10:13:17.505  2809  2809 D AndroidRuntime: CheckJNI is OFF
+10-19 10:13:17.529  2809  2809 D ICU     : No timezone override file found: /data/misc/zoneinfo/current/icu/icu_tzdata.dat
+10-19 10:13:17.549  2809  2809 E memtrack: Couldn't load memtrack module (No such file or directory)
+10-19 10:13:17.549  2809  2809 E android.os.Debug: failed to load memtrack module: -2
+10-19 10:13:17.555  2809  2809 I Radio-JNI: register_android_hardware_Radio DONE
+10-19 10:13:17.562  2809  2809 D AndroidRuntime: Calling main entry com.android.commands.input.Input
+10-19 10:13:17.562  2809  2809 I Input   : injectMotionEvent: MotionEvent { action=ACTION_DOWN, actionButton=0, id[0]=0, x[0]=634.0, y[0]=1305.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=74946, downTime=74946, deviceId=0, source=0x1002 }
+10-19 10:13:17.611  2809  2809 I Input   : injectMotionEvent: MotionEvent { action=ACTION_MOVE, actionButton=0, id[0]=0, x[0]=634.0, y[0]=1305.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=74946, downTime=74946, deviceId=0, source=0x1002 }
+10-19 10:13:17.632  2809  2809 I Input   : injectMotionEvent: MotionEvent { action=ACTION_MOVE, actionButton=0, id[0]=0, x[0]=634.0, y[0]=1305.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=75017, downTime=75017, deviceId=0, source=0x1002 }
+10-19 10:13:17.653  2809  2809 I Input   : injectMotionEvent: MotionEvent { action=ACTION_MOVE, actionButton=0, id[0]=0, x[0]=634.0, y[0]=1305.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=75038, downTime=75038, deviceId=0, source=0x1002 }
+10-19 10:13:17.673  2809  2809 I Input   : injectMotionEvent: MotionEvent { action=ACTION_MOVE, actionButton=0, id[0]=0, x[0]=634.0, y[0]=1305.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=75058, downTime=75058, deviceId=0, source=0x1002 }
+10-19 10:13:17.716  2809  2809 I Input   : injectMotionEvent: MotionEvent { action=ACTION_UP, actionButton=0, id[0]=0, x[0]=634.0, y[0]=1305.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=75101, downTime=75101, deviceId=0, source=0x1002 }
+10-19 10:13:17.741  2809  2809 D AndroidRuntime: Shutting down VM
+10-19 10:13:21.218  2821  2821 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 0 <<<<<<
+10-19 10:13:21.219  2821  2821 D AndroidRuntime: CheckJNI is OFF
+10-19 10:13:21.229  2821  2821 D ICU     : No timezone override file found: /data/misc/zoneinfo/current/icu/icu_tzdata.dat
+10-19 10:13:21.251  2821  2821 E memtrack: Couldn't load memtrack module (No such file or directory)
+10-19 10:13:21.251  2821  2821 E android.os.Debug: failed to load memtrack module: -2
+10-19 10:13:21.252  2821  2821 I Radio-JNI: register_android_hardware_Radio DONE
+10-19 10:13:21.273  2821  2821 D AndroidRuntime: Calling main entry com.android.commands.input.Input
+10-19 10:13:21.278  2821  2821 I Input   : injectMotionEvent: MotionEvent { action=ACTION_DOWN, actionButton=0, id[0]=0, x[0]=634.0, y[0]=1305.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=78663, downTime=78663, deviceId=0, source=0x1002 }
+10-19 10:13:21.303  2821  2821 I Input   : injectMotionEvent: MotionEvent { action=ACTION_MOVE, actionButton=0, id[0]=0, x[0]=634.0, y[0]=1305.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=78663, downTime=78663, deviceId=0, source=0x1002 }
+10-19 10:13:21.340  2821  2821 I Input   : injectMotionEvent: MotionEvent { action=ACTION_MOVE, actionButton=0, id[0]=0, x[0]=634.0, y[0]=1305.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=78725, downTime=78725, deviceId=0, source=0x1002 }
+10-19 10:13:21.374  2821  2821 I Input   : injectMotionEvent: MotionEvent { action=ACTION_MOVE, actionButton=0, id[0]=0, x[0]=634.0, y[0]=1305.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=78758, downTime=78758, deviceId=0, source=0x1002 }
+10-19 10:13:21.411  2821  2821 I Input   : injectMotionEvent: MotionEvent { action=ACTION_UP, actionButton=0, id[0]=0, x[0]=634.0, y[0]=1305.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=78796, downTime=78796, deviceId=0, source=0x1002 }
+10-19 10:13:21.448  2821  2821 D AndroidRuntime: Shutting down VM
+10-19 10:13:21.456  2656  2674 I Army2Coffee: [app] hop nhap chu (kieu 65536, toi da 500)
+10-19 10:13:21.527  2656  2656 I Army2Coffee: [app] hop nhap chu kieu 65536
+10-19 10:13:21.611  2656  2669 D EGL_emulation: eglMakeCurrent: 0x7fb06dae6820: ver 3 0 (tinfo 0x7fb06dac2ca0)
+10-19 10:13:21.616  1986  1986 I LatinIME: Starting input. Cursor position = 0,0
+10-19 10:13:21.669  1986  2766 D EGL_emulation: eglMakeCurrent: 0x7fb06dae6780: ver 3 0 (tinfo 0x7fb06dac2a80)
+10-19 10:13:24.690  1253  1937 E SurfaceFlinger: ro.sf.lcd_density must be defined as a build property
+10-19 10:13:24.691  1253  1260 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 9850880
+10-19 10:13:24.693  2832  2832 D         : HostConnection::get() New Host Connection established 0x7fd5e72d2480, tid 2832
+10-19 10:13:24.931  2835  2835 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 0 <<<<<<
+10-19 10:13:24.932  2835  2835 D AndroidRuntime: CheckJNI is OFF
+10-19 10:13:24.939  2835  2835 D ICU     : No timezone override file found: /data/misc/zoneinfo/current/icu/icu_tzdata.dat
+10-19 10:13:24.952  2835  2835 E memtrack: Couldn't load memtrack module (No such file or directory)
+10-19 10:13:24.952  2835  2835 E android.os.Debug: failed to load memtrack module: -2
+10-19 10:13:24.952  2835  2835 I Radio-JNI: register_android_hardware_Radio DONE
+10-19 10:13:24.957  2835  2835 D AndroidRuntime: Calling main entry com.android.commands.input.Input
+10-19 10:13:24.959  2835  2835 I Input   : injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_1, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=82344, downTime=82344, deviceId=-1, source=0x101 }
+10-19 10:13:24.961  2835  2835 I Input   : injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_1, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=82344, downTime=82344, deviceId=-1, source=0x101 }
+10-19 10:13:24.977  2835  2835 I Input   : injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_2, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=82344, downTime=82344, deviceId=-1, source=0x101 }
+10-19 10:13:24.980  2835  2835 I Input   : injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_2, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=82344, downTime=82344, deviceId=-1, source=0x101 }
+10-19 10:13:24.981  2835  2835 I Input   : injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_3, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=82344, downTime=82344, deviceId=-1, source=0x101 }
+10-19 10:13:24.997  2835  2835 I Input   : injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_3, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=82344, downTime=82344, deviceId=-1, source=0x101 }
+10-19 10:13:25.030  2835  2835 I Input   : injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_4, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=82344, downTime=82344, deviceId=-1, source=0x101 }
+10-19 10:13:25.032  2835  2835 I Input   : injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_4, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=82344, downTime=82344, deviceId=-1, source=0x101 }
+10-19 10:13:25.053  2835  2835 I Input   : injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_5, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=82344, downTime=82344, deviceId=-1, source=0x101 }
+10-19 10:13:25.061  2835  2835 I Input   : injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_5, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=82344, downTime=82344, deviceId=-1, source=0x101 }
+10-19 10:13:25.090  2835  2835 I Input   : injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_6, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=82344, downTime=82344, deviceId=-1, source=0x101 }
+10-19 10:13:25.097  2835  2835 I Input   : injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_6, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=82344, downTime=82344, deviceId=-1, source=0x101 }
+10-19 10:13:25.118  2835  2835 D AndroidRuntime: Shutting down VM
+10-19 10:13:26.419  2844  2844 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 0 <<<<<<
+10-19 10:13:26.419  2844  2844 D AndroidRuntime: CheckJNI is OFF
+10-19 10:13:26.428  2844  2844 D ICU     : No timezone override file found: /data/misc/zoneinfo/current/icu/icu_tzdata.dat
+10-19 10:13:26.440  2844  2844 E memtrack: Couldn't load memtrack module (No such file or directory)
+10-19 10:13:26.441  2844  2844 E android.os.Debug: failed to load memtrack module: -2
+10-19 10:13:26.441  2844  2844 I Radio-JNI: register_android_hardware_Radio DONE
+10-19 10:13:26.445  2844  2844 D AndroidRuntime: Calling main entry com.android.commands.input.Input
+10-19 10:13:26.448  2844  2844 I Input   : injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_ENTER, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=83831, downTime=83831, deviceId=-1, source=0x101 }
+10-19 10:13:26.450  2844  2844 I Input   : injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_ENTER, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=83831, downTime=83831, deviceId=-1, source=0x101 }
+10-19 10:13:26.452  2656  2669 D EGL_emulation: eglMakeCurrent: 0x7fb06dae6820: ver 3 0 (tinfo 0x7fb06dac2ca0)
+10-19 10:13:26.453  2656  2669 E Surface : getSlotFromBufferLocked: unknown buffer: 0x7fb06dae8940
+10-19 10:13:26.454  2844  2844 D AndroidRuntime: Shutting down VM
+10-19 10:13:26.459  2656  2669 D EGL_emulation: eglMakeCurrent: 0x7fb06dae6820: ver 3 0 (tinfo 0x7fb06dac2ca0)
+10-19 10:13:26.460  1986  2766 D EGL_emulation: eglMakeCurrent: 0x7fb06dae6780: ver 3 0 (tinfo 0x7fb06dac2a80)
+10-19 10:13:26.486  1986  2766 E Surface : getSlotFromBufferLocked: unknown buffer: 0x7fb0738a5760
+10-19 10:13:29.612  1268  1617 W audio_hw_generic: Not supplying enough data to HAL, expected position 1451041 , only wrote 1314068
+10-19 10:13:29.692  1253  1258 E SurfaceFlinger: ro.sf.lcd_density must be defined as a build property
+10-19 10:13:29.721  1253  1260 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 9850880
+10-19 10:13:29.727  2855  2855 D         : HostConnection::get() New Host Connection established 0x7f74f1452480, tid 2855
+10-19 10:13:30.221  2858  2858 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 0 <<<<<<
+10-19 10:13:30.222  2858  2858 D AndroidRuntime: CheckJNI is OFF
+10-19 10:13:30.236  2858  2858 D ICU     : No timezone override file found: /data/misc/zoneinfo/current/icu/icu_tzdata.dat
+10-19 10:13:30.286  2858  2858 E memtrack: Couldn't load memtrack module (No such file or directory)
+10-19 10:13:30.286  2858  2858 E android.os.Debug: failed to load memtrack module: -2
+10-19 10:13:30.287  2858  2858 I Radio-JNI: register_android_hardware_Radio DONE
+10-19 10:13:30.293  2858  2858 D AndroidRuntime: Calling main entry com.android.commands.settings.SettingsCmd
+10-19 10:13:30.314  2858  2858 D AndroidRuntime: Shutting down VM
+10-19 10:13:31.741  2868  2868 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 0 <<<<<<
+10-19 10:13:31.743  2868  2868 D AndroidRuntime: CheckJNI is OFF
+10-19 10:13:31.754  2868  2868 D ICU     : No timezone override file found: /data/misc/zoneinfo/current/icu/icu_tzdata.dat
+10-19 10:13:31.790  2868  2868 E memtrack: Couldn't load memtrack module (No such file or directory)
+10-19 10:13:31.790  2868  2868 E android.os.Debug: failed to load memtrack module: -2
+10-19 10:13:31.796  2868  2868 I Radio-JNI: register_android_hardware_Radio DONE
+10-19 10:13:31.801  2868  2868 D AndroidRuntime: Calling main entry com.android.commands.input.Input
+10-19 10:13:31.804  2868  2868 I Input   : injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_HOME, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=89188, downTime=89188, deviceId=-1, source=0x101 }
+10-19 10:13:31.805  2868  2868 I Input   : injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_HOME, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=89188, downTime=89188, deviceId=-1, source=0x101 }
+10-19 10:13:31.807  1563  1599 I ActivityManager: START u0 {act=android.intent.action.MAIN cat=[android.intent.category.HOME] flg=0x10200000 cmp=com.android.launcher3/.Launcher (has extras)} from uid 1000 on display 0
+10-19 10:13:31.817  1253  1937 D PermissionCache: checking android.permission.READ_FRAME_BUFFER for uid=1000 => granted (2356 us)
+10-19 10:13:31.832  1253  1937 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 1118208
+10-19 10:13:31.834  1563  1599 D         : HostConnection::get() New Host Connection established 0x7fb06dad3580, tid 1599
+10-19 10:13:31.893  2868  2868 D AndroidRuntime: Shutting down VM
+10-19 10:13:32.000  2441  2504 D EGL_emulation: eglMakeCurrent: 0x7fb06ba69580: ver 3 0 (tinfo 0x7fb06ba85fe0)
+10-19 10:13:32.009  2656  2669 D EGL_emulation: eglMakeCurrent: 0x7fb06dae6820: ver 3 0 (tinfo 0x7fb06dac2ca0)
+10-19 10:13:32.019  2656  2669 E Surface : getSlotFromBufferLocked: unknown buffer: 0x7fb06dae6be0
+10-19 10:13:32.553  2441  2504 W OpenGLRenderer: Incorrectly called buildLayer on View: ShortcutAndWidgetContainer, destroying layer...
+10-19 10:13:32.553  2441  2504 W OpenGLRenderer: Incorrectly called buildLayer on View: ShortcutAndWidgetContainer, destroying layer...
+10-19 10:13:35.189  2877  2877 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 0 <<<<<<
+10-19 10:13:35.190  2877  2877 D AndroidRuntime: CheckJNI is OFF
+10-19 10:13:35.197  2877  2877 D ICU     : No timezone override file found: /data/misc/zoneinfo/current/icu/icu_tzdata.dat
+10-19 10:13:35.208  2877  2877 E memtrack: Couldn't load memtrack module (No such file or directory)
+10-19 10:13:35.208  2877  2877 E android.os.Debug: failed to load memtrack module: -2
+10-19 10:13:35.209  2877  2877 I Radio-JNI: register_android_hardware_Radio DONE
+10-19 10:13:35.213  2877  2877 D AndroidRuntime: Calling main entry com.android.commands.am.Am
+10-19 10:13:35.216  1563  1750 I ActivityManager: START u0 {flg=0x10000000 cmp=vn.army2coffee.thuan/.MainActivity} from uid 0 on display 0
+10-19 10:13:35.314  2656  2669 D EGL_emulation: eglMakeCurrent: 0x7fb06dae6820: ver 3 0 (tinfo 0x7fb06dac2ca0)
+10-19 10:13:35.614  2441  2504 D EGL_emulation: eglMakeCurrent: 0x7fb06ba69580: ver 3 0 (tinfo 0x7fb06ba85fe0)
+10-19 10:13:35.617  2441  2504 E Surface : getSlotFromBufferLocked: unknown buffer: 0x7fb06ba6a0c0
+10-19 10:13:35.638  2877  2877 D AndroidRuntime: Shutting down VM
+10-19 10:13:39.898  1253  1258 E SurfaceFlinger: ro.sf.lcd_density must be defined as a build property
+10-19 10:13:39.924  1253  1937 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 9850880
+10-19 10:13:39.927  2888  2888 D         : HostConnection::get() New Host Connection established 0x7f4643592480, tid 2888
+10-19 10:13:40.423  2894  2894 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 0 <<<<<<
+10-19 10:13:40.424  2894  2894 D AndroidRuntime: CheckJNI is OFF
+10-19 10:13:40.444  2894  2894 D ICU     : No timezone override file found: /data/misc/zoneinfo/current/icu/icu_tzdata.dat
+10-19 10:13:40.483  2894  2894 E memtrack: Couldn't load memtrack module (No such file or directory)
+10-19 10:13:40.484  2894  2894 E android.os.Debug: failed to load memtrack module: -2
+10-19 10:13:40.487  2894  2894 I Radio-JNI: register_android_hardware_Radio DONE
+10-19 10:13:40.499  2894  2894 D AndroidRuntime: Calling main entry com.android.commands.input.Input
+10-19 10:13:40.505  2894  2894 I Input   : injectMotionEvent: MotionEvent { action=ACTION_DOWN, actionButton=0, id[0]=0, x[0]=634.0, y[0]=1187.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=97889, downTime=97889, deviceId=0, source=0x1002 }
+10-19 10:13:40.533  2894  2894 I Input   : injectMotionEvent: MotionEvent { action=ACTION_MOVE, actionButton=0, id[0]=0, x[0]=634.0, y[0]=1187.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=97889, downTime=97889, deviceId=0, source=0x1002 }
+10-19 10:13:40.575  2894  2894 I Input   : injectMotionEvent: MotionEvent { action=ACTION_MOVE, actionButton=0, id[0]=0, x[0]=634.0, y[0]=1187.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=97960, downTime=97960, deviceId=0, source=0x1002 }
+10-19 10:13:40.614  2894  2894 I Input   : injectMotionEvent: MotionEvent { action=ACTION_MOVE, actionButton=0, id[0]=0, x[0]=634.0, y[0]=1187.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=97999, downTime=97999, deviceId=0, source=0x1002 }
+10-19 10:13:40.651  2894  2894 I Input   : injectMotionEvent: MotionEvent { action=ACTION_UP, actionButton=0, id[0]=0, x[0]=634.0, y[0]=1187.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=98036, downTime=98036, deviceId=0, source=0x1002 }
+10-19 10:13:40.686  2894  2894 D AndroidRuntime: Shutting down VM
+10-19 10:13:44.149  2906  2906 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 0 <<<<<<
+10-19 10:13:44.153  2906  2906 D AndroidRuntime: CheckJNI is OFF
+10-19 10:13:44.183  2906  2906 D ICU     : No timezone override file found: /data/misc/zoneinfo/current/icu/icu_tzdata.dat
+10-19 10:13:44.208  2906  2906 E memtrack: Couldn't load memtrack module (No such file or directory)
+10-19 10:13:44.208  2906  2906 E android.os.Debug: failed to load memtrack module: -2
+10-19 10:13:44.213  2906  2906 I Radio-JNI: register_android_hardware_Radio DONE
+10-19 10:13:44.219  2906  2906 D AndroidRuntime: Calling main entry com.android.commands.input.Input
+10-19 10:13:44.220  2906  2906 I Input   : injectMotionEvent: MotionEvent { action=ACTION_DOWN, actionButton=0, id[0]=0, x[0]=634.0, y[0]=1187.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=101604, downTime=101604, deviceId=0, source=0x1002 }
+10-19 10:13:44.261  2906  2906 I Input   : injectMotionEvent: MotionEvent { action=ACTION_MOVE, actionButton=0, id[0]=0, x[0]=634.0, y[0]=1187.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=101604, downTime=101604, deviceId=0, source=0x1002 }
+10-19 10:13:44.298  2906  2906 I Input   : injectMotionEvent: MotionEvent { action=ACTION_MOVE, actionButton=0, id[0]=0, x[0]=634.0, y[0]=1187.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=101682, downTime=101682, deviceId=0, source=0x1002 }
+10-19 10:13:44.330  2906  2906 I Input   : injectMotionEvent: MotionEvent { action=ACTION_MOVE, actionButton=0, id[0]=0, x[0]=634.0, y[0]=1187.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=101714, downTime=101714, deviceId=0, source=0x1002 }
+10-19 10:13:44.364  2906  2906 I Input   : injectMotionEvent: MotionEvent { action=ACTION_UP, actionButton=0, id[0]=0, x[0]=634.0, y[0]=1187.0, toolType[0]=TOOL_TYPE_UNKNOWN, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=101748, downTime=101748, deviceId=0, source=0x1002 }
+10-19 10:13:44.406  2906  2906 D AndroidRuntime: Shutting down VM
+10-19 10:13:44.419  2656  2674 I Army2Coffee: [app] hop nhap chu (kieu 0, toi da 500)
+10-19 10:13:44.483  2656  2656 I Army2Coffee: [app] hop nhap chu kieu 0
+10-19 10:13:44.570  2656  2669 D EGL_emulation: eglMakeCurrent: 0x7fb06dae6820: ver 3 0 (tinfo 0x7fb06dac2ca0)
+10-19 10:13:44.576  1986  1986 I LatinIME: Starting input. Cursor position = 0,5
+10-19 10:13:44.694  1986  2766 D EGL_emulation: eglMakeCurrent: 0x7fb06dae6780: ver 3 0 (tinfo 0x7fb06dac2a80)
+10-19 10:13:47.709  2916  2916 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 0 <<<<<<
+10-19 10:13:47.710  2916  2916 D AndroidRuntime: CheckJNI is OFF
+10-19 10:13:47.718  2916  2916 D ICU     : No timezone override file found: /data/misc/zoneinfo/current/icu/icu_tzdata.dat
+10-19 10:13:47.731  2916  2916 E memtrack: Couldn't load memtrack module (No such file or directory)
+10-19 10:13:47.731  2916  2916 E android.os.Debug: failed to load memtrack module: -2
+10-19 10:13:47.732  2916  2916 I Radio-JNI: register_android_hardware_Radio DONE
+10-19 10:13:47.737  2916  2916 D AndroidRuntime: Calling main entry com.android.commands.input.Input
+10-19 10:13:47.740  2916  2916 I Input   : injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_A, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=105125, downTime=105125, deviceId=-1, source=0x101 }
+10-19 10:13:47.742  2916  2916 I Input   : injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_A, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=105125, downTime=105125, deviceId=-1, source=0x101 }
+10-19 10:13:47.754  2916  2916 I Input   : injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_B, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=105125, downTime=105125, deviceId=-1, source=0x101 }
+10-19 10:13:47.758  2916  2916 I Input   : injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_B, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=105125, downTime=105125, deviceId=-1, source=0x101 }
+10-19 10:13:47.770  2916  2916 I Input   : injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_C, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=105125, downTime=105125, deviceId=-1, source=0x101 }
+10-19 10:13:47.772  2916  2916 I Input   : injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_C, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=105125, downTime=105125, deviceId=-1, source=0x101 }
+10-19 10:13:47.801  2916  2916 D AndroidRuntime: Shutting down VM
+10-19 10:13:49.110  2925  2925 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 0 <<<<<<
+10-19 10:13:49.111  2925  2925 D AndroidRuntime: CheckJNI is OFF
+10-19 10:13:49.118  2925  2925 D ICU     : No timezone override file found: /data/misc/zoneinfo/current/icu/icu_tzdata.dat
+10-19 10:13:49.129  2925  2925 E memtrack: Couldn't load memtrack module (No such file or directory)
+10-19 10:13:49.129  2925  2925 E android.os.Debug: failed to load memtrack module: -2
+10-19 10:13:49.130  2925  2925 I Radio-JNI: register_android_hardware_Radio DONE
+10-19 10:13:49.134  2925  2925 D AndroidRuntime: Calling main entry com.android.commands.input.Input
+10-19 10:13:49.136  2925  2925 I Input   : injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_HOME, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=106520, downTime=106520, deviceId=-1, source=0x101 }
+10-19 10:13:49.137  2925  2925 I Input   : injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_HOME, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=106520, downTime=106520, deviceId=-1, source=0x101 }
+10-19 10:13:49.140  1563  1599 I ActivityManager: START u0 {act=android.intent.action.MAIN cat=[android.intent.category.HOME] flg=0x10200000 cmp=com.android.launcher3/.Launcher (has extras)} from uid 1000 on display 0
+10-19 10:13:49.142  1253  1686 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 1118208
+10-19 10:13:49.204  2925  2925 D AndroidRuntime: Shutting down VM
+10-19 10:13:49.245  2656  2669 D EGL_emulation: eglMakeCurrent: 0x7fb06dae6820: ver 3 0 (tinfo 0x7fb06dac2ca0)
+10-19 10:13:49.278  2441  2504 D EGL_emulation: eglMakeCurrent: 0x7fb06ba69580: ver 3 0 (tinfo 0x7fb06ba85fe0)
+10-19 10:13:49.294  2656  2669 D EGL_emulation: eglMakeCurrent: 0x7fb06dae6820: ver 3 0 (tinfo 0x7fb06dac2ca0)
+10-19 10:13:49.304  2656  2669 E Surface : getSlotFromBufferLocked: unknown buffer: 0x7fb06dae6be0
+10-19 10:13:49.417  1986  2766 D EGL_emulation: eglMakeCurrent: 0x7fb06dae6780: ver 3 0 (tinfo 0x7fb06dac2a80)
+10-19 10:13:49.427  1986  2766 E Surface : getSlotFromBufferLocked: unknown buffer: 0x7fb0738a5760
+10-19 10:13:49.760  2656  2669 E Surface : getSlotFromBufferLocked: unknown buffer: 0x7fb06dae95c0
+10-19 10:13:49.941  2441  2504 W OpenGLRenderer: Incorrectly called buildLayer on View: ShortcutAndWidgetContainer, destroying layer...
+10-19 10:13:49.941  2441  2504 W OpenGLRenderer: Incorrectly called buildLayer on View: ShortcutAndWidgetContainer, destroying layer...
+10-19 10:13:52.502  2934  2934 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 0 <<<<<<
+10-19 10:13:52.503  2934  2934 D AndroidRuntime: CheckJNI is OFF
+10-19 10:13:52.510  2934  2934 D ICU     : No timezone override file found: /data/misc/zoneinfo/current/icu/icu_tzdata.dat
+10-19 10:13:52.523  2934  2934 E memtrack: Couldn't load memtrack module (No such file or directory)
+10-19 10:13:52.523  2934  2934 E android.os.Debug: failed to load memtrack module: -2
+10-19 10:13:52.523  2934  2934 I Radio-JNI: register_android_hardware_Radio DONE
+10-19 10:13:52.528  2934  2934 D AndroidRuntime: Calling main entry com.android.commands.am.Am
+10-19 10:13:52.531  1563  1751 I ActivityManager: START u0 {flg=0x10000000 cmp=vn.army2coffee.thuan/.MainActivity} from uid 0 on display 0
+10-19 10:13:52.616  2656  2669 D EGL_emulation: eglMakeCurrent: 0x7fb06dae6820: ver 3 0 (tinfo 0x7fb06dac2ca0)
+10-19 10:13:52.890  2656  2669 D EGL_emulation: eglMakeCurrent: 0x7fb06dae6820: ver 3 0 (tinfo 0x7fb06dac2ca0)
+10-19 10:13:52.897  1986  1986 I LatinIME: Starting input. Cursor position = 3,3
+10-19 10:13:52.968  2656  2669 D EGL_emulation: eglMakeCurrent: 0x7fb06dae6820: ver 3 0 (tinfo 0x7fb06dac2ca0)
+10-19 10:13:53.023  2934  2934 D AndroidRuntime: Shutting down VM
+10-19 10:13:53.053  2441  2504 D EGL_emulation: eglMakeCurrent: 0x7fb06ba69580: ver 3 0 (tinfo 0x7fb06ba85fe0)
+10-19 10:13:53.058  2441  2504 E Surface : getSlotFromBufferLocked: unknown buffer: 0x7fb0738a60c0
+10-19 10:13:53.107  1986  2766 D EGL_emulation: eglMakeCurrent: 0x7fb06dae6780: ver 3 0 (tinfo 0x7fb06dac2a80)
+10-19 10:13:57.255  1253  2000 E SurfaceFlinger: ro.sf.lcd_density must be defined as a build property
+10-19 10:13:57.256  1253  1260 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 9850880
+10-19 10:13:57.258  2945  2945 D         : HostConnection::get() New Host Connection established 0x7f6e69f12480, tid 2945
+10-19 10:13:57.517  2948  2948 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 0 <<<<<<
+10-19 10:13:57.518  2948  2948 D AndroidRuntime: CheckJNI is OFF
+10-19 10:13:57.526  2948  2948 D ICU     : No timezone override file found: /data/misc/zoneinfo/current/icu/icu_tzdata.dat
+10-19 10:13:57.537  2948  2948 E memtrack: Couldn't load memtrack module (No such file or directory)
+10-19 10:13:57.537  2948  2948 E android.os.Debug: failed to load memtrack module: -2
+10-19 10:13:57.538  2948  2948 I Radio-JNI: register_android_hardware_Radio DONE
+10-19 10:13:57.543  2948  2948 D AndroidRuntime: Calling main entry com.android.commands.input.Input
+10-19 10:13:57.544  2948  2948 I Input   : injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_BACK, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=114928, downTime=114928, deviceId=-1, source=0x101 }
+10-19 10:13:57.546  2948  2948 I Input   : injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_BACK, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=114928, downTime=114928, deviceId=-1, source=0x101 }
+10-19 10:13:57.548  2948  2948 D AndroidRuntime: Shutting down VM
+10-19 10:13:57.551  1986  2766 D EGL_emulation: eglMakeCurrent: 0x7fb06dae6780: ver 3 0 (tinfo 0x7fb06dac2a80)
+10-19 10:13:57.552  1986  2766 E Surface : getSlotFromBufferLocked: unknown buffer: 0x7fb06a24dfa0
+10-19 10:13:59.777  1253  2000 E SurfaceFlinger: ro.sf.lcd_density must be defined as a build property
+10-19 10:13:59.778  1253  1258 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 9850880
+10-19 10:13:59.780  2959  2959 D         : HostConnection::get() New Host Connection established 0x7fc2094d2480, tid 2959
+10-19 10:14:00.005  1786  2099 D EGL_emulation: eglMakeCurrent: 0x7fb06dae6fa0: ver 3 0 (tinfo 0x7fb061fff300)
+10-19 10:14:00.027  2962  2962 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 0 <<<<<<
+10-19 10:14:00.028  2962  2962 D AndroidRuntime: CheckJNI is OFF
+10-19 10:14:00.042  2962  2962 D ICU     : No timezone override file found: /data/misc/zoneinfo/current/icu/icu_tzdata.dat
+10-19 10:14:00.058  2962  2962 E memtrack: Couldn't load memtrack module (No such file or directory)
+10-19 10:14:00.058  2962  2962 E android.os.Debug: failed to load memtrack module: -2
+10-19 10:14:00.059  2962  2962 I Radio-JNI: register_android_hardware_Radio DONE
+10-19 10:14:00.064  2962  2962 D AndroidRuntime: Calling main entry com.android.commands.input.Input
+10-19 10:14:00.066  2962  2962 I Input   : injectKeyEvent: KeyEvent { action=ACTION_DOWN, keyCode=KEYCODE_BACK, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=117450, downTime=117450, deviceId=-1, source=0x101 }
+10-19 10:14:00.068  2962  2962 I Input   : injectKeyEvent: KeyEvent { action=ACTION_UP, keyCode=KEYCODE_BACK, scanCode=0, metaState=0, flags=0x0, repeatCount=0, eventTime=117450, downTime=117450, deviceId=-1, source=0x101 }
+10-19 10:14:00.070  2656  2669 D EGL_emulation: eglMakeCurrent: 0x7fb06dae6820: ver 3 0 (tinfo 0x7fb06dac2ca0)
+10-19 10:14:00.071  2656  2669 E Surface : getSlotFromBufferLocked: unknown buffer: 0x7fb06dae95c0
+10-19 10:14:00.072  2962  2962 D AndroidRuntime: Shutting down VM
+10-19 10:14:00.073  2656  2656 W InputEventReceiver: Attempted to finish an input event but the input event receiver has already been disposed.
+10-19 10:14:00.075  2656  2669 D EGL_emulation: eglMakeCurrent: 0x7fb06dae6820: ver 3 0 (tinfo 0x7fb06dac2ca0)
+10-19 10:14:03.319  1253  1260 E SurfaceFlinger: ro.sf.lcd_density must be defined as a build property
+10-19 10:14:03.341  1253  2000 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 9850880
+10-19 10:14:03.345  2973  2973 D         : HostConnection::get() New Host Connection established 0x7f2ccf4d2480, tid 2973
+10-19 10:14:03.616  1253  1290 D hwcomposer: hw_composer sent 3042 syncs in 60s
+10-19 10:14:03.787  2976  2976 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 0 <<<<<<
+10-19 10:14:03.789  2976  2976 D AndroidRuntime: CheckJNI is OFF
+10-19 10:14:03.799  2976  2976 D ICU     : No timezone override file found: /data/misc/zoneinfo/current/icu/icu_tzdata.dat
+10-19 10:14:03.830  2976  2976 E memtrack: Couldn't load memtrack module (No such file or directory)
+10-19 10:14:03.831  2976  2976 E android.os.Debug: failed to load memtrack module: -2
+10-19 10:14:03.831  2976  2976 I Radio-JNI: register_android_hardware_Radio DONE
+10-19 10:14:03.838  2976  2976 D AndroidRuntime: Calling main entry com.android.commands.settings.SettingsCmd
+10-19 10:14:03.844  2976  2976 D AndroidRuntime: Shutting down VM

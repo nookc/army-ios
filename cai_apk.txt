@@ -1,0 +1,4 @@
+ky/Army2Coffee.apk: 1 file pushed, 0 skipped. 290.1 MB/s (13477774 bytes in 0.044s)
+Performing Push Install
+	pkg: /data/local/tmp/Army2Coffee.apk
+Success

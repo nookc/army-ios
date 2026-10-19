@@ -1,0 +1,17 @@
+--------- beginning of system
+--------- beginning of main
+10-19 10:12:22.780  2656  2656 I Army2Coffee: [app] activity tao (lan 1, game chua chay)
+10-19 10:12:22.963  2656  2656 I Army2Coffee: [app] khoi dong Army 2 Coffee (Android), man 320x456, jar 10101308 byte
+10-19 10:12:22.964  2656  2670 I Army2Coffee: [app] luong game bat dau
+10-19 10:12:22.980  2656  2670 I Army2Coffee: [Boot] khoi dong coreLG.TerrainMidlet
+10-19 10:12:22.993  2656  2670 I Army2Coffee: [am thanh] audio/x-wav 7180 byte: ok
+10-19 10:12:22.993  2656  2670 I Army2Coffee: [am thanh] audio/x-wav 1834 byte: ok
+10-19 10:12:22.996  2656  2670 I Army2Coffee: [am thanh] audio/x-wav 2934 byte: ok
+10-19 10:12:23.501  2656  2656 I Army2Coffee: [bocuc] canvas 0 67 1080 1606 pad 0 1608 1080 2148 game 320 456
+10-19 10:12:36.063  2656  2674 I Army2Coffee: [am thanh] audio/x-wav 902214 byte: ok
+10-19 10:13:08.596  2656  2674 I Army2Coffee: [app] hop nhap chu (kieu 0, toi da 500)
+10-19 10:13:08.645  2656  2656 I Army2Coffee: [app] hop nhap chu kieu 0
+10-19 10:13:21.456  2656  2674 I Army2Coffee: [app] hop nhap chu (kieu 65536, toi da 500)
+10-19 10:13:21.527  2656  2656 I Army2Coffee: [app] hop nhap chu kieu 65536
+10-19 10:13:44.419  2656  2674 I Army2Coffee: [app] hop nhap chu (kieu 0, toi da 500)
+10-19 10:13:44.483  2656  2656 I Army2Coffee: [app] hop nhap chu kieu 0
