@@ -1,0 +1,4 @@
+ky/Army250.apk: 1 file pushed, 0 skipped. 315.5 MB/s (14098312 bytes in 0.043s)
+Performing Push Install
+	pkg: /data/local/tmp/Army250.apk
+Success

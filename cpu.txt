@@ -1,0 +1,4 @@
+  PID PR CPU% S  #THR     VSS     RSS PCY UID      Name
+ 2671  0   8% S    17 1339652K  50280K  fg u0_a55   vn.army250.thuan
+  PID PR CPU% S  #THR     VSS     RSS PCY UID      Name
+ 2671  0   7% S    17 1340536K  50444K  fg u0_a55   vn.army250.thuan
