@@ -8,7 +8,7 @@ O=native/build/android/test
 mkdir -p "$O"
 say() { echo "== $*"; }
 cap() { adb exec-out screencap -p > "$O/$1.png"; say "chup $1"; }
-alog() { adb logcat -d -s Army2Coffee:I; }
+alog() { adb logcat -d -s Army2Coffee:I | tr -d '\r'; }   # Android cu: adb tra ve CRLF
 
 APK=${APK:-native/build/android/Army2Coffee-test.apk}
 adb shell getprop ro.build.version.release > "$O/android.txt"
@@ -49,8 +49,8 @@ tapg() {
 hop() { alog | grep -c "hop nhap chu kieu"; }
 pid_of() {
   local p
-  p=$(adb shell pidof $PKG 2>/dev/null | tr -d '\r')
-  [ -z "$p" ] && p=$(adb shell ps 2>/dev/null | tr -d '\r' | awk -v k=$PKG '$NF == k {print $2}' | head -1)
+  p=$(adb shell ps 2>/dev/null | tr -d '\r' | awk -v k=$PKG '$NF == k {print $2}' | head -1)
+  [ -z "$p" ] && p=$(adb shell ps -A 2>/dev/null | tr -d '\r' | awk -v k=$PKG '$NF == k {print $2}' | head -1)
   echo "$p"
 }
 
@@ -66,7 +66,8 @@ adb shell dumpsys gfxinfo $PKG reset > /dev/null
 sleep 10
 adb shell dumpsys gfxinfo $PKG > "$O/gfxinfo.txt"
 adb shell dumpsys meminfo $PKG > "$O/meminfo.txt"
-adb shell top -b -n 2 -d 5 -p "$PID" > "$O/cpu.txt"
+adb shell top -b -n 2 -d 5 -p "$PID" > "$O/cpu.txt" 2>&1
+grep -q "Invalid argument" "$O/cpu.txt" && adb shell top -n 2 -d 5 | tr -d '\r' | grep -E "PID|army2" > "$O/cpu.txt"
 
 # o TEN -> hop nhap chu Android, go bang ban phim (adb input text), Enter = OK
 n0=$(hop)

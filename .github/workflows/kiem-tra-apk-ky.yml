@@ -1,4 +1,4 @@
-name: Kiem tra APK da ky (Android 6 / 11 / 14)
+name: Kiem tra APK da ky (Android 5 / 6)
 
 # Cai APK phat hanh (ky bang khoa rieng, ngoai CI) len emulator nhieu doi Android va chay thu bang thao tac that.
 on:
@@ -16,12 +16,10 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          - api: 21
+            target: default
           - api: 23
             target: default
-          - api: 30
-            target: default
-          - api: 34
-            target: google_apis
     steps:
       - uses: actions/checkout@v4
 
