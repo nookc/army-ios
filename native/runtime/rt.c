@@ -7,6 +7,7 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <time.h>
 #include <errno.h>
 #include <sched.h>
@@ -745,8 +746,23 @@ static int GC_CALLBACK rt_roots_filter(const char *name, void *start, size_t siz
 }
 #endif
 
+#ifdef __ANDROID__
+/* Android: tien trinh app co hang tram thu vien he thong (ART...) - chi quet du lieu cua libarmy2.so */
+static unsigned g_roots_seen, g_roots_kept;
+static int GC_CALLBACK rt_roots_filter(const char *name, void *start, size_t size) {
+    (void)start;
+    (void)size;
+    g_roots_seen++;
+    if (name && strstr(name, "libarmy2.so")) {
+        g_roots_kept++;
+        return 1;
+    }
+    return 0;
+}
+#endif
+
 void rt_gc_roots_stats(unsigned *seen, unsigned *kept) {
-#ifdef __APPLE__
+#if defined(__APPLE__) || defined(__ANDROID__)
     *seen = g_roots_seen;
     *kept = g_roots_kept;
 #else
@@ -757,6 +773,9 @@ void rt_gc_roots_stats(unsigned *seen, unsigned *kept) {
 void rt_init(void) {
     GC_set_warn_proc(gc_warn);
     GC_set_abort_func(gc_abort);
+#ifdef __ANDROID__
+    GC_register_has_static_roots_callback(rt_roots_filter);
+#endif
 #ifdef __APPLE__
     {
         unsigned long sz = 0;

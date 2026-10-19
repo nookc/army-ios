@@ -1,24 +1,76 @@
 /* io.c - tai nguyen trong jar (zlib), RMS (tep), socket TCP, he thong, SMS, am thanh */
-#include <dirent.h>
-#include <errno.h>
-#include <fcntl.h>
+#ifdef _WIN32
+#ifndef _WIN32_WINNT
+#define _WIN32_WINNT 0x0601
+#endif
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#include <windows.h>
+#include <io.h>
+#include <wchar.h>
+#else
 #include <netdb.h>
 #include <netinet/in.h>
 #include <netinet/tcp.h>
 #include <arpa/inet.h>
 #include <poll.h>
+#include <sys/ioctl.h>
+#include <sys/socket.h>
+#include <unistd.h>
+#endif
+#include <dirent.h>
+#include <errno.h>
+#include <fcntl.h>
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/ioctl.h>
-#include <sys/socket.h>
 #include <sys/stat.h>
 #include <time.h>
-#include <unistd.h>
+#ifdef J2N_STB_ZLIB
+/* khong co zlib he thong (Windows): dung bo giai nen deflate cua stb_image (gfx.c) */
+int stbi_zlib_decode_noheader_buffer(char *obuffer, int olen, const char *ibuffer, int ilen);
+#else
 #include <zlib.h>
+#endif
 #include "natives.h"
 #include "platform.h"
+
+/* ============================================================ tep (Windows: duong dan UTF-8 -> UTF-16) */
+#ifdef _WIN32
+static wchar_t *u8w(const char *s) {
+    int n = MultiByteToWideChar(CP_UTF8, 0, s, -1, 0, 0);
+    wchar_t *w = (wchar_t *)malloc(sizeof(wchar_t) * (size_t)(n > 0 ? n : 1));
+    if (n <= 0 || !MultiByteToWideChar(CP_UTF8, 0, s, -1, w, n)) w[0] = 0;
+    return w;
+}
+static FILE *u8fopen(const char *path, const char *mode) {
+    wchar_t *wp = u8w(path), *wm = u8w(mode);
+    FILE *f = _wfopen(wp, wm);
+    free(wp);
+    free(wm);
+    return f;
+}
+static int u8remove(const char *path) {
+    wchar_t *wp = u8w(path);
+    int r = DeleteFileW(wp) ? 0 : -1;
+    free(wp);
+    return r;
+}
+static int u8rename_over(const char *from, const char *to) {
+    wchar_t *a = u8w(from), *b = u8w(to);
+    int r = MoveFileExW(a, b, MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH) ? 0 : -1;
+    free(a);
+    free(b);
+    return r;
+}
+static void file_sync(FILE *f) { _commit(_fileno(f)); }
+#else
+#define u8fopen fopen
+#define u8remove remove
+#define u8rename_over rename
+static void file_sync(FILE *f) { fsync(fileno(f)); }
+#endif
 
 /* ============================================================ jar */
 typedef struct zent {
@@ -47,24 +99,31 @@ static uint32_t hstr(const char *s, size_t n) {
 }
 
 static void jar_load(void) {
-    const char *path = plat_jar_path();
-    FILE *f = path ? fopen(path, "rb") : 0;
-    if (!f) {
-        rt_log("[jar] khong mo duoc %s", path ? path : "(null)");
-        return;
-    }
-    fseek(f, 0, SEEK_END);
-    long n = ftell(f);
-    fseek(f, 0, SEEK_SET);
-    jar = (uint8_t *)malloc((size_t)n);
-    if (fread(jar, 1, (size_t)n, f) != (size_t)n) {
+    size_t ml = 0;
+    const uint8_t *mem = plat_jar_mem(&ml);
+    if (mem && ml > 22) {
+        jar = (uint8_t *)mem;              /* jar nam san trong bo nho (tai nguyen exe / asset) */
+        jar_len = ml;
+    } else {
+        const char *path = plat_jar_path();
+        FILE *f = path ? u8fopen(path, "rb") : 0;
+        if (!f) {
+            rt_log("[jar] khong mo duoc %s", path ? path : "(null)");
+            return;
+        }
+        fseek(f, 0, SEEK_END);
+        long n = ftell(f);
+        fseek(f, 0, SEEK_SET);
+        jar = (uint8_t *)malloc((size_t)n);
+        if (fread(jar, 1, (size_t)n, f) != (size_t)n) {
+            fclose(f);
+            free(jar);
+            jar = 0;
+            return;
+        }
         fclose(f);
-        free(jar);
-        jar = 0;
-        return;
+        jar_len = (size_t)n;
     }
-    fclose(f);
-    jar_len = (size_t)n;
     /* tim end of central directory */
     long e = (long)jar_len - 22;
     while (e >= 0 && !(jar[e] == 'P' && jar[e + 1] == 'K' && jar[e + 2] == 5 && jar[e + 3] == 6)) e--;
@@ -126,6 +185,13 @@ uint8_t *j2n_jar_read(const char *name, size_t *len) {
     if (z->method == 0) {
         memcpy(out, jar + data, z->usize);
     } else if (z->method == 8) {
+#ifdef J2N_STB_ZLIB
+        int r = stbi_zlib_decode_noheader_buffer((char *)out, (int)z->usize, (const char *)jar + data, (int)z->csize);
+        if (r != (int)z->usize) {
+            free(out);
+            return 0;
+        }
+#else
         z_stream s;
         memset(&s, 0, sizeof s);
         if (inflateInit2(&s, -MAX_WBITS) != Z_OK) {
@@ -142,6 +208,7 @@ uint8_t *j2n_jar_read(const char *name, size_t *len) {
             free(out);
             return 0;
         }
+#endif
     } else {
         free(out);
         return 0;
@@ -205,7 +272,7 @@ static void rms_path(const char *name, char *out, size_t n) {
 jobj N_j2n_Rms_load(jctx *t, jobj name) {
     char p[1024];
     rms_path(rt_str_cstr(name), p, sizeof p);
-    FILE *f = fopen(p, "rb");
+    FILE *f = u8fopen(p, "rb");
     if (!f) return 0;
     fseek(f, 0, SEEK_END);
     long n = ftell(f);
@@ -221,35 +288,49 @@ int32_t N_j2n_Rms_save(jctx *t, jobj name, jobj data) {
     char p[1024], tmp[1100];
     rms_path(rt_str_cstr(name), p, sizeof p);
     snprintf(tmp, sizeof tmp, "%s.tmp", p);
-    FILE *f = fopen(tmp, "wb");
+    FILE *f = u8fopen(tmp, "wb");
     if (!f) return 0;
     size_t n = data ? (size_t)ALEN(data) : 0;
     int ok = n == 0 || fwrite(AD(data, uint8_t), 1, n, f) == n;
     ok = (fflush(f) == 0) && ok;
-    fsync(fileno(f));
+    file_sync(f);
     fclose(f);
     if (!ok) {
-        remove(tmp);
+        u8remove(tmp);
         return 0;
     }
-    return rename(tmp, p) == 0;   /* ghi nguyen tu: mat dien giua chung khong hong kho cu */
+    return u8rename_over(tmp, p) == 0;   /* ghi nguyen tu: mat dien giua chung khong hong kho cu */
 }
 
 int32_t N_j2n_Rms_delete(jctx *t, jobj name) {
     (void)t;
     char p[1024];
     rms_path(rt_str_cstr(name), p, sizeof p);
-    return remove(p) == 0;
+    return u8remove(p) == 0;
 }
 
 jobj N_j2n_Rms_list(jctx *t) {
+#ifdef _WIN32
+    wchar_t *wd = u8w(plat_data_dir());
+    _WDIR *d = _wopendir(wd);
+    free(wd);
+#else
     DIR *d = opendir(plat_data_dir());
+#endif
     if (!d) return rt_newarr(t, rt_arrof(t, &K_java_lang_String), 0);
     char *names[256];
     int n = 0;
+#ifdef _WIN32
+    struct _wdirent *e;
+    char sb[600];
+    while ((e = _wreaddir(d)) && n < 256) {
+        if (!WideCharToMultiByte(CP_UTF8, 0, e->d_name, -1, sb, sizeof sb, 0, 0)) continue;
+        const char *s = sb;
+#else
     struct dirent *e;
     while ((e = readdir(d)) && n < 256) {
         const char *s = e->d_name;
+#endif
         size_t l = strlen(s);
         if (l > 7 && strncmp(s, "rms_", 4) == 0 && strcmp(s + l - 3, ".db") == 0) {
             size_t hl = (l - 7) / 2;
@@ -263,7 +344,11 @@ jobj N_j2n_Rms_list(jctx *t) {
             names[n++] = nm;
         }
     }
+#ifdef _WIN32
+    _wclosedir(d);
+#else
     closedir(d);
+#endif
     jobj arr = rt_newarr(t, rt_arrof(t, &K_java_lang_String), n);
     for (int i = 0; i < n; i++) {
         if (arr) AD(arr, jobj)[i] = rt_str_utf8(t, names[i]);
@@ -273,8 +358,22 @@ jobj N_j2n_Rms_list(jctx *t) {
 }
 
 /* ============================================================ socket */
+#ifdef _WIN32
+static pthread_once_t wsa_once = PTHREAD_ONCE_INIT;
+static void wsa_init(void) {
+    WSADATA w;
+    WSAStartup(MAKEWORD(2, 2), &w);
+}
+#define SOCK_CLOSE closesocket
+#else
+#define SOCK_CLOSE close
+#endif
+
 int32_t N_j2n_Net_connect(jctx *t, jobj host, int32_t port) {
     (void)t;
+#ifdef _WIN32
+    pthread_once(&wsa_once, wsa_init);
+#endif
     char *h = rt_str_cstr(host);
     char ps[16];
     snprintf(ps, sizeof ps, "%d", port);
@@ -291,6 +390,41 @@ int32_t N_j2n_Net_connect(jctx *t, jobj host, int32_t port) {
     }
     int fd = -1;
     for (struct addrinfo *a = res; a; a = a->ai_next) {
+#ifdef _WIN32
+        SOCKET sk = socket(a->ai_family, a->ai_socktype, a->ai_protocol);
+        if (sk == INVALID_SOCKET) continue;
+        fd = (int)sk;
+        u_long nb = 1;
+        ioctlsocket(sk, FIONBIO, &nb);
+        int r = connect(sk, a->ai_addr, (int)a->ai_addrlen);
+        if (r != 0 && WSAGetLastError() == WSAEWOULDBLOCK) {
+            fd_set wf, ef;
+            FD_ZERO(&wf);
+            FD_ZERO(&ef);
+            FD_SET(sk, &wf);
+            FD_SET(sk, &ef);
+            struct timeval tv = {15, 0};
+            r = select(0, 0, &wf, &ef, &tv);
+            if (r == 1 && FD_ISSET(sk, &wf)) {
+                int err = 0;
+                int el = sizeof err;
+                getsockopt(sk, SOL_SOCKET, SO_ERROR, (char *)&err, &el);
+                r = err == 0 ? 0 : -1;
+            } else {
+                r = -1;
+            }
+        }
+        if (r == 0) {
+            nb = 0;
+            ioctlsocket(sk, FIONBIO, &nb);
+            BOOL one = TRUE;
+            setsockopt(sk, IPPROTO_TCP, TCP_NODELAY, (const char *)&one, sizeof one);
+            setsockopt(sk, SOL_SOCKET, SO_KEEPALIVE, (const char *)&one, sizeof one);
+            break;
+        }
+        closesocket(sk);
+        fd = -1;
+#else
         fd = socket(a->ai_family, a->ai_socktype, a->ai_protocol);
         if (fd < 0) continue;
         int fl = fcntl(fd, F_GETFL, 0);
@@ -320,6 +454,7 @@ int32_t N_j2n_Net_connect(jctx *t, jobj host, int32_t port) {
         }
         close(fd);
         fd = -1;
+#endif
     }
     freeaddrinfo(res);
     if (fd < 0) rt_log("[net] khong ket noi duoc %s:%d", h, port);
@@ -332,11 +467,19 @@ int32_t N_j2n_Net_read(jctx *t, int32_t fd, jobj b, int32_t off, int32_t len) {
         return -2;
     }
     for (;;) {
+#ifdef _WIN32
+        int n = recv((SOCKET)fd, (char *)AD(b, uint8_t) + off, len, 0);
+        if (n > 0) return n;
+        if (n == 0) return -1;
+        if (WSAGetLastError() == WSAEINTR) continue;
+        return -2;
+#else
         ssize_t n = recv(fd, AD(b, uint8_t) + off, (size_t)len, 0);
         if (n > 0) return (int32_t)n;
         if (n == 0) return -1;
         if (errno == EINTR) continue;
         return -2;
+#endif
     }
 }
 
@@ -351,28 +494,45 @@ int32_t N_j2n_Net_write(jctx *t, int32_t fd, jobj b, int32_t off, int32_t len) {
     int fl = 0;
 #endif
     for (;;) {
+#ifdef _WIN32
+        int n = send((SOCKET)fd, (const char *)AD(b, uint8_t) + off, len, fl);
+        if (n >= 0) return n;
+        if (WSAGetLastError() == WSAEINTR) continue;
+        return -2;
+#else
         ssize_t n = send(fd, AD(b, uint8_t) + off, (size_t)len, fl);
         if (n >= 0) return (int32_t)n;
         if (errno == EINTR) continue;
         return -2;
+#endif
     }
 }
 
 int32_t N_j2n_Net_available(jctx *t, int32_t fd) {
     (void)t;
+#ifdef _WIN32
+    u_long n = 0;
+    if (ioctlsocket((SOCKET)fd, FIONREAD, &n) != 0) return 0;
+    return (int32_t)n;
+#else
     int n = 0;
     if (ioctl(fd, FIONREAD, &n) != 0) return 0;
     return n;
+#endif
 }
 
 void N_j2n_Net_shutdown(jctx *t, int32_t fd) {
     (void)t;
+#ifdef _WIN32
+    shutdown((SOCKET)fd, SD_BOTH);
+#else
     shutdown(fd, SHUT_RDWR);
+#endif
 }
 
 void N_j2n_Net_close(jctx *t, int32_t fd) {
     (void)t;
-    close(fd);
+    SOCK_CLOSE(fd);
 }
 
 jobj N_j2n_Net_localAddress(jctx *t, int32_t fd) {
@@ -405,9 +565,17 @@ jobj N_j2n_Sys_property0(jctx *t, jobj key) {
 int32_t N_j2n_Sys_tzOffset(jctx *t) {
     (void)t;
     time_t now = time(0);
+#ifdef _WIN32
+    struct tm g;
+    gmtime_s(&g, &now);
+    g.tm_isdst = -1;
+    time_t gt = mktime(&g);              /* gio dia phuong hieu nhu UTC -> do lech mui gio */
+    return (int32_t)((now - gt) * 1000);
+#else
     struct tm lt;
     localtime_r(&now, &lt);
     return (int32_t)(lt.tm_gmtoff * 1000);
+#endif
 }
 
 jobj N_j2n_Sys_tzId(jctx *t) {

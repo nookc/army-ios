@@ -56,6 +56,11 @@ void plat_sound_stop(int h) { (void)h; }
 void plat_sound_close(int h) { (void)h; }
 void plat_sound_volume(int h, int l) { (void)h; (void)l; }
 
+const uint8_t *plat_jar_mem(size_t *len) {
+    (void)len;
+    return NULL;
+}
+
 void plat_log(const char *s) {
     fprintf(stderr, "%s\n", s);
 }

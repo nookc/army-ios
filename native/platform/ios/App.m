@@ -249,6 +249,7 @@ void plat_exit(void) {
 static char gDataDirC[1024], gJarC[1024];
 const char *plat_data_dir(void) { return gDataDirC; }
 const char *plat_jar_path(void) { return gJarC[0] ? gJarC : NULL; }
+const uint8_t *plat_jar_mem(size_t *len) { (void)len; return NULL; }
 
 /* nhat ky ra Documents/log.txt, loi sap ra Documents/crash.txt (xem trong app Tep: "Tren iPhone" > Army2 Thuan) */
 static FILE *gLog;

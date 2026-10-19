@@ -4,6 +4,7 @@
  * Nen tang cai dat cac ham plat_*; runtime cung cap cac ham j2n_* cho nen tang goi (an toan da luong).
  */
 #pragma once
+#include <stddef.h>
 #include <stdint.h>
 
 #ifdef __cplusplus
@@ -23,6 +24,8 @@ void plat_exit(void);
 const char *plat_data_dir(void);
 /* duong dan tep jar cua game */
 const char *plat_jar_path(void);
+/* jar nam san trong bo nho (tai nguyen exe / asset apk); NULL = doc tep plat_jar_path() */
+const uint8_t *plat_jar_mem(size_t *len);
 /* am thanh: tra ve handle >= 0 hoac -1 */
 int plat_sound_create(const uint8_t *data, int len, const char *type);
 void plat_sound_start(int h, int loops);
@@ -46,6 +49,8 @@ enum {
 };
 /* khoi dong game tren luong moi; w,h = kich thuoc Canvas */
 int j2n_start(const char *midlet_class, int w, int h);
+/* nhu j2n_start nhung chay game ngay tren luong goi (khong tra ve khi game con chay) */
+int j2n_run(const char *midlet_class, int w, int h);
 void j2n_post(int type, int a, int b);
 void j2n_text_done(int ok, const char *utf8);
 /* chup khung hinh hien tai (cho kiem thu): copy vao out (w*h) neu kich thuoc khop, tra ve so khung da ve */

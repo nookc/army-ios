@@ -1,5 +1,5 @@
 # Build ban Linux de thu: make JAR=... (mac dinh client hien tai)
-JAR ?= /home/claude/clientpatch/client_ka1.jar
+JAR ?= /home/claude/clientpatch/client_tia3.jar
 OPT ?= -O1 -g
 CC ?= gcc
 GEN := build/gen

@@ -211,6 +211,24 @@ static void *main_entry(void *arg) {
     return java_main(arg);
 }
 
+/* chay game ngay tren luong hien tai (Android: luong rieng do lop nen tang tao, KHONG phai luong UI;
+   GC dang ky luong nay lam luong chinh nen no phai song suot doi app - ham khong tra ve khi game con chay) */
+int j2n_run(const char *midlet_class, int w, int h) {
+    extern int rt_attach_thread(jctx *ctx);
+    extern void rt_thread_qos(void);
+    rt_init();
+    rt_thread_run_hook = thread_hook;
+    gfx_init(w, h);
+    g_midlet = strdup(midlet_class);
+    rt_thread_qos();
+    jctx *c = (jctx *)GC_MALLOC_UNCOLLECTABLE(sizeof(jctx));
+    memset(c, 0, sizeof *c);
+    c->id = 1;
+    rt_attach_thread(c);
+    java_main(0);
+    return 1;
+}
+
 int j2n_start(const char *midlet_class, int w, int h) {
     rt_init();
     rt_thread_run_hook = thread_hook;

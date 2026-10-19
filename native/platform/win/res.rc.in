@@ -1,0 +1,27 @@
+#include <winver.h>
+1 ICON "army2.ico"
+1 24 "app.manifest"
+101 RCDATA "@JAR@"
+1 VERSIONINFO
+FILEVERSION 2,3,0,@BUILD@
+PRODUCTVERSION 2,3,0,@BUILD@
+FILEOS 0x40004
+FILETYPE 0x1
+BEGIN
+  BLOCK "StringFileInfo"
+  BEGIN
+    BLOCK "042a04b0"
+    BEGIN
+      VALUE "CompanyName", "Army 2 Coffee"
+      VALUE "FileDescription", "Army 2 Coffee"
+      VALUE "FileVersion", "2.3.0.@BUILD@"
+      VALUE "ProductName", "Army 2 Coffee"
+      VALUE "ProductVersion", "2.3.0"
+      VALUE "OriginalFilename", "Army2Coffee.exe"
+    END
+  END
+  BLOCK "VarFileInfo"
+  BEGIN
+    VALUE "Translation", 0x042a, 1200
+  END
+END
