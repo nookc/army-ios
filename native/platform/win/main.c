@@ -625,7 +625,12 @@ static DWORD WINAPI audio_thread(LPVOID a) {
     return 0;
 }
 
+static ULONGLONG gAudioTry;
+
+/* mo waveOut; that bai (may chua co thiet bi am thanh) thi thu lai sau moi 5 giay khi game phat tieng */
 static void audio_init(void) {
+    static int logged;
+    gAudioTry = GetTickCount64();
     WAVEFORMATEX f;
     memset(&f, 0, sizeof f);
     f.wFormatTag = WAVE_FORMAT_PCM;
@@ -634,9 +639,9 @@ static void audio_init(void) {
     f.wBitsPerSample = 16;
     f.nBlockAlign = 2;
     f.nAvgBytesPerSec = SR * 2;
-    gWoEv = CreateEventW(0, FALSE, FALSE, 0);
+    if (!gWoEv) gWoEv = CreateEventW(0, FALSE, FALSE, 0);
     if (waveOutOpen(&gWo, WAVE_MAPPER, &f, (DWORD_PTR)gWoEv, 0, CALLBACK_EVENT) != MMSYSERR_NOERROR) {
-        plat_log("[am thanh] khong mo duoc waveOut");
+        if (!logged++) plat_log("[am thanh] khong mo duoc waveOut (se thu lai)");
         return;
     }
     for (int i = 0; i < NBUF; i++) {
@@ -646,6 +651,7 @@ static void audio_init(void) {
         waveOutPrepareHeader(gWo, &gHdr[i], sizeof gHdr[i]);
     }
     gAudioOk = 1;
+    if (logged) plat_log("[am thanh] da mo waveOut");
     CloseHandle(CreateThread(0, 0, audio_thread, 0, 0, 0));
 }
 
@@ -680,6 +686,7 @@ int plat_sound_create(const uint8_t *data, int len, const char *type) {
 
 void plat_sound_start(int h, int loops) {
     if (h < 0 || h >= NSND) return;
+    if (!gAudioOk && GetTickCount64() - gAudioTry > 5000) audio_init();   /* chi luong game goi */
     EnterCriticalSection(&gSndCs);
     snd *s = &gSnd[h];
     if (s->used) {

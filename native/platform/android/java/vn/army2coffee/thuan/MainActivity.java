@@ -33,19 +33,21 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import java.io.File;
-import java.io.FileOutputStream;
 
 /**
  * Army 2 Coffee - ban Android "thuan": client J2ME dich san sang ma may (libarmy2.so), khong gia lap.
  * Man hinh: khung game 320 x gH phong to (diem anh net) + ban phim ao 4x2 giong ban iOS.
  */
 public final class MainActivity extends Activity {
+    static final String TAG = "Army2Coffee";
     static boolean started;
     static int gW = 320, gH = 466;
+    static int created;
 
     GameView view;
     AlertDialog dialog;
     EditText dialogEdit;
+    TextReq dialogReq;
 
     @Override
     protected void onCreate(Bundle b) {
@@ -58,6 +60,16 @@ public final class MainActivity extends Activity {
         }
         view = new GameView(this);
         setContentView(view);
+        created++;
+        Log.i(TAG, "[app] activity tao (lan " + created + ", game " + (started ? "dang chay" : "chua chay") + ")");
+        if (pending != null) {
+            // activity bi tao lai giua luc dang nhap chu: hien lai hop (giu chu da go)
+            view.post(new Runnable() {
+                public void run() {
+                    showPending();
+                }
+            });
+        }
     }
 
     @Override
@@ -77,6 +89,8 @@ public final class MainActivity extends Activity {
 
     @Override
     protected void onDestroy() {
+        Log.i(TAG, "[app] activity huy" + (isFinishing() ? " (ket thuc)" : ""));
+        closeDialogSilently();
         if (Native.act == this) {
             Native.act = null;
         }
@@ -141,17 +155,77 @@ public final class MainActivity extends Activity {
     }
 
     // ------------------------------------------------------------------ hop nhap chu (TextBox cua game)
-    void showTextBox(String title, String text, int max, int cons) {
-        view.releaseAll();
-        if (dialog != null && dialog.isShowing()) {
-            dialog.dismiss();
+    /** yeu cau nhap chu cua game; giu tinh de song qua viec activity bi Android tao lai */
+    static final class TextReq {
+        final String title;
+        String text;
+        final int max, cons;
+
+        TextReq(String title, String text, int max, int cons) {
+            this.title = title;
+            this.text = text;
+            this.max = max;
+            this.cons = cons;
         }
+    }
+
+    /** hop dang cho tra loi (chi doc/ghi tren luong UI) */
+    static TextReq pending;
+
+    /** goi tu luong game */
+    static void requestTextBox(final String title, final String text, final int max, final int cons) {
+        new Handler(Looper.getMainLooper()).post(new Runnable() {
+            public void run() {
+                pending = new TextReq(title, text, max, cons);
+                MainActivity a = Native.act;
+                if (a != null && !a.isFinishing()) {
+                    a.showPending();
+                }
+                // chua co activity (app dang o nen): hop se hien khi activity moi duoc tao
+            }
+        });
+    }
+
+    /** dong hop ma khong bao ket qua cho game (activity sap huy / co hop moi); giu chu da go */
+    void closeDialogSilently() {
+        AlertDialog d = dialog;
+        if (d == null) {
+            return;
+        }
+        if (dialogEdit != null && dialogReq != null && dialogReq == pending) {
+            dialogReq.text = dialogEdit.getText().toString();
+        }
+        dialog = null;
+        dialogEdit = null;
+        dialogReq = null;
+        d.setOnCancelListener(null);
+        try {
+            d.dismiss();
+        } catch (Throwable e) {
+        }
+    }
+
+    static void finishText(TextReq r, boolean ok, String text) {
+        if (pending != r) {
+            return;   // da tra loi roi / da co hop moi thay the
+        }
+        pending = null;
+        Native.textDone(ok, ok ? text : null);
+    }
+
+    void showPending() {
+        final TextReq r = pending;
+        if (r == null || isFinishing()) {
+            return;
+        }
+        view.releaseAll();
+        closeDialogSilently();
         final EditText ed = new EditText(this);
-        ed.setText(text == null ? "" : text);
+        ed.setText(r.text == null ? "" : r.text);
         ed.setSingleLine(true);
         ed.setSelectAllOnFocus(true);
-        int c = cons & 0xFFFF;
-        boolean pw = (cons & 0x10000) != 0;
+        int c = r.cons & 0xFFFF;
+        boolean pw = (r.cons & 0x10000) != 0;
         int it;
         if (c == 2) {
             it = InputType.TYPE_CLASS_NUMBER | (pw ? InputType.TYPE_NUMBER_VARIATION_PASSWORD : 0);
@@ -167,35 +241,25 @@ public final class MainActivity extends Activity {
             it = InputType.TYPE_CLASS_TEXT | (pw ? InputType.TYPE_TEXT_VARIATION_PASSWORD : InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
         }
         ed.setInputType(it);
-        if (max > 0) {
-            ed.setFilters(new InputFilter[]{new InputFilter.LengthFilter(max)});
+        if (r.max > 0) {
+            ed.setFilters(new InputFilter[]{new InputFilter.LengthFilter(r.max)});
         }
-        final boolean[] done = {false};
         AlertDialog.Builder bd = new AlertDialog.Builder(this);
-        bd.setTitle(title != null && title.length() > 0 ? title : "Nhập");
+        bd.setTitle(r.title != null && r.title.length() > 0 ? r.title : "Nhập");
         bd.setView(ed);
         bd.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface d, int which) {
-                if (!done[0]) {
-                    done[0] = true;
-                    Native.textDone(true, ed.getText().toString());
-                }
+                finishText(r, true, ed.getText().toString());
             }
         });
         bd.setNegativeButton("Hủy", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface d, int which) {
-                if (!done[0]) {
-                    done[0] = true;
-                    Native.textDone(false, null);
-                }
+                finishText(r, false, null);
             }
         });
         bd.setOnCancelListener(new DialogInterface.OnCancelListener() {
             public void onCancel(DialogInterface d) {
-                if (!done[0]) {
-                    done[0] = true;
-                    Native.textDone(false, null);
-                }
+                finishText(r, false, null);
             }
         });
         final AlertDialog d = bd.create();
@@ -218,18 +282,8 @@ public final class MainActivity extends Activity {
         ed.requestFocus();
         dialog = d;
         dialogEdit = ed;
-        Log.i("Army2Coffee", "[app] hop nhap chu kieu " + cons);
-    }
-
-    /** tu kiem thu: dien chu vao hop dang mo roi bam OK */
-    boolean answerDialog(String s) {
-        AlertDialog d = dialog;
-        if (d == null || !d.isShowing() || dialogEdit == null) {
-            return false;
-        }
-        dialogEdit.setText(s);
-        d.getButton(DialogInterface.BUTTON_POSITIVE).performClick();
-        return true;
+        dialogReq = r;
+        Log.i(TAG, "[app] hop nhap chu kieu " + r.cons);
     }
 
     // ------------------------------------------------------------------ khoi dong game (sau khi biet kich thuoc)
@@ -241,14 +295,11 @@ public final class MainActivity extends Activity {
         File data = new File(getFilesDir(), "rms");
         data.mkdirs();
         if (!Native.start(getAssets(), data.getAbsolutePath(), gW, gH)) {
-            Log.e("Army2Coffee", "khong khoi dong duoc runtime");
+            Log.e(TAG, "khong khoi dong duoc runtime");
             return;
         }
         started = true;
         view.makeFrame();
-        if (getIntent() != null && getIntent().getBooleanExtra("autotest", false)) {
-            new Thread(new AutoTest(this), "autotest").start();
-        }
     }
 
     // ================================================================== man hinh + ban phim ao
@@ -345,6 +396,8 @@ public final class MainActivity extends Activity {
                 gh -= gh % 2;
                 gh = Math.max(360, Math.min(600, gh));
                 act.startGame(gh);
+            } else if (frame == null) {
+                makeFrame();   // activity moi (Android tao lai) gan vao game dang chay
             }
             layout(w, h);
         }
@@ -366,6 +419,25 @@ public final class MainActivity extends Activity {
             int x = (w - cw) / 2, y = (ah - ch) / 2;
             canvasR.set(x, y, x + cw, y + ch);
             arrow.setStrokeWidth(Math.max(2f, w / 160f));
+            post(new Runnable() {
+                public void run() {
+                    logLayout();
+                }
+            });
+        }
+
+        String lastLayout;
+
+        void logLayout() {
+            int[] o = new int[2];
+            getLocationOnScreen(o);
+            String l = "[bocuc] canvas " + (o[0] + canvasR.left) + " " + (o[1] + canvasR.top) + " " + (o[0] + canvasR.right) + " "
+                    + (o[1] + canvasR.bottom) + " pad " + (o[0] + padR.left) + " " + (o[1] + padR.top) + " " + (o[0] + padR.right) + " "
+                    + (o[1] + padR.bottom) + " game " + gW + " " + gH;
+            if (!l.equals(lastLayout)) {
+                lastLayout = l;
+                Log.i(TAG, l);
+            }
         }
 
         @Override
@@ -559,124 +631,6 @@ public final class MainActivity extends Activity {
                 default:
                     return true;
             }
-        }
-    }
-
-    // ================================================================== tu kiem thu (CI: adb ... --ez autotest true)
-    static final class AutoTest implements Runnable {
-        final MainActivity act;
-        final Handler ui = new Handler(Looper.getMainLooper());
-
-        AutoTest(MainActivity a) {
-            act = a;
-        }
-
-        static void sleep(long ms) {
-            try {
-                Thread.sleep(ms);
-            } catch (InterruptedException e) {
-            }
-        }
-
-        static void key(int c) {
-            Native.post(Native.KEY_PRESS, c, 0);
-            sleep(100);
-            Native.post(Native.KEY_RELEASE, c, 0);
-        }
-
-        static void tap(int x, int y) {
-            Native.post(Native.POINTER_PRESS, x, y);
-            sleep(90);
-            Native.post(Native.POINTER_RELEASE, x, y);
-        }
-
-        /** thu muc ket qua tu kiem thu: bo nho ngoai cua app (adb pull duoc), khong co thi filesDir */
-        File outDir() {
-            File d = act.getExternalFilesDir(null);
-            return d != null ? d : act.getFilesDir();
-        }
-
-        void shot(String name) {
-            try {
-                Bitmap b = Bitmap.createBitmap(gW, gH, Bitmap.Config.ARGB_8888);
-                int f = Native.copyFrame(b, -1);
-                File o = new File(outDir(), name + ".png");
-                FileOutputStream out = new FileOutputStream(o);
-                b.compress(Bitmap.CompressFormat.PNG, 100, out);
-                out.close();
-                Log.i("Army2Coffee", "[autotest] " + name + " khung " + f);
-            } catch (Throwable e) {
-                Log.w("Army2Coffee", "[autotest] chup loi " + e);
-            }
-        }
-
-        boolean answer(final String s) {
-            final boolean[] ok = {false};
-            final java.util.concurrent.CountDownLatch done = new java.util.concurrent.CountDownLatch(1);
-            ui.post(new Runnable() {
-                public void run() {
-                    ok[0] = act.answerDialog(s);
-                    done.countDown();
-                }
-            });
-            try {
-                done.await(3, java.util.concurrent.TimeUnit.SECONDS);
-            } catch (InterruptedException e) {
-            }
-            Log.i("Army2Coffee", "[autotest] tra loi hop nhap chu '" + s + "': " + (ok[0] ? "ok" : "KHONG THAY HOP"));
-            return ok[0];
-        }
-
-        public void run() {
-            int[][] steps = {{7000, 0}, {300, -5}, {3500, 0}, {300, -6}, {5000, 0}, {300, -7}, {5000, 0}};
-            String[] names = {"t1_cauhinh", null, "t2_amthanh", null, "t3_gioithieu", null, "t4_dangnhap"};
-            for (int i = 0; i < steps.length; i++) {
-                sleep(steps[i][0]);
-                if (steps[i][1] != 0) {
-                    key(steps[i][1]);
-                }
-                if (names[i] != null) {
-                    shot(names[i]);
-                }
-            }
-            int f0 = Native.frames();
-            sleep(10000);
-            int f1 = Native.frames();
-            Runtime rt = Runtime.getRuntime();
-            String res = "fps " + (f1 - f0) / 10.0 + "\nram java " + (rt.totalMemory() - rt.freeMemory()) / (1 << 20) + " MB\n"
-                    + Native.gcStats() + "\n";
-            try {
-                FileOutputStream o = new FileOutputStream(new File(outDir(), "autotest.txt"));
-                o.write(res.getBytes("UTF-8"));
-                o.close();
-            } catch (Throwable e) {
-            }
-            Log.i("Army2Coffee", "[autotest] toc do " + res.replace('\n', ' '));
-            // o TEN -> hop nhap chu Android
-            tap(188, gH - 124);
-            sleep(3000);
-            Native.post(Native.GC, 0, 0);
-            sleep(2000);
-            answer("tbot6");
-            sleep(2500);
-            shot("t6_da_nhap_ten");
-            // o MAT KHAU
-            tap(188, gH - 89);
-            sleep(1500);
-            final boolean[] showing = {false};
-            ui.post(new Runnable() {
-                public void run() {
-                    showing[0] = act.dialog != null && act.dialog.isShowing();
-                }
-            });
-            sleep(500);
-            if (!showing[0]) {
-                tap(188, gH - 89);
-            }
-            sleep(2500);
-            Native.post(Native.GC, 0, 0);
-            sleep(1500);
-            Log.i("Army2Coffee", "[autotest] xong");
         }
     }
 }

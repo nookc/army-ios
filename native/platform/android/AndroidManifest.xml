@@ -16,11 +16,11 @@
         android:largeHeap="true">
         <activity
             android:name=".MainActivity"
-            android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|keyboard|keyboardHidden|navigation|uiMode|density|fontScale|locale|layoutDirection"
+            android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|keyboard|keyboardHidden|navigation|uiMode|density|fontScale|locale|layoutDirection|mcc|mnc|touchscreen|colorMode"
             android:exported="true"
             android:launchMode="singleTask"
             android:screenOrientation="portrait"
-            android:theme="@android:style/Theme.Black.NoTitleBar"
+            android:theme="@android:style/Theme.Material.NoActionBar"
             android:windowSoftInputMode="adjustNothing|stateHidden">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

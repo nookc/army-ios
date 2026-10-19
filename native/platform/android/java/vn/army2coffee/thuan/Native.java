@@ -39,17 +39,8 @@ final class Native {
     static volatile MainActivity act;
 
     // ------------------------------------------------------------------ goi tu C (luong game)
-    static void showTextBox(final String title, final String text, final int max, final int cons) {
-        final MainActivity a = act;
-        if (a == null) {
-            textDone(false, null);
-            return;
-        }
-        a.runOnUiThread(new Runnable() {
-            public void run() {
-                a.showTextBox(title, text, max, cons);
-            }
-        });
+    static void showTextBox(String title, String text, int max, int cons) {
+        MainActivity.requestTextBox(title, text, max, cons);
     }
 
     static int soundCreate(byte[] data, String type) {

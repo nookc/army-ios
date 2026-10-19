@@ -47,16 +47,7 @@ jobs:
           profile: pixel_4
           disable-animations: true
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -no-snapshot
-          script: |
-            mkdir -p native/build/android/test
-            adb install -r native/build/android/Army2Coffee-test.apk
-            adb logcat -c
-            adb shell am start -n vn.army2coffee.thuan/.MainActivity --ez autotest true
-            sleep 75
-            adb exec-out screencap -p > native/build/android/test/man_hinh_android.png
-            adb pull /sdcard/Android/data/vn.army2coffee.thuan/files native/build/android/test/files || true
-            sh -c 'adb shell pidof vn.army2coffee.thuan > native/build/android/test/trang_thai_app.txt || echo "APP DA SAP / THOAT" > native/build/android/test/trang_thai_app.txt'
-            sh -c 'adb logcat -d > native/build/android/test/logcat.txt'
+          script: bash native/tools/android_ci_test.sh
 
       - name: Day APK, anh chup, log len nhanh ban-build-android
         if: always()

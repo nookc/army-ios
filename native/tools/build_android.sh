@@ -43,7 +43,8 @@ head -3 "$B/gen/stats.txt"
 
 # ---- ma may cho tung ABI -> libarmy2.so
 TC=$NDK/toolchains/llvm/prebuilt/linux-x86_64
-DEFS="-DGC_THREADS -DTHREAD_LOCAL_ALLOC -DGC_BUILTIN_ATOMIC -DNO_EXECUTE_PERMISSION"
+# -fsigned-char: char co dau nhu x86 va iOS arm64 (Android ARM mac dinh char khong dau)
+DEFS="-fsigned-char -DGC_THREADS -DTHREAD_LOCAL_ALLOC -DGC_BUILTIN_ATOMIC -DNO_EXECUTE_PERMISSION"
 INC="-I$N/runtime -I$B/gen -I$TP/bdwgc/include -I$TP/stb"
 for ABI in $ABIS; do
   case $ABI in
