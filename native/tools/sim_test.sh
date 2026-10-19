@@ -43,7 +43,7 @@ for i in $(seq 1 110); do
 done
 sleep 3
 xcrun simctl io "$DEV" screenshot "$OUT/man_hinh_simulator.png" || true
-if xcrun simctl spawn "$DEV" launchctl list 2>/dev/null | grep -q "$BID"; then
+if pgrep -f "Army2Coffee.app/Army2Coffee" >/dev/null 2>&1; then
   echo "app con chay" > "$OUT/trang_thai_app.txt"
 else
   echo "APP DA SAP / THOAT" > "$OUT/trang_thai_app.txt"
