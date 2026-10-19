@@ -198,6 +198,9 @@ public final class Ui {
                     case Disp.EV_SERIAL:
                         runSerial();
                         break;
+                    case Disp.EV_GC:
+                        System.gc();
+                        break;
                     case Disp.EV_SIZE:
                         if (d != null && Display.isCanvas(d)) {
                             Display.sizeCanvas(d, ev[1], ev[2]);

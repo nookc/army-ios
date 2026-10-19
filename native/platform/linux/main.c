@@ -60,6 +60,11 @@ void plat_log(const char *s) {
     fprintf(stderr, "%s\n", s);
 }
 
+void plat_log_raw(const char *s) {
+    size_t n = strlen(s);
+    if (write(2, s, n) < 0 || write(2, "\n", 1) < 0) return;
+}
+
 static void msleep(int ms) {
     struct timespec ts = {ms / 1000, (long)(ms % 1000) * 1000000L};
     while (nanosleep(&ts, &ts) != 0 && errno == EINTR) {

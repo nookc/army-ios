@@ -14,6 +14,7 @@ public final class Disp {
     public static final int EV_KEY_REPEAT = 10;
     public static final int EV_PAUSE = 11;
     public static final int EV_RESUME = 12;
+    public static final int EV_GC = 13; /* tu kiem thu: goi GC tren luong su kien */
 
     private Disp() {
     }

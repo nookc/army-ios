@@ -16,13 +16,14 @@
 #define THR(o) ((struct O_java_lang_Throwable *)(o))
 
 /* ============================================================ log */
+#include "platform.h"
 void rt_log(const char *fmt, ...) {
+    char b[1024];
     va_list ap;
     va_start(ap, fmt);
-    vfprintf(stderr, fmt, ap);
+    vsnprintf(b, sizeof b, fmt, ap);
     va_end(ap);
-    fputc('\n', stderr);
-    fflush(stderr);
+    plat_log(b); /* iOS: vao Documents/log.txt; Linux: stderr */
 }
 
 /* ============================================================ luong / ngu canh */
@@ -708,7 +709,65 @@ int rt_attach_thread(jctx *ctx) {
 /* ============================================================ khoi dong */
 static jctx *g_main;
 
+/* canh bao / loi cua GC: ghi thang (khong khoa, khong NSLog) vi co the dang dung "the gioi" */
+static void GC_CALLBACK gc_warn(char *msg, GC_word arg) {
+    char f[256], b[512];
+    snprintf(f, sizeof f, "[gc] %s", msg);
+    snprintf(b, sizeof b, f, (unsigned long)arg);
+    plat_log_raw(b);
+}
+
+static void GC_CALLBACK gc_abort(const char *msg) {
+    char b[512];
+    snprintf(b, sizeof b, "[gc] LOI NANG (abort): %s", msg ? msg : "?");
+    plat_log_raw(b);
+}
+
+#ifdef __APPLE__
+#include <mach-o/getsect.h>
+#include <mach-o/ldsyms.h>
+/* Chi quet du lieu tinh cua chinh app. Mac dinh Boehm GC dang ky __DATA cua MOI thu vien he thong
+ * (hang tram cai, ~3 vung moi cai) lam goc; tren iPhone that, mo ban phim nap them rat nhieu thu vien
+ * -> vuot gioi han 2048 vung goc -> GC abort ("Too many root sets") = van app. Runtime khong de con tro
+ * vao heap GC trong bo nho cua thu vien he thong (moi du lieu chuyen sang ObjC/CF deu duoc chep). */
+static uintptr_t g_roots_lo, g_roots_hi;
+static unsigned g_roots_seen, g_roots_kept;
+static int GC_CALLBACK rt_roots_filter(const char *name, void *start, size_t size) {
+    (void)name;
+    (void)size;
+    uintptr_t a = (uintptr_t)start;
+    g_roots_seen++;
+    if (a >= g_roots_lo && a < g_roots_hi) {
+        g_roots_kept++;
+        return 1;
+    }
+    return 0;
+}
+#endif
+
+void rt_gc_roots_stats(unsigned *seen, unsigned *kept) {
+#ifdef __APPLE__
+    *seen = g_roots_seen;
+    *kept = g_roots_kept;
+#else
+    *seen = *kept = 0;
+#endif
+}
+
 void rt_init(void) {
+    GC_set_warn_proc(gc_warn);
+    GC_set_abort_func(gc_abort);
+#ifdef __APPLE__
+    {
+        unsigned long sz = 0;
+        uint8_t *p = getsegmentdata(&_mh_execute_header, "__DATA", &sz);
+        if (p && sz) {
+            g_roots_lo = (uintptr_t)p;
+            g_roots_hi = (uintptr_t)p + sz;
+            GC_register_has_static_roots_callback(rt_roots_filter);
+        }
+    }
+#endif
     GC_INIT();
     GC_allow_register_threads();
     init_prim_arrays();

@@ -16,6 +16,8 @@
 #include <signal.h>
 #include <time.h>
 #include <mach/mach.h>
+#include <mach-o/dyld.h>
+#include <sys/ucontext.h>
 #include "platform.h"
 #import "PadView.h"
 
@@ -27,6 +29,7 @@ static NSString *gDataDir;
 static NSString *gJar;
 
 @class GameVC;
+static void log_roots(const char *when);
 static __weak GameVC *gVC;
 
 /* ============================================================ man hinh */
@@ -182,7 +185,11 @@ static CGImageRef make_image(const uint32_t *px, int w, int h) {
         j2n_text_done(1, s.UTF8String);
     }]];
     [_pad releaseAll];
+    plat_log([[NSString stringWithFormat:@"[app] hop nhap chu (kieu %d, toi da %d)", cons, max] UTF8String]);
     [self presentViewController:a animated:YES completion:nil];
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 3 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+        log_roots("sau khi mo ban phim");
+    });
 }
 @end
 
@@ -243,10 +250,23 @@ static char gDataDirC[1024], gJarC[1024];
 const char *plat_data_dir(void) { return gDataDirC; }
 const char *plat_jar_path(void) { return gJarC[0] ? gJarC : NULL; }
 
-/* nhat ky ra Documents/log.txt (xem trong app Tep: "Tren iPhone" > Army 2 Coffee) */
+/* nhat ky ra Documents/log.txt, loi sap ra Documents/crash.txt (xem trong app Tep: "Tren iPhone" > Army2 Thuan) */
 static FILE *gLog;
 static pthread_mutex_t gLogMu = PTHREAD_MUTEX_INITIALIZER;
-static int gCrashFd = -1;
+static int gCrashFd = -1, gLogFd = -1;
+static uintptr_t gImgBase;
+static char gImgInfo[200];
+
+static void raw_write(int fd, const char *s) {
+    if (fd < 0 || !s) return;
+    size_t n = strlen(s);
+    while (n > 0) {
+        ssize_t w = write(fd, s, n);
+        if (w <= 0) return;
+        s += w;
+        n -= (size_t)w;
+    }
+}
 
 static void log_open(void) {
     NSString *docs = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES).firstObject;
@@ -258,8 +278,14 @@ static void log_open(void) {
         [NSFileManager.defaultManager moveItemAtPath:p toPath:old error:nil];
     }
     gLog = fopen(p.fileSystemRepresentation, "a");
+    gLogFd = open(p.fileSystemRepresentation, O_WRONLY | O_CREAT | O_APPEND, 0644);
     NSString *c = [docs stringByAppendingPathComponent:@"crash.txt"];
     gCrashFd = open(c.fileSystemRepresentation, O_WRONLY | O_CREAT | O_APPEND, 0644);
+    gImgBase = (uintptr_t)_dyld_get_image_header(0);
+    snprintf(gImgInfo, sizeof gImgInfo, "app %s build %s: base=0x%lx slide=0x%lx",
+             [[NSBundle.mainBundle objectForInfoDictionaryKey:@"CFBundleShortVersionString"] UTF8String] ?: "?",
+             [[NSBundle.mainBundle objectForInfoDictionaryKey:@"CFBundleVersion"] UTF8String] ?: "?",
+             (unsigned long)gImgBase, (unsigned long)_dyld_get_image_vmaddr_slide(0));
 }
 
 void plat_log(const char *s) {
@@ -275,23 +301,64 @@ void plat_log(const char *s) {
     pthread_mutex_unlock(&gLogMu);
 }
 
+/* khong khoa, khong cap phat: dung duoc trong GC / khi sap */
+void plat_log_raw(const char *s) {
+    raw_write(2, s);
+    raw_write(2, "\n");
+    raw_write(gLogFd, s);
+    raw_write(gLogFd, "\n");
+}
+
 static struct sigaction gOld[32];
 
-static void on_crash(int sig, siginfo_t *si, void *uc) {
-    if (gCrashFd >= 0) {
-        char b[128];
-        time_t now = time(NULL);
-        int n = snprintf(b, sizeof b, "\n=== SAP: tin hieu %d dia chi %p luc %ld\n", sig, si ? si->si_addr : 0, (long)now);
-        write(gCrashFd, b, (size_t)n);
-        void *bt[64];
-        int k = backtrace(bt, 64);
-        backtrace_symbols_fd(bt, k, gCrashFd);
+static void crash_line(const char *s) {
+    raw_write(gCrashFd, s);
+    raw_write(gLogFd, s);
+}
+
+static void on_crash(int sig, siginfo_t *si, void *ucv) {
+    char b[512];
+    uintptr_t pc = 0, lr = 0, sp = 0, fp = 0;
+#if defined(__arm64__)
+    ucontext_t *uc = (ucontext_t *)ucv;
+    if (uc && uc->uc_mcontext) {
+        pc = (uintptr_t)arm_thread_state64_get_pc(uc->uc_mcontext->__ss);
+        lr = (uintptr_t)arm_thread_state64_get_lr(uc->uc_mcontext->__ss);
+        sp = (uintptr_t)arm_thread_state64_get_sp(uc->uc_mcontext->__ss);
+        fp = (uintptr_t)arm_thread_state64_get_fp(uc->uc_mcontext->__ss);
     }
+#endif
+    snprintf(b, sizeof b, "\n=== SAP: tin hieu %d ma %d dia chi %p luc %ld, luong %s\n%s\npc=0x%lx (app+0x%lx) lr=0x%lx (app+0x%lx) sp=0x%lx\n",
+             sig, si ? si->si_code : 0, si ? si->si_addr : 0, (long)time(NULL),
+             pthread_main_np() ? "chinh" : "phu", gImgInfo, (unsigned long)pc, (unsigned long)(pc - gImgBase),
+             (unsigned long)lr, (unsigned long)(lr - gImgBase), (unsigned long)sp);
+    crash_line(b);
+    /* chuoi khung (frame pointer) cua doan ma bi loi */
+    uintptr_t hi = (uintptr_t)pthread_get_stackaddr_np(pthread_self());
+    uintptr_t lo = hi - pthread_get_stacksize_np(pthread_self());
+    for (int i = 0; i < 40 && fp >= lo && fp + 16 <= hi && (fp & 7) == 0; i++) {
+        uintptr_t next = ((uintptr_t *)fp)[0], ret = ((uintptr_t *)fp)[1];
+        snprintf(b, sizeof b, "  #%d 0x%lx (app+0x%lx)\n", i, (unsigned long)ret, (unsigned long)(ret - gImgBase));
+        crash_line(b);
+        if (next <= fp) break;
+        fp = next;
+    }
+    void *bt[64];
+    int k = backtrace(bt, 64);
+    if (gCrashFd >= 0) backtrace_symbols_fd(bt, k, gCrashFd);
+    if (gLogFd >= 0) backtrace_symbols_fd(bt, k, gLogFd);
     sigaction(sig, &gOld[sig], NULL);
     raise(sig);
 }
 
+static void on_objc_exception(NSException *e) {
+    NSString *s = [NSString stringWithFormat:@"\n=== NGOAI LE ObjC %@: %@\n%@\n", e.name, e.reason,
+                                             [e.callStackSymbols componentsJoinedByString:@"\n"]];
+    crash_line(s.UTF8String);
+}
+
 static void crash_install(void) {
+    NSSetUncaughtExceptionHandler(&on_objc_exception);
     int sigs[] = {SIGSEGV, SIGBUS, SIGILL, SIGFPE, SIGABRT, SIGTRAP};
     for (size_t i = 0; i < sizeof sigs / sizeof sigs[0]; i++) {
         struct sigaction sa;
@@ -300,6 +367,16 @@ static void crash_install(void) {
         sa.sa_flags = SA_SIGINFO | SA_ONSTACK;
         sigaction(sigs[i], &sa, &gOld[sigs[i]]);
     }
+}
+
+/* so thu vien da nap + so vung du lieu GC xet (sau khi mo ban phim iOS nap them rat nhieu thu vien) */
+static void log_roots(const char *when) {
+    unsigned seen = 0, kept = 0;
+    rt_gc_roots_stats(&seen, &kept);
+    char b[256];
+    snprintf(b, sizeof b, "[gc] %s: %u thu vien da nap, GC xet %u vung du lieu (giu %u cua app, bo %u cua he thong)",
+             when, _dyld_image_count(), seen, kept, seen - kept);
+    plat_log(b);
 }
 
 /* ---- am thanh: WAV (AVAudioPlayer). MIDI da duoc runtime/midi.c tong hop san thanh WAV */
@@ -374,6 +451,44 @@ static void save_png(NSString *name) {
     NSLog(@"[autotest] %@ khung %d", name, f);
 }
 
+/* chup ca cua so UIKit (gom hop nhap chu cua iOS) */
+static void save_window_png(NSString *name) {
+    dispatch_sync(dispatch_get_main_queue(), ^{
+        UIWindow *w = gVC.view.window;
+        if (!w) return;
+        UIGraphicsImageRenderer *r = [[UIGraphicsImageRenderer alloc] initWithBounds:w.bounds];
+        UIImage *img = [r imageWithActions:^(UIGraphicsImageRendererContext *ctx) {
+            [w drawViewHierarchyInRect:w.bounds afterScreenUpdates:NO];
+        }];
+        NSString *p = [gDataDir stringByAppendingPathComponent:[name stringByAppendingString:@".png"]];
+        [UIImagePNGRepresentation(img) writeToFile:p atomically:YES];
+        NSLog(@"[autotest] %@ (cua so)", name);
+    });
+}
+
+/* dien chu vao hop nhap dang mo roi bam OK (nhu nguoi dung) */
+static BOOL autotest_answer(NSString *text) {
+    __block BOOL ok = NO;
+    dispatch_sync(dispatch_get_main_queue(), ^{
+        UIViewController *p = gVC.presentedViewController;
+        if ([p isKindOfClass:UIAlertController.class]) {
+            UIAlertController *a = (UIAlertController *)p;
+            a.textFields.firstObject.text = text;
+            [gVC dismissViewControllerAnimated:YES completion:nil];
+            j2n_text_done(1, text.UTF8String);
+            ok = YES;
+        }
+    });
+    NSLog(@"[autotest] tra loi hop nhap chu '%@': %@", text, ok ? @"ok" : @"KHONG THAY HOP");
+    return ok;
+}
+
+static void tap(int x, int y) {
+    j2n_post(J2N_POINTER_PRESS, x, y);
+    usleep(90000);
+    j2n_post(J2N_POINTER_RELEASE, x, y);
+}
+
 static void autotest(void) {
     dispatch_async(dispatch_get_global_queue(QOS_CLASS_USER_INITIATED, 0), ^{
         struct { int ms; int key; const char *shot; } steps[] = {
@@ -389,17 +504,7 @@ static void autotest(void) {
             }
             if (steps[i].shot) save_png([NSString stringWithUTF8String:steps[i].shot]);
         }
-        /* go chu vao o ten (phim ky tu nhu ban phim QWERTY) */
-        const char *name = "tbot6";
-        for (const char *c = name; *c; c++) {
-            j2n_post(J2N_KEY_PRESS, *c, 0);
-            usleep(80000);
-            j2n_post(J2N_KEY_RELEASE, *c, 0);
-            usleep(80000);
-        }
-        usleep(1500000);
-        save_png(@"t5_go_ten");
-        /* do toc do khi Canvas dang hien (truoc khi mo hop nhap chu): dem khung trong 10 giay */
+        /* do toc do khi Canvas dang hien: dem khung trong 10 giay */
         int f0 = j2n_frames();
         usleep(10000000);
         int f1 = j2n_frames();
@@ -410,15 +515,32 @@ static void autotest(void) {
         NSString *r = [NSString stringWithFormat:@"fps %.1f\nram %ld MB\n", (f1 - f0) / 10.0, ram];
         [r writeToFile:[gDataDir stringByAppendingPathComponent:@"autotest.txt"] atomically:YES encoding:NSUTF8StringEncoding error:nil];
         NSLog(@"[autotest] toc do %@", r);
-        /* cham 2 lan vao o mat khau -> game mo TextBox -> hop nhap chu cua iOS (anh simctl o cuoi) */
-        for (int k = 0; k < 2; k++) {
-            j2n_post(J2N_POINTER_PRESS, 188, gH - 89);
-            usleep(80000);
-            j2n_post(J2N_POINTER_RELEASE, 188, gH - 89);
-            usleep(700000);
+        log_roots("truoc khi mo ban phim");
+
+        /* 1) cham 1 lan vao o TEN nhu nguoi dung -> hop nhap chu iOS (ban phim thuong) */
+        tap(188, gH - 124);
+        usleep(3000000);
+        save_window_png(@"t5_hop_nhap_ten");
+        j2n_post(J2N_GC, 0, 0); /* GC khi da nap thu vien ban phim */
+        usleep(3500000);
+        autotest_answer(@"tbot6");
+        usleep(2500000);
+        save_png(@"t6_da_nhap_ten");
+
+        /* 2) cham vao o MAT KHAU (1 lan, chua mo thi cham lan 2) -> hop nhap mat khau */
+        tap(188, gH - 89);
+        usleep(1500000);
+        __block BOOL shown = NO;
+        dispatch_sync(dispatch_get_main_queue(), ^{ shown = gVC.presentedViewController != nil; });
+        if (!shown) {
+            tap(188, gH - 89);
+            usleep(1500000);
         }
         usleep(1500000);
-        save_png(@"t6_cham_mat_khau");
+        save_window_png(@"t7_hop_nhap_mat_khau");
+        j2n_post(J2N_GC, 0, 0);
+        usleep(2000000);
+        log_roots("sau 2 hop nhap chu");
         NSLog(@"[autotest] xong");
     });
 }
@@ -466,8 +588,9 @@ static void autotest(void) {
                [NSBundle.mainBundle objectForInfoDictionaryKey:@"CFBundleShortVersionString"],
                [NSBundle.mainBundle objectForInfoDictionaryKey:@"CFBundleVersion"], gW, gH,
                UIDevice.currentDevice.systemVersion] UTF8String]);
-    j2n_start("coreLG.TerrainMidlet", gW, gH);
     crash_install();
+    j2n_start("coreLG.TerrainMidlet", gW, gH);
+    log_roots("khoi dong");
     if ([NSProcessInfo.processInfo.arguments containsObject:@"-autotest"]) autotest();
     return YES;
 }

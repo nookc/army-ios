@@ -30,6 +30,8 @@ void plat_sound_stop(int h);
 void plat_sound_close(int h);
 void plat_sound_volume(int h, int level);
 void plat_log(const char *s);
+/* ghi log khan cap: chi write(), khong khoa/khong cap phat (dung trong GC, tin hieu loi) */
+void plat_log_raw(const char *s);
 
 /* ---------------- runtime cung cap ---------------- */
 enum {
@@ -40,6 +42,7 @@ enum {
     J2N_POINTER_RELEASE = 5,
     J2N_SIZE = 9,
     J2N_KEY_REPEAT = 10,
+    J2N_GC = 13, /* tu kiem thu: chay GC tren luong su kien Java */
 };
 /* khoi dong game tren luong moi; w,h = kich thuoc Canvas */
 int j2n_start(const char *midlet_class, int w, int h);
@@ -48,6 +51,8 @@ void j2n_text_done(int ok, const char *utf8);
 /* chup khung hinh hien tai (cho kiem thu): copy vao out (w*h) neu kich thuoc khop, tra ve so khung da ve */
 int j2n_snapshot(uint32_t *out, int w, int h);
 int j2n_frames(void);
+/* so vung du lieu tinh GC da xet / da nhan lam goc (iOS: chi giu cua app) */
+void rt_gc_roots_stats(unsigned *seen, unsigned *kept);
 
 #ifdef __cplusplus
 }
