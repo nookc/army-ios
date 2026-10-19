@@ -27,6 +27,15 @@ Mỗi lần push lên nhánh `main` cũng tự build bản `thuong`.
 
 Thay file `Bundled/Army250.jar` rồi push. App mới sẽ tự cập nhật client khi mở, vẫn giữ đăng nhập đã lưu.
 
+Client hiện tại (gửi phiên bản `2.3.0+cx+sl+ka+v250+bang+hp`, hiện 2.5.0) có thêm:
+
+- 4 phòng boss bậc cao: T-Rex Cao Thủ (băng), T-Rex Chiến Thần (lửa), T-Rex Thách Đấu (rồng băng), Bạo Chúa Âm Minh (rồng lửa); chiến trường băng có tuyết rơi.
+- 5 hộp quà Tinh Anh → Âm Minh có hiệu ứng động trong rương (Âm Minh có rồng sương bay vòng).
+- HP thật khi máu nhân vật trên 32.767 (không còn hiện âm / mất thanh máu đầu trận).
+- Quả cầu lửa + rồng đồ Thách Đấu vẫn hiện khi mặc cải trang.
+
+Cần server Army2.5.0 mới (SerArmy2.jar cùng đợt); client cũ vẫn chơi được nhưng bị nhắc cập nhật khi vào 4 phòng boss mới.
+
 ## Bản "thuần" (không giả lập): iOS, Android, Windows
 
 Thư mục `native/` dịch sẵn client J2ME (`Bundled/Army250.jar`) sang C rồi sang mã máy (`tools/j2c.py` + runtime C + Boehm GC), không cần máy ảo Java nên chạy mượt và nhẹ hơn nhiều.
