@@ -12,6 +12,7 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.media.AudioManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -29,6 +30,7 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.TextView;
 
@@ -53,6 +55,7 @@ public final class MainActivity extends Activity {
     protected void onCreate(Bundle b) {
         super.onCreate(b);
         Native.act = this;
+        setVolumeControlStream(AudioManager.STREAM_MUSIC);   // phim am luong chinh tieng game
         Window w = getWindow();
         w.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         if (Build.VERSION.SDK_INT >= 21) {
@@ -205,6 +208,17 @@ public final class MainActivity extends Activity {
         }
     }
 
+    /** an ban phim Android (no khong tu an khi hop dong, se che ban phim ao cua game) */
+    void hideIme(View v) {
+        try {
+            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+            if (imm != null && v != null && v.getWindowToken() != null) {
+                imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+            }
+        } catch (Throwable e) {
+        }
+    }
+
     static void finishText(TextReq r, boolean ok, String text) {
         if (pending != r) {
             return;   // da tra loi roi / da co hop moi thay the
@@ -249,11 +263,13 @@ public final class MainActivity extends Activity {
         bd.setView(ed);
         bd.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface d, int which) {
+                hideIme(ed);
                 finishText(r, true, ed.getText().toString());
             }
         });
         bd.setNegativeButton("Hủy", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface d, int which) {
+                hideIme(ed);
                 finishText(r, false, null);
             }
         });
@@ -263,6 +279,16 @@ public final class MainActivity extends Activity {
             }
         });
         final AlertDialog d = bd.create();
+        d.setCanceledOnTouchOutside(false);   // cham nham ra ngoai khong mat chu dang go
+        d.setOnDismissListener(new DialogInterface.OnDismissListener() {
+            public void onDismiss(DialogInterface di) {
+                view.post(new Runnable() {
+                    public void run() {
+                        hideIme(view);
+                    }
+                });
+            }
+        });
         ed.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             public boolean onEditorAction(TextView v, int actionId, KeyEvent ev) {
                 if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_GO
@@ -413,6 +439,7 @@ public final class MainActivity extends Activity {
             }
             int ph = padHeight(w, h);
             padR.set(0, h - ph, w, h);
+            padDirty = true;
             int ah = h - ph;
             float s = Math.min(w / (float) gW, ah / (float) gH);
             int cw = Math.round(gW * s), ch = Math.round(gH * s);
@@ -449,11 +476,29 @@ public final class MainActivity extends Activity {
             drawPad(c);
         }
 
+        Bitmap padBmp;
+        boolean padDirty = true;
+
         void drawPad(Canvas c) {
             int w = padR.width(), h = padR.height();
             if (w <= 0 || h <= 0) {
                 return;
             }
+            if (padBmp == null || padBmp.getWidth() != w || padBmp.getHeight() != h) {
+                padBmp = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+                padDirty = true;
+            }
+            if (padDirty) {
+                padDirty = false;
+                Canvas pc = new Canvas(padBmp);
+                pc.translate(-padR.left, -padR.top);
+                drawPadCells(pc);
+            }
+            c.drawBitmap(padBmp, padR.left, padR.top, null);
+        }
+
+        void drawPadCells(Canvas c) {
+            int w = padR.width(), h = padR.height();
             int widest = 1;
             for (Bitmap b : labels) {
                 if (b != null && b.getWidth() > widest) {
@@ -529,6 +574,7 @@ public final class MainActivity extends Activity {
         void press(int i) {
             if (++cellCount[i] == 1) {
                 performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
+                padDirty = true;
                 invalidate(padR);
             }
             keyDown(i);
@@ -541,6 +587,7 @@ public final class MainActivity extends Activity {
             cellCount[i]--;
             keyUp(i);
             if (cellCount[i] == 0) {
+                padDirty = true;
                 invalidate(padR);
             }
         }
@@ -568,6 +615,7 @@ public final class MainActivity extends Activity {
                 canvasPtr = -1;
                 Native.post(Native.POINTER_RELEASE, 0, 0);
             }
+            padDirty = true;
             invalidate();
         }
 

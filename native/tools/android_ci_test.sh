@@ -87,8 +87,10 @@ adb shell input text abc; sleep 1
 adb shell input keyevent 3; sleep 3
 adb shell am start -W -n $PKG/.MainActivity; sleep 4
 cap b2_hop_hien_lai
-adb shell input keyevent 4; sleep 3     # Back trong hop = Huy
-cap b3_huy_hop
+adb shell input keyevent 4; sleep 2     # Back lan 1: an ban phim Android
+cap b3_an_ban_phim
+adb shell input keyevent 4; sleep 3     # Back lan 2: Huy hop, ban phim Android phai an
+cap b4_huy_hop
 adb shell settings put global always_finish_activities 0
 
 PID2=$(adb shell pidof $PKG | tr -d '\r')

@@ -67,9 +67,18 @@ static char *wu8(const wchar_t *w) {
     return s;
 }
 
+/* tao thu muc, ca cac thu muc cha con thieu (vd --du-lieu "D:\\Army2\\acc2") */
 static void mkdir_u8(const char *p) {
     wchar_t *w = u8w(p);
-    CreateDirectoryW(w, 0);
+    size_t n = wcslen(w);
+    for (size_t i = 1; i <= n; i++) {
+        if (i < n && w[i] != L'\\' && w[i] != L'/') continue;
+        if (w[i - 1] == L':' || w[i - 1] == L'\\' || w[i - 1] == L'/') continue;   /* "C:", "\\\\may" */
+        wchar_t c = w[i];
+        w[i] = 0;
+        CreateDirectoryW(w, 0);
+        w[i] = c;
+    }
     free(w);
 }
 
