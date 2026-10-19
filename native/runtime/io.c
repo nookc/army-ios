@@ -405,8 +405,10 @@ int32_t N_j2n_Net_connect(jctx *t, jobj host, int32_t port) {
     memset(&hints, 0, sizeof hints);
     hints.ai_family = AF_UNSPEC;
     hints.ai_socktype = SOCK_STREAM;
-#ifdef AI_DEFAULT
-    hints.ai_flags = AI_DEFAULT;     /* iOS: tu tong hop dia chi IPv6 tren mang NAT64 */
+#if defined(__APPLE__) && defined(AI_DEFAULT)
+    /* CHI iOS: tu tong hop dia chi IPv6 tren mang NAT64. Android (bionic) cung dinh nghia AI_DEFAULT nhung
+       getaddrinfo cua no tu choi co AI_V4MAPPED_CFG (EAI_BADFLAGS) -> moi ket noi tren Android deu hong */
+    hints.ai_flags = AI_DEFAULT;
 #endif
     int gr = EAI_AGAIN;
     for (int k = 0; k < 3; k++) {        /* EAI_AGAIN (DNS tam loi / bi ngat): thu lai */
@@ -415,6 +417,10 @@ int32_t N_j2n_Net_connect(jctx *t, jobj host, int32_t port) {
         if (res) {
             freeaddrinfo(res);
             res = 0;
+        }
+        if (gr == EAI_BADFLAGS && hints.ai_flags) {
+            hints.ai_flags = 0;          /* he dieu hanh khong nhan co: thu lai khong co */
+            continue;
         }
         if (gr != EAI_AGAIN) break;
     }
