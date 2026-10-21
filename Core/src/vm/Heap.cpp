@@ -4,6 +4,7 @@
 #include <atomic>
 #include <bit>
 #include <chrono>
+#include <cstdint>
 #include <cstring>
 #include <cstdio>
 #include <cstdlib>
@@ -599,6 +600,18 @@ Heap::Heap(HeapLimits limits) : limits_(limits) {
     const usize hard_limit =
         static_cast<usize>(std::numeric_limits<u32>::max()) - 1U;
     limits_.maximum_objects = std::min(limits_.maximum_objects, hard_limit);
+#if !defined(PHONEME_WEB) && UINTPTR_MAX > 0xFFFFFFFFU
+    // Army2.5.0: the slot table must never move. Host threads (MediaEventService
+    // player polling every 25 ms, LCDUI text/actions, Java thread start) read
+    // slots_ under mutex_ without holding the execution gate, while the bytecode
+    // engine allocates through vm_allocate_* holding only the gate. A push_back
+    // that reallocated slots_ freed the buffer a host thread was reading, which
+    // crashed in Heap::resolve_slot_unlocked (seen right after login, when the
+    // table grows past 65,536 objects). Reserve the whole object limit up front:
+    // it is address space only, pages are touched when slots are first used.
+    constexpr usize kMaximumReservedSlots = 2'000'001U;
+    slots_.reserve(std::min(limits_.maximum_objects, kMaximumReservedSlots));
+#endif
     update_automatic_collection_threshold_unlocked();
 }
 
@@ -933,6 +946,10 @@ Result<ObjectRef> Heap::vm_allocate_object(
         PerformanceCounters::record_failed_allocation();
         return std::unexpected(object_bytes.error());
     }
+    // Army2.5.0: the slot table / free list are shared with host threads that
+    // allocate or resolve through the locked API without the execution gate
+    // (MediaEventService, LCDUI actions). Mutate them under mutex_ as well.
+    std::scoped_lock lock(mutex_);
     auto capacity = ensure_capacity_unlocked(*object_bytes);
     if (!capacity) return std::unexpected(capacity.error());
 
@@ -981,8 +998,13 @@ Result<ObjectRef> Heap::vm_allocate_array(std::string_view class_name,
         PerformanceCounters::record_failed_allocation();
         return std::unexpected(object_bytes.error());
     }
-    auto capacity = ensure_capacity_unlocked(*object_bytes);
-    if (!capacity) return std::unexpected(capacity.error());
+    // Army2.5.0: fail fast before building a large payload, then re-check under
+    // mutex_ (host threads allocate through the locked API without the gate).
+    {
+        std::scoped_lock lock(mutex_);
+        auto capacity = ensure_capacity_unlocked(*object_bytes);
+        if (!capacity) return std::unexpected(capacity.error());
+    }
 
 #if PHONEME_ENABLE_VM_PROFILING
     array_allocation_profiler().record(class_name, length, *object_bytes);
@@ -1004,6 +1026,9 @@ Result<ObjectRef> Heap::vm_allocate_array(std::string_view class_name,
                         element_width);
         }
     }
+    std::scoped_lock lock(mutex_);
+    auto capacity = ensure_capacity_unlocked(*object_bytes);
+    if (!capacity) return std::unexpected(capacity.error());
     Object object {
         .class_name = intern_class_name(class_name),
         .fields = {},
