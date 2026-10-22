@@ -35,6 +35,7 @@ Client hiện tại (gửi phiên bản `2.3.0+cx+sl+ka+v250+bang+hp`, hiện 2.
 - Quả cầu lửa + rồng đồ Thách Đấu vẫn hiện khi mặc cải trang.
 - v8g: nhân vật thứ 12 Hỗn Độn Thú (đạn sao băng nảy như bóng, đường ngắm vẽ cả các lần nảy, bộ trang bị 5 món riêng, cải trang khớp thân); phòng U Minh Giới: boss Hỗn Độn Thú trên map Đảo Bay (đảo bay trên biển dung nham, rồng bay lượn). Client gửi thêm `+nv11+nv12`.
 - v8h: tặng trang bị cho bạn bè (đồ chế tác từ Cao Thủ trở lên, mã bảo vệ, bạn đồng ý mới chuyển), mục MÃ BẢO VỆ trong XEM THÔNG TIN; sảnh chờ boss bậc cao thu nhỏ 70%; Hỗn Độn Thú vẽ lại chắc + nét hơn; boss U Minh Giới mới (cánh lửa xanh / đỏ, trúng đầu / chân). Client gửi thêm `+tang`.
+- v8h-4: kết nối máy chủ theo tên miền `army250new.com` (danh sách máy chủ `http://army250new.com/s`, mặc định `army250new.com:8122`) - trong app không còn địa chỉ IP; đổi VPS chỉ cần trỏ lại tên miền.
 
 Cần server Army2.5.0 mới (SerArmy2.jar cùng đợt); client cũ vẫn chơi được nhưng bị nhắc cập nhật khi vào 4 phòng boss mới.
 
