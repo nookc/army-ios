@@ -33,6 +33,7 @@ Client hiện tại (gửi phiên bản `2.3.0+cx+sl+ka+v250+bang+hp`, hiện 2.
 - 5 hộp quà Tinh Anh → Âm Minh có hiệu ứng động trong rương (Âm Minh có rồng sương bay vòng).
 - HP thật khi máu nhân vật trên 32.767 (không còn hiện âm / mất thanh máu đầu trận).
 - Quả cầu lửa + rồng đồ Thách Đấu vẫn hiện khi mặc cải trang.
+- v8g: nhân vật thứ 12 Hỗn Độn Thú (đạn sao băng nảy như bóng, đường ngắm vẽ cả các lần nảy, bộ trang bị 5 món riêng, cải trang khớp thân); phòng U Minh Giới: boss Hỗn Độn Thú trên map Đảo Bay (đảo bay trên biển dung nham, rồng bay lượn). Client gửi thêm `+nv11+nv12`.
 
 Cần server Army2.5.0 mới (SerArmy2.jar cùng đợt); client cũ vẫn chơi được nhưng bị nhắc cập nhật khi vào 4 phòng boss mới.
 
