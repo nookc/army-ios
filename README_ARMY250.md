@@ -38,6 +38,7 @@ Client hiện tại (gửi phiên bản `2.3.0+cx+sl+ka+v250+bang+hp`, hiện 2.
 - v8h-4: kết nối máy chủ theo tên miền `army250new.com` (danh sách máy chủ `http://army250new.com/s`, mặc định `army250new.com:8122`) - trong app không còn địa chỉ IP; đổi VPS chỉ cần trỏ lại tên miền.
 - v8h-4b: Tốc độ trận x2 .. x10 tăng cả hoạt ảnh (nhân vật, cải trang, boss, hiệu ứng) theo tốc độ, không chỉ đạn / di chuyển.
 - v8h-5: Tốc độ trận xN = cả trận nhanh gấp N, kể cả thao tác của mình (đi, giữ lực, giữ phím ngắm), chữ bay, hiệu ứng vẽ; bấm nhanh phím ngắm vẫn nhích 1 độ.
+- v8h-6: Bỏ hẳn nạp tiền trong app: mục NẠP TIỀN ở menu chính thành MÃ QUÀ TẶNG (mở thẳng ô nhập mã, gửi `giftcode`). ABOUT ME mở thẳng trang web của game, đăng ký biệt đội mở trang lập đội trên web; cả hai không thoát game (link server gửi chỉ dùng nếu cùng tên miền với web).
 
 Cần server Army2.5.0 mới (SerArmy2.jar cùng đợt); client cũ vẫn chơi được nhưng bị nhắc cập nhật khi vào 4 phòng boss mới.
 
