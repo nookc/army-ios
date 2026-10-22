@@ -50,6 +50,17 @@
 #include "PimNatives.hpp"
 #include "AmmsNatives.hpp"
 
+#include <cstdint>
+
+#if defined(__APPLE__)
+// Army250 v8h-6: MIDlet.platformRequest opens URLs; the iOS app overrides this
+// weak default in phoneME/Core/PhoneMEPlatformBridge.m.
+extern "C" __attribute__((weak)) std::int32_t phoneme_ios_platform_request(
+    const char*) {
+    return 0;
+}
+#endif
+
 namespace phoneme::vm {
 namespace {
 
@@ -3892,7 +3903,7 @@ void register_core_natives(NativeMethodRegistry& registry) {
         "javax/microedition/midlet/MIDlet",
         "platformRequest",
         "(Ljava/lang/String;)Z",
-        [](Machine&, std::span<const Value> arguments)
+        []([[maybe_unused]] Machine& machine, std::span<const Value> arguments)
             -> Result<std::optional<Value>> {
             auto receiver = require_receiver(arguments);
             if (!receiver) {
@@ -3902,7 +3913,34 @@ void register_core_natives(NativeMethodRegistry& registry) {
                 return fail(ErrorCode::invalid_argument,
                             "MIDlet.platformRequest expects one URL");
             }
-            return std::optional<Value>(Value::from_int(0));
+            std::int32_t opened = 0;
+#if defined(__APPLE__)
+            // Army250 v8h-6: open the link in the system browser (ABOUT ME / team page)
+            auto url_reference = arguments[1].as_reference();
+            if (url_reference && !url_reference->is_null()) {
+                auto url_text = machine.heap().string_value(*url_reference);
+                if (url_text) {
+                    std::string url_utf8;
+                    url_utf8.reserve(url_text->size());
+                    for (const char16_t unit : *url_text) {
+                        const auto code = static_cast<std::uint32_t>(unit);
+                        if (code < 0x80U) {
+                            url_utf8.push_back(static_cast<char>(code));
+                        } else if (code < 0x800U) {
+                            url_utf8.push_back(static_cast<char>(0xC0U | (code >> 6U)));
+                            url_utf8.push_back(static_cast<char>(0x80U | (code & 0x3FU)));
+                        } else {
+                            url_utf8.push_back(static_cast<char>(0xE0U | (code >> 12U)));
+                            url_utf8.push_back(
+                                static_cast<char>(0x80U | ((code >> 6U) & 0x3FU)));
+                            url_utf8.push_back(static_cast<char>(0x80U | (code & 0x3FU)));
+                        }
+                    }
+                    opened = phoneme_ios_platform_request(url_utf8.c_str()) != 0 ? 1 : 0;
+                }
+            }
+#endif
+            return std::optional<Value>(Value::from_int(opened));
         });
     registry.end_registration_batch();
 }
