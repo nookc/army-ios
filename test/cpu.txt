@@ -1,0 +1,15 @@
+Tasks: 1 total,   0 running,   1 sleeping,   0 stopped,   0 zombie
+  Mem:  2028600K total,  1824424K used,   204176K free,  16416768 buffers
+ Swap:  1521444K total,   2097152 used,  1519396K free,  1016184K cached
+200%cpu  13%user   0%nice  60%sys  50%idle   0%iow   7%irq   3%sirq  67%host
+   PID USER         PR  NI VIRT  RES  SHR S[%CPU] %MEM     TIME+ ARGS
+  2043 u0_a130      10 -10  13G 144M  89M S 53.3   7.2   0:24.99 vn.army250.thuan
+
+
+
+Tasks: 1 total,   0 running,   1 sleeping,   0 stopped,   0 zombie
+  Mem:  2028600K total,  1824424K used,   204176K free,  16424960 buffers
+ Swap:  1521444K total,   2097152 used,  1519396K free,  1016212K cached
+200%cpu   7%user   0%nice  66%sys  48%idle   0%iow   7%irq   2%sirq  71%host
+   PID USER         PR  NI VIRT  RES  SHR S[%CPU] %MEM     TIME+ ARGS
+  2043 u0_a130      10 -10  13G 144M  89M S 56.6   7.2   0:25.15 vn.army250.thuan
