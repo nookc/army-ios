@@ -1,0 +1,26 @@
+warning: refs/tags/v8.2.8 d54010c33189bfac434d85d315ad69783be7ea9b is not a commit!
+Note: switching to 'ee59af3722e56de8404de6cd0c21c2493cc4d855'.
+
+You are in 'detached HEAD' state. You can look around, make experimental
+changes and commit them, and you can discard any commits you make in this
+state without impacting any branches by switching back to a branch.
+
+If you want to create a new branch to retain commits you create, you may
+do so (now or later) by using -c with the switch command. Example:
+
+  git switch -c <new-branch-name>
+
+Or undo this operation with:
+
+  git switch -
+
+Turn off this advice by setting config variable advice.detachedHead to false
+
+j2c: 564 lop, 8 tep, 0 loi dich, 0 tham chieu thieu
+classes 564
+methods 3545
+literals 1363
+== bien dich (Windows x86-64)
+== lien ket
+-rwxr-xr-x 1 runner runner 21106453 Oct 24 04:09 /home/runner/work/army-ios/army-ios/native/build/win/Army250-debug.exe
+-rwxr-xr-x 1 runner runner 20097024 Oct 24 04:09 /home/runner/work/army-ios/army-ios/native/build/win/Army250.exe
