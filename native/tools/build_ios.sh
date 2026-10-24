@@ -64,17 +64,37 @@ CC1
   if [ "$SDK" = iphonesimulator ]; then
     /usr/libexec/PlistBuddy -c "Set :CFBundleSupportedPlatforms:0 iPhoneSimulator" "$APP/Info.plist"
   fi
-  # khoa DT* nhu Xcode them (mot so cong cu ky / cai dat can)
-  local SV
-  SV=$(xcrun --sdk "$SDK" --show-sdk-version)
+  # khoa DT* + BuildMachineOSBuild y nhu Xcode them. App Store Connect / TestFlight doc cac khoa nay de biet ban Xcode,
+  # SDK, macOS da build: thieu hoac sai dang (truoc day thieu DTXcodeBuild, DTSDKBuild..., DTXcode "263" thay vi "2630")
+  # -> "This build is using a beta version of Xcode and can't be submitted" du CI dung Xcode chinh thuc.
+  local SV SB XV XB XN MB
+  SV=$(xcrun --sdk "$SDK" --show-sdk-version)            # 26.2
+  SB=$(xcrun --sdk "$SDK" --show-sdk-build-version)      # 23C57
+  XV=$(xcodebuild -version | awk 'NR==1{print $2}')      # 26.3 / 26.0.1
+  XB=$(xcodebuild -version | awk 'NR==2{print $3}')      # 17C529
+  XN=$(echo "$XV" | awk -F. '{printf "%02d%d%d", $1, $2, $3}')   # 2630 / 2601 (dang Xcode ghi)
+  MB=$(sw_vers -buildVersion)                            # macOS may build
   local PB=/usr/libexec/PlistBuddy
-  $PB -c "Add :DTPlatformName string $SDK" "$APP/Info.plist"
-  $PB -c "Add :DTPlatformVersion string $SV" "$APP/Info.plist"
-  $PB -c "Add :DTSDKName string $SDK$SV" "$APP/Info.plist"
-  $PB -c "Add :DTXcode string $(xcodebuild -version | head -1 | awk '{print $2}' | tr -d .)" "$APP/Info.plist" || true
+  dat_khoa() { $PB -c "Delete :$1" "$APP/Info.plist" >/dev/null 2>&1 || true; $PB -c "Add :$1 string $2" "$APP/Info.plist"; }
+  dat_khoa BuildMachineOSBuild "$MB"
+  dat_khoa DTCompiler com.apple.compilers.llvm.clang.1_0
+  dat_khoa DTPlatformBuild "$SB"
+  dat_khoa DTPlatformName "$SDK"
+  dat_khoa DTPlatformVersion "$SV"
+  dat_khoa DTSDKBuild "$SB"
+  dat_khoa DTSDKName "$SDK$SV"
+  dat_khoa DTXcode "$XN"
+  dat_khoa DTXcodeBuild "$XB"
+  echo "== Info.plist: Xcode $XV ($XB) -> DTXcode $XN, SDK $SDK$SV ($SB), macOS $MB"
+  for k in BuildMachineOSBuild DTPlatformBuild DTSDKBuild DTXcode DTXcodeBuild; do
+    [ -n "$($PB -c "Print :$k" "$APP/Info.plist" 2>/dev/null)" ] || { echo "THIEU $k trong Info.plist"; exit 1; }
+  done
   $PB -c "Add :UIRequiredDeviceCapabilities array" -c "Add :UIRequiredDeviceCapabilities:0 string arm64" "$APP/Info.plist"
 
   plutil -convert binary1 "$APP/Info.plist"
+  # bang khai bao quyen rieng tu (Apple yeu cau tu 05/2024 khi dung API "required reason"; doc thuoc tinh tep log)
+  plutil -lint "$N/platform/ios/PrivacyInfo.xcprivacy"
+  cp "$N/platform/ios/PrivacyInfo.xcprivacy" "$APP/"
   cp "$JAR" "$APP/Army250.jar"
   cp "$N/platform/ios/res/AppIcon60x60@2x.png" "$N/platform/ios/res/AppIcon60x60@3x.png" "$APP/"
   # bieu tuong: Assets.car bang actool nhu Xcode (Info.plist co CFBundleIconName=AppIcon); loi thi van con PNG o tren
