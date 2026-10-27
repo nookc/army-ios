@@ -79,7 +79,7 @@ public final class MainActivity extends Activity {
     protected void onResume() {
         super.onResume();
         view.resumeFrames();
-        Sound.pauseAll(false);
+        Native.soundPauseAll(false);
     }
 
     @Override
@@ -87,7 +87,7 @@ public final class MainActivity extends Activity {
         super.onPause();
         view.pauseFrames();
         view.releaseAll();
-        Sound.pauseAll(true);
+        Native.soundPauseAll(true);
     }
 
     @Override
@@ -409,6 +409,8 @@ public final class MainActivity extends Activity {
                     invalidate(canvasR);
                 }
             }
+            // v8h-31: bao nhip quet cho vong lap game (ve khung dung nhip man hinh, het giat nhe do lech nhip)
+            Native.vsync(t);
             Choreographer.getInstance().postFrameCallback(this);
         }
 

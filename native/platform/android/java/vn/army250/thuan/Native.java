@@ -33,6 +33,9 @@ final class Native {
 
     static native int frames();
 
+    /** v8h-31: 1 nhip quet man hinh (Choreographer frameTimeNanos) */
+    static native void vsync(long frameTimeNanos);
+
     static native String gcStats();
 
     /** activity dang hien (cap nhat o onCreate) */
@@ -47,20 +50,66 @@ final class Native {
         return Sound.create(data, type);
     }
 
-    static void soundStart(int h, int loops) {
-        Sound.start(h, loops);
+    /**
+     * v8h-31: phat / dung / am luong chay tren luong am thanh rieng (theo dung thu tu goi): truoc day luong game goi thang
+     * AudioTrack (stop + reloadStaticData + play: 1-10+ ms moi tieng ban / no) -> khung hinh bi tre
+     */
+    private static final java.util.concurrent.ExecutorService AM = java.util.concurrent.Executors.newSingleThreadExecutor(
+            new java.util.concurrent.ThreadFactory() {
+                public Thread newThread(Runnable r) {
+                    Thread t = new Thread(r, "Army250-AmThanh");
+                    t.setDaemon(true);
+                    return t;
+                }
+            });
+
+    private static void am(Runnable r) {
+        try {
+            AM.execute(r);
+        } catch (Throwable e) {
+            r.run();
+        }
     }
 
-    static void soundStop(int h) {
-        Sound.stop(h);
+    static void soundStart(final int h, final int loops) {
+        am(new Runnable() {
+            public void run() {
+                Sound.start(h, loops);
+            }
+        });
     }
 
-    static void soundClose(int h) {
-        Sound.close(h);
+    static void soundStop(final int h) {
+        am(new Runnable() {
+            public void run() {
+                Sound.stop(h);
+            }
+        });
     }
 
-    static void soundVolume(int h, int level) {
-        Sound.volume(h, level);
+    static void soundClose(final int h) {
+        am(new Runnable() {
+            public void run() {
+                Sound.close(h);
+            }
+        });
+    }
+
+    /** app ra nen / vao lai: dung / phat tiep (cung luong am thanh - dung thu tu voi lenh phat dang cho) */
+    static void soundPauseAll(final boolean pause) {
+        am(new Runnable() {
+            public void run() {
+                Sound.pauseAll(pause);
+            }
+        });
+    }
+
+    static void soundVolume(final int h, final int level) {
+        am(new Runnable() {
+            public void run() {
+                Sound.volume(h, level);
+            }
+        });
     }
 
     static boolean openUrl(String url) {

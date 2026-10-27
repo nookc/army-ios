@@ -634,10 +634,18 @@ typedef struct tstart {
 #ifdef __APPLE__
 #include <pthread/qos.h>
 #endif
-/* luong Java tren iOS: uu tien tuong tac (khong bi gom hen gio / ha xung nhip nhu luong mac dinh) */
+#ifdef __ANDROID__
+#include <sys/resource.h>
+#include <unistd.h>
+#endif
+/* luong Java tren iOS: uu tien tuong tac (khong bi gom hen gio / ha xung nhip nhu luong mac dinh).
+   v8h-31 Android: uu tien nhu luong ve (THREAD_PRIORITY_DISPLAY -4) - khong bi day xuong nhan cham / xung thap (khong duoc
+   thi thoi) */
 void rt_thread_qos(void) {
 #ifdef __APPLE__
     pthread_set_qos_class_self_np(QOS_CLASS_USER_INTERACTIVE, 0);
+#elif defined(__ANDROID__)
+    setpriority(PRIO_PROCESS, (id_t)gettid(), -4);
 #endif
 }
 
@@ -676,8 +684,13 @@ void rt_thread_start(jctx *t, jobj thread) {
     }
 }
 
+int j2n_frame_sleep(void *t, int64_t ms);
+
 void rt_sleep(jctx *t, int64_t ms) {
-    (void)t;
+    /* v8h-31: luong game ngu giua 2 khung -> doi nhip quet man hinh (disp.c) */
+    if (j2n_frame_sleep(t, ms)) {
+        return;
+    }
     if (ms <= 0) {
         sched_yield();
         return;
@@ -788,6 +801,8 @@ void rt_init(void) {
     }
 #endif
     GC_INIT();
+    /* v8h-31: heap san 96 MB (ca anh lon giu san) - trong tran x10 GC tu ~16 lan xuong ~1-2 lan moi phut (moi lan dung ca game vai ms) */
+    GC_expand_hp((size_t)96 << 20);
     GC_allow_register_threads();
     init_prim_arrays();
     g_main = new_ctx(0);

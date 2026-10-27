@@ -69,7 +69,13 @@ static void file_sync(FILE *f) { _commit(_fileno(f)); }
 #define u8fopen fopen
 #define u8remove remove
 #define u8rename_over rename
+#ifdef __ANDROID__
+/* v8h-31: Android khong fsync (bo nho may cham: vai chuc ms tren luong game moi lan luu cai dat); ghi tep tam roi doi ten van
+   nguyen tu khi app tat / sap, chi mat dien dung luc ghi moi co the mat lan luu cuoi */
+static void file_sync(FILE *f) { (void)f; }
+#else
 static void file_sync(FILE *f) { fsync(fileno(f)); }
+#endif
 #endif
 
 /* ============================================================ jar */
@@ -701,6 +707,106 @@ int32_t N_j2n_SmsConn_sms(jctx *t, jobj num, jobj text) {
 
 int midi_to_wav(const uint8_t *m, int n, uint8_t **out, int *outlen);
 
+/* ------------------------------------------------------------ v8h-31: nhac MIDI dung san o luong nen
+ * Dung MIDI -> WAV mat 0,1 s (may tinh) den 0,3 - 1 s (dien thoai) - truoc day chay tren luong game luc bat nhac (dung hinh).
+ * Khi vao game, luong nen dung san moi tep .mid trong jar; tao nhac thi lay ban da dung (dang dung do thi cho xong). */
+#define MW_MAX 4
+typedef struct midi_wav {
+    uint32_t h;
+    int n;
+    uint8_t *wav;
+    int wl;
+    int dang;
+} midi_wav;
+static midi_wav g_mw[MW_MAX];
+static int g_nmw;
+static pthread_mutex_t g_mw_mu = PTHREAD_MUTEX_INITIALIZER;
+static pthread_cond_t g_mw_cv = PTHREAD_COND_INITIALIZER;
+
+static uint32_t hbytes(const uint8_t *d, int n) {
+    uint32_t h = 2166136261u;
+    for (int i = 0; i < n; i++) h = (h ^ d[i]) * 16777619u;
+    return h;
+}
+
+static int la_mid(const char *nm) {
+    size_t l = strlen(nm);
+    if (l < 5) return 0;
+    const char *e = nm + l - 4;
+    return e[0] == '.' && (e[1] | 32) == 'm' && (e[2] | 32) == 'i' && (e[3] | 32) == 'd';
+}
+
+static void *midi_bg(void *arg) {
+    (void)arg;
+    pthread_once(&jar_once, jar_load);
+    for (int i = 0; i < nents; i++) {
+        if (!la_mid(ents[i].name)) continue;
+        size_t len = 0;
+        uint8_t *m = j2n_jar_read(ents[i].name, &len);
+        if (!m) continue;
+        pthread_mutex_lock(&g_mw_mu);
+        if (g_nmw >= MW_MAX) {
+            pthread_mutex_unlock(&g_mw_mu);
+            free(m);
+            break;
+        }
+        midi_wav *w = &g_mw[g_nmw++];
+        w->h = hbytes(m, (int)len);
+        w->n = (int)len;
+        w->wav = 0;
+        w->wl = 0;
+        w->dang = 1;
+        pthread_mutex_unlock(&g_mw_mu);
+        uint8_t *out = 0;
+        int ol = 0;
+        int ok = midi_to_wav(m, (int)len, &out, &ol);
+        free(m);
+        pthread_mutex_lock(&g_mw_mu);
+        w->dang = 0;
+        if (ok) {
+            w->wav = out;
+            w->wl = ol;
+        }
+        pthread_cond_broadcast(&g_mw_cv);
+        pthread_mutex_unlock(&g_mw_mu);
+    }
+    return 0;
+}
+
+void j2n_midi_san(void) {
+    pthread_attr_t at;
+    pthread_attr_init(&at);
+    pthread_attr_setdetachstate(&at, PTHREAD_CREATE_DETACHED);
+    pthread_t th;
+    pthread_create(&th, &at, midi_bg, 0);
+    pthread_attr_destroy(&at);
+}
+
+/* ban WAV da dung san cua tep MIDI nay (cho toi 10 giay neu luong nen dang dung); NULL = khong co */
+static const uint8_t *midi_san(const uint8_t *d, int n, int *wl) {
+    uint32_t h = hbytes(d, n);
+    const uint8_t *r = 0;
+    pthread_mutex_lock(&g_mw_mu);
+    for (int k = 0; k < g_nmw; k++) {
+        midi_wav *w = &g_mw[k];
+        if (w->h != h || w->n != n) continue;
+        if (w->dang) {
+            struct timespec dl;
+            clock_gettime(CLOCK_REALTIME, &dl);
+            dl.tv_sec += 10;
+            while (w->dang && pthread_cond_timedwait(&g_mw_cv, &g_mw_mu, &dl) == 0) {
+            }
+        }
+        if (!w->dang && w->wav) {
+            r = w->wav;
+            *wl = w->wl;
+        }
+        break;
+    }
+    pthread_mutex_unlock(&g_mw_mu);
+    return r;
+}
+
 int32_t N_j2n_SoundPlayer_create(jctx *t, jobj data, jobj type) {
     (void)t;
     if (!data) return -1;
@@ -709,6 +815,11 @@ int32_t N_j2n_SoundPlayer_create(jctx *t, jobj data, jobj type) {
     int n = ALEN(data);
     if (strstr(ty, "mid") || (n > 4 && memcmp(d, "MThd", 4) == 0)) {
         /* MIDI: dung san thanh WAV (nen tang chi can phat PCM) */
+        int sl = 0;
+        const uint8_t *san = midi_san(d, n, &sl);
+        if (san) {
+            return plat_sound_create(san, sl, "audio/x-wav");
+        }
         uint8_t *w = 0;
         int wl = 0;
         if (midi_to_wav(d, n, &w, &wl)) {

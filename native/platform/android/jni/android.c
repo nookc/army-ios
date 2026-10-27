@@ -448,6 +448,13 @@ JNIEXPORT jint JNICALL Java_vn_army250_thuan_Native_copyFrame(JNIEnv *e, jclass 
     return f;
 }
 
+/* v8h-31: nhip quet man hinh (Choreographer.doFrame) -> vong lap game ve khung theo nhip (disp.c j2n_frame_sleep) */
+JNIEXPORT void JNICALL Java_vn_army250_thuan_Native_vsync(JNIEnv *e, jclass cls, jlong t) {
+    (void)e;
+    (void)cls;
+    j2n_vsync((int64_t)t);
+}
+
 JNIEXPORT jint JNICALL Java_vn_army250_thuan_Native_frames(JNIEnv *e, jclass cls) {
     (void)e;
     (void)cls;

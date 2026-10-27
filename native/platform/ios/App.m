@@ -145,6 +145,8 @@ static CGImageRef make_image(const uint32_t *px, int w, int h) {
 }
 
 - (void)tick {
+    // v8h-31: bao nhip quet cho vong lap game (ve khung dung nhip man hinh - het giat nhe do lech nhip 30 ms / 16,7 ms)
+    j2n_vsync((int64_t)(_link.timestamp * 1e9));
     int f = gFrameNo;
     if (f == gShownNo || !gFront) return;
     gShownNo = f;

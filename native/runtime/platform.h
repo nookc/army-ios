@@ -53,6 +53,10 @@ int j2n_start(const char *midlet_class, int w, int h);
 int j2n_run(const char *midlet_class, int w, int h);
 void j2n_post(int type, int a, int b);
 void j2n_text_done(int ok, const char *utf8);
+/* v8h-31: 1 nhip quet man hinh (t_ns dong ho don dieu, vd Choreographer frameTimeNanos) - vong lap game ve khung theo nhip nay
+   (khong goi = ngu theo dong ho nhu cu). j2n_vsync_mode: 0 tat, 1 khoa 30 khung/giay (mac dinh), 2 trung binh 30 ms khop nhip */
+void j2n_vsync(int64_t t_ns);
+extern int j2n_vsync_mode;
 /* chup khung hinh hien tai (cho kiem thu): copy vao out (w*h) neu kich thuoc khop, tra ve so khung da ve */
 int j2n_snapshot(uint32_t *out, int w, int h);
 int j2n_frames(void);

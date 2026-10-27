@@ -9,6 +9,7 @@
 #include "natives.h"
 #include "platform.h"
 
+void j2n_midi_san(void);
 extern uint32_t *gfx_fb;
 extern int gfx_w, gfx_h;
 void gfx_init(int w, int h);
@@ -143,6 +144,116 @@ int j2n_snapshot(uint32_t *out, int w, int h) {
 
 int j2n_frames(void) { return frames; }
 
+/* ------------------------------------------------------------ v8h-31: nhip khung theo nhip quet man hinh
+ * Vong lap game (coreLG.a.run) ve 1 khung (serviceRepaints) roi ngu "30 - thoi gian da chay" ms. Man hinh quet 60 / 90 / 120 Hz
+ * khong chia het cho ~33 khung/giay + Android danh thuc tre -> moi khung hien 1 hoac 2 nhip quet ngau nhien (giat nhe lien tuc).
+ * Nen tang co nhip quet (Android: Choreographer) goi j2n_vsync() moi nhip; lan ngu dau tien sau serviceRepaints cua luong game
+ * (Disp.frameMark) doi toi nhip quet hen thay vi ngu theo dong ho:
+ *   che do 1: dung K nhip moi khung (K = 33,3 ms / chu ky quet: 60 Hz 2, 90 Hz 3, 120 Hz 4) -> 30 khung/giay deu tuyet doi
+ *   che do 2: trung binh 30 ms moi khung nhu cu (~33 khung/giay) nhung khop nhip quet (60 Hz: 2-2-2-2-1 deu dan)
+ * Khong co nhip quet gan day (app ra nen, nen tang khong goi) -> ngu nhu cu. */
+int j2n_vsync_mode = 1;
+static pthread_mutex_t vs_mu = PTHREAD_MUTEX_INITIALIZER;
+static pthread_cond_t vs_cv;
+static pthread_once_t vs_once = PTHREAD_ONCE_INIT;
+static int64_t vs_tick, vs_next, vs_last_ns, vs_period_ns, vs_seen_ms, vs_due_ns;
+static void *volatile vs_game;
+static volatile int vs_mark;
+
+static int64_t vs_mono_ms(void) {
+    struct timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    return (int64_t)ts.tv_sec * 1000 + ts.tv_nsec / 1000000;
+}
+
+static void vs_init(void) {
+    pthread_condattr_t a;
+    pthread_condattr_init(&a);
+#if !defined(__APPLE__) && !defined(_WIN32)
+    pthread_condattr_setclock(&a, CLOCK_MONOTONIC);
+#endif
+    pthread_cond_init(&vs_cv, &a);
+    pthread_condattr_destroy(&a);
+}
+
+/* nen tang: 1 nhip quet man hinh (t_ns: thoi diem nhip, dong ho don dieu) */
+void j2n_vsync(int64_t t_ns) {
+    pthread_once(&vs_once, vs_init);
+    pthread_mutex_lock(&vs_mu);
+    if (vs_last_ns > 0) {
+        int64_t d = t_ns - vs_last_ns;
+        if (d > 3000000 && d < 60000000) {
+            vs_period_ns = vs_period_ns > 0 ? (vs_period_ns * 7 + d) / 8 : d;
+        }
+    }
+    vs_last_ns = t_ns;
+    vs_tick++;
+    vs_seen_ms = vs_mono_ms();
+    pthread_cond_broadcast(&vs_cv);
+    pthread_mutex_unlock(&vs_mu);
+}
+
+/* Ui.serviceRepaints (luong game): vua xong 1 khung */
+void N_j2n_Disp_frameMark(jctx *t) {
+    vs_game = t;
+    vs_mark = 1;
+}
+
+/* rt_sleep: lan ngu giua 2 khung cua luong game -> doi nhip quet. 1 = da doi, 0 = ngu theo dong ho nhu cu */
+int j2n_frame_sleep(void *t, int64_t ms) {
+    if (!j2n_vsync_mode || !t || t != vs_game || !vs_mark || ms <= 0 || ms > 40) {
+        return 0;
+    }
+    vs_mark = 0;
+    pthread_once(&vs_once, vs_init);
+    pthread_mutex_lock(&vs_mu);
+    int64_t per = vs_period_ns;
+    if (per <= 0 || vs_mono_ms() - vs_seen_ms > 100) {
+        pthread_mutex_unlock(&vs_mu);
+        return 0;
+    }
+    struct timespec dl;
+#if defined(__APPLE__) || defined(_WIN32)
+    clock_gettime(CLOCK_REALTIME, &dl);
+#else
+    clock_gettime(CLOCK_MONOTONIC, &dl);
+#endif
+    dl.tv_nsec += 100 * 1000000L;
+    if (dl.tv_nsec >= 1000000000L) {
+        dl.tv_sec++;
+        dl.tv_nsec -= 1000000000L;
+    }
+    if (j2n_vsync_mode == 2) {
+        /* trung binh 30 ms / khung: hen 'due' cong 30 ms moi khung, thuc o nhip quet dau tien gan due nhat */
+        if (vs_due_ns <= 0 || vs_due_ns < vs_last_ns - 30000000LL || vs_due_ns > vs_last_ns + 60000000LL) {
+            vs_due_ns = vs_last_ns + 30000000LL;
+        }
+        while (vs_last_ns + per / 2 < vs_due_ns) {
+            if (pthread_cond_timedwait(&vs_cv, &vs_mu, &dl) != 0) {
+                break;
+            }
+        }
+        vs_due_ns += 30000000LL;
+    } else {
+        int k = (int)((33333333LL + per / 2) / per);
+        if (k < 1) {
+            k = 1;
+        }
+        /* khung nang qua K nhip / lan dau: khung sau bat dau o nhip ke tiep (khong don khung) */
+        if (vs_next <= vs_tick || vs_next > vs_tick + k) {
+            vs_next = vs_tick + 1;
+        }
+        while (vs_tick < vs_next) {
+            if (pthread_cond_timedwait(&vs_cv, &vs_mu, &dl) != 0) {
+                break;
+            }
+        }
+        vs_next = vs_tick + k;
+    }
+    pthread_mutex_unlock(&vs_mu);
+    return 1;
+}
+
 void N_j2n_Disp_showTextBox(jctx *t, jobj title, jobj text, int32_t max, int32_t cons) {
     (void)t;
     pthread_mutex_lock(&mu);
@@ -220,6 +331,7 @@ int j2n_run(const char *midlet_class, int w, int h) {
     rt_thread_run_hook = thread_hook;
     gfx_init(w, h);
     g_midlet = strdup(midlet_class);
+    j2n_midi_san();
     rt_thread_qos();
     jctx *c = (jctx *)GC_MALLOC_UNCOLLECTABLE(sizeof(jctx));
     memset(c, 0, sizeof *c);
@@ -234,6 +346,7 @@ int j2n_start(const char *midlet_class, int w, int h) {
     rt_thread_run_hook = thread_hook;
     gfx_init(w, h);
     g_midlet = strdup(midlet_class);
+    j2n_midi_san();
     pthread_attr_t at;
     pthread_attr_init(&at);
     pthread_attr_setstacksize(&at, 16u << 20);

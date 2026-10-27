@@ -45,6 +45,10 @@ public final class Ui {
     }
 
     public static void serviceRepaints(Displayable c) {
+        if (Thread.currentThread() != evThread) {
+            // v8h-31: vong lap game ve xong 1 khung -> ngu giua 2 khung theo nhip quet man hinh (neu nen tang co)
+            Disp.frameMark();
+        }
         if (c != cur) {
             return;
         }

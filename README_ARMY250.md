@@ -41,6 +41,7 @@ Client hiện tại (gửi phiên bản `2.3.0+cx+sl+ka+v250+bang+hp`, hiện 2.
 - v8h-6: Bỏ hẳn nạp tiền trong app: mục NẠP TIỀN ở menu chính thành MÃ QUÀ TẶNG (mở thẳng ô nhập mã, gửi `giftcode`). ABOUT ME mở thẳng trang web của game, đăng ký biệt đội mở trang lập đội trên web; cả hai không thoát game (link server gửi chỉ dùng nếu cùng tên miền với web).
 - v8h-8: Màn Trang bị hiện đúng chỉ số trong trận theo chỉ số ban đầu từng nhân vật do quản trị chỉnh (máu, sát thương %, phòng thủ, may mắn, đồng đội) và dame tăng dần theo sức mạnh (tới +40% ở mức bộ Chiến Thần U Minh +20) - mss 111 act 26. Cửa hàng item ẩn item quản trị ngừng bán, cập nhật giá ngay khi quản trị sửa (act 27). Client gửi thêm `+cb`, `+an`.
 - v8h-7: Boss 5 phòng bậc cao (T-Rex Cao Thủ / Chiến Thần, rồng Thách Đấu / Âm Minh, Hỗn Độn Thú) vẽ to hơn trong trận theo hệ số server gửi (mss 111 act 25, mặc định x1,3; sảnh chờ giữ nguyên). Máu cộng hiện số xanh lá; nhân vật bị trừ máu camera dừng lại cho rõ, tốc độ xN camera quay mượt như x1. Màn Trang bị cộng đúng chỉ số bộ cải trang đang mặc (act 24) thay cho +5% mỗi món. Map ma: con ma mới mọc vào ô của con đã chết (act 23) - đủ 300 con mỗi trận. Client gửi thêm `+ma`, `+ct`, `+to`.
+- v8h-31: Tốc độ trận xN: số trừ / cộng máu của người chơi và boss bay lên, mờ đi nhanh gấp N như cả trận (trước vẫn chậm như x1); khung hình bỏ qua để giữ tốc độ thì số máu vẫn chạy đúng nhịp.
 
 Cần server Army2.5.0 mới (SerArmy2.jar cùng đợt); client cũ vẫn chơi được nhưng bị nhắc cập nhật khi vào 4 phòng boss mới.
 
@@ -55,6 +56,13 @@ Thư mục `native/` dịch sẵn client J2ME (`Bundled/Army250.jar`) sang C r�
 | Windows (EXE 64-bit, Windows 7 SP1+) | cùng workflow trên | nhánh `ban-build-windows` (và artifact `Army250-Windows`) |
 
 Cả hai workflow tự chạy khi push thay đổi trong `native/` hoặc `Bundled/Army250.jar` lên `main`.
+
+**Chống khựng (v8h-31):**
+
+- Khung hình bám theo nhịp màn hình (vsync): Android lấy nhịp từ `Choreographer`, iOS từ `CADisplayLink`; vòng lặp game ra khung đều 30 khung/giây (màn 60 Hz: mỗi khung đúng 2 lần quét, màn 90 / 120 Hz: 3 / 4 lần) thay cho ngủ theo đồng hồ (trước 1/5 số khung bị hiện lệch nhịp → giật). `j2n_vsync_mode` trong `runtime/disp.c`: 1 = khóa 30 khung (mặc định), 2 = nhịp 30 ms như cũ nhưng canh theo vsync, 0 = tắt. Không có tín hiệu vsync quá 100 ms thì tự về ngủ thường.
+- Ảnh lớn (sảnh / boss / map) giữ trong bộ nhớ đệm (LRU, tối đa ~9 triệu điểm ảnh), không giải mã lại mỗi lần vào phòng; ảnh boss bậc cao nạp sẵn ở luồng nền 3 giây sau khi mở app.
+- Âm thanh Android chạy trên luồng riêng (`Army250-AmThanh`), không chặn luồng game; nhạc MIDI chuyển sẵn sang WAV ở luồng nền.
+- Heap Boehm GC đặt sẵn 96 MB (dọn rác thưa hơn khi đánh x10); luồng game Android ưu tiên cao hơn; lưu dữ liệu (RMS) trên Android không `fsync` mỗi lần ghi.
 
 **Ký APK:** repo công khai nên khóa ký **không** nằm trong repo/CI. CI chỉ ra APK chưa ký (và một APK ký khóa thử để chạy emulator). Bản phát hành ký ở máy có khóa:
 

@@ -45,4 +45,7 @@ public final class Disp {
     public static native boolean vibrate(int ms);
 
     public static native void exit();
+
+    /** v8h-31: luong game vua xong 1 khung (serviceRepaints) - lan ngu tiep theo doi nhip quet man hinh (disp.c) */
+    public static native void frameMark();
 }

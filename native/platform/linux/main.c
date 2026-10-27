@@ -5,6 +5,7 @@
  * Tep lenh ket thuc ".live": doc tiep dong moi ghi them.
  */
 #include <errno.h>
+#include <stdint.h>
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -152,7 +153,35 @@ static void run_cmd(char *line) {
     }
 }
 
+/* v8h-31: J2N_VSYNC_HZ=60 (90, 120...) -> gia lap nhip quet man hinh nhu Android Choreographer (thu nhip khung theo nhip quet).
+   J2N_VSYNC_MODE: 1 khoa 30 khung/giay (mac dinh), 2 trung binh 30 ms, 0 tat */
+static void *vsync_thread(void *arg) {
+    long hz = (long)(intptr_t)arg;
+    int64_t per = 1000000000LL / hz;
+    struct timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    for (;;) {
+        ts.tv_nsec += per;
+        while (ts.tv_nsec >= 1000000000L) {
+            ts.tv_sec++;
+            ts.tv_nsec -= 1000000000L;
+        }
+        clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &ts, 0);
+        j2n_vsync((int64_t)ts.tv_sec * 1000000000LL + ts.tv_nsec);
+    }
+    return 0;
+}
+
 int main(int argc, char **argv) {
+    const char *vhz = getenv("J2N_VSYNC_HZ");
+    if (getenv("J2N_VSYNC_MODE")) {
+        j2n_vsync_mode = atoi(getenv("J2N_VSYNC_MODE"));
+    }
+    if (vhz && atoi(vhz) > 0) {
+        pthread_t vt;
+        pthread_create(&vt, 0, vsync_thread, (void *)(intptr_t)atoi(vhz));
+        fprintf(stderr, "[harness] gia lap nhip quet %d Hz, che do %d\n", atoi(vhz), j2n_vsync_mode);
+    }
     if (argc < 7) {
         fprintf(stderr, "dung: %s <jar> <midlet> <rong> <cao> <tep lenh> <thu muc ra>\n", argv[0]);
         return 2;
