@@ -240,6 +240,53 @@ static void arc(jctx *t, jobj self, int x, int y, int w, int h, int start, int a
     int ax = x + o.tx, ay = y + o.ty;
     double cx = ax + (w - 1) / 2.0, cy = ay + (h - 1) / 2.0;
     double rx = (w - 1) / 2.0, ry = (h - 1) / 2.0;
+    if (fill && (arcang >= 360 || arcang <= -360) && w >= 3 && h >= 3) {
+        /* v8h-33: elip day du to theo hang ngang - quat tu tam de lai ke ho o vong lon (chop trang toan man hinh) */
+        int64_t ry0 = (int64_t)ay, ry1 = (int64_t)ay + h;
+        if (ry0 < o.y0) ry0 = o.y0;
+        if (ry1 > o.y1) ry1 = o.y1;
+        for (int64_t yy = ry0; yy < ry1; yy++) {
+            double ty = ((double)yy - cy) / (ry + 0.5);
+            double q = 1.0 - ty * ty;
+            if (q < 0) continue;
+            double half = (rx + 0.5) * sqrt(q);
+            int64_t xa = (int64_t)ceil(cx - half - 1e-9), xb = (int64_t)floor(cx + half + 1e-9);
+            if (xa < o.x0) xa = o.x0;
+            if (xb > (int64_t)o.x1 - 1) xb = (int64_t)o.x1 - 1;
+            uint32_t *row = o.px + (size_t)yy * o.w;
+            for (int64_t xx = xa; xx <= xb; xx++) row[xx] = o.color;
+        }
+        return;
+    }
+    if (fill && w >= 3 && h >= 3) {
+        /* v8h-33: hinh quat to theo diem anh (goc theo quy uoc MIDP: 45 do nam tren duong cheo khung) - khong ho */
+        double a0 = (double)(start % 360), sweep = (double)(arcang < -360 ? -360 : arcang > 360 ? 360 : arcang);
+        if (sweep < 0) {
+            a0 += sweep;
+            sweep = -sweep;
+        }
+        while (a0 < 0) a0 += 360.0;
+        int64_t ry0 = (int64_t)ay, ry1 = (int64_t)ay + h, rx0 = (int64_t)ax, rx1 = (int64_t)ax + w;
+        if (ry0 < o.y0) ry0 = o.y0;
+        if (ry1 > o.y1) ry1 = o.y1;
+        if (rx0 < o.x0) rx0 = o.x0;
+        if (rx1 > o.x1) rx1 = o.x1;
+        const double RAD = 180.0 / 3.14159265358979323846;
+        for (int64_t yy = ry0; yy < ry1; yy++) {
+            double ty = ((double)yy - cy) / (ry + 0.5);
+            uint32_t *row = o.px + (size_t)yy * o.w;
+            for (int64_t xx = rx0; xx < rx1; xx++) {
+                double tx = ((double)xx - cx) / (rx + 0.5);
+                if (tx * tx + ty * ty > 1.0) continue;
+                double ang = (tx == 0 && ty == 0) ? a0 : atan2(-ty, tx) * RAD;
+                if (ang < 0) ang += 360.0;
+                double d = ang - a0;
+                if (d < 0) d += 360.0;
+                if (d <= sweep) row[xx] = o.color;
+            }
+        }
+        return;
+    }
     int ns = start % 360;
     int ca = arcang < -360 ? -360 : arcang > 360 ? 360 : arcang;
     double desired = ceil(fabs((double)ca) * (double)(w > h ? w : h) / 90.0);
