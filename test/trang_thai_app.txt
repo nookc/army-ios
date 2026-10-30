@@ -1,0 +1,1 @@
+app con chay; RAM 56 MB; CPU 3 s
