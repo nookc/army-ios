@@ -1,0 +1,10 @@
+30/10 17:40:09 [app] khoi dong 2.5.0 (57), man 320x470, iOS 26.2
+30/10 17:40:09 [gc] khoi dong: 471 thu vien da nap, GC xet 1020 vung du lieu (giu 3 cua app, bo 1017 cua he thong)
+30/10 17:40:09 [Boot] khoi dong coreLG.TerrainMidlet
+30/10 17:40:13 [Boot] giai nen san anh lon: 48 ms
+30/10 17:40:41 [gc] truoc khi mo ban phim: 510 thu vien da nap, GC xet 1105 vung du lieu (giu 3 cua app, bo 1102 cua he thong)
+30/10 17:40:41 [app] hop nhap chu (kieu 0, toi da 500)
+30/10 17:40:44 [gc] sau khi mo ban phim: 733 thu vien da nap, GC xet 1638 vung du lieu (giu 3 cua app, bo 1635 cua he thong)
+30/10 17:40:52 [app] hop nhap chu (kieu 65536, toi da 500)
+30/10 17:40:55 [gc] sau khi mo ban phim: 734 thu vien da nap, GC xet 1641 vung du lieu (giu 3 cua app, bo 1638 cua he thong)
+30/10 17:40:57 [gc] sau 2 hop nhap chu: 734 thu vien da nap, GC xet 1641 vung du lieu (giu 3 cua app, bo 1638 cua he thong)
