@@ -1,0 +1,9 @@
+07/11 09:32:19 [app] khoi dong Army2.5.0 (Windows), man 320x400, jar trong exe
+07/11 09:32:19 [am thanh] khong mo duoc waveOut (se thu lai)
+07/11 09:32:19 [Boot] khoi dong coreLG.TerrainMidlet
+07/11 09:32:19 [am thanh] audio/x-wav 7180 byte: ok
+07/11 09:32:19 [am thanh] audio/x-wav 1834 byte: ok
+07/11 09:32:19 [am thanh] audio/x-wav 2934 byte: ok
+07/11 09:32:22 [Boot] giai nen san anh lon: 60 ms
+07/11 09:32:30 [am thanh] audio/x-wav 902214 byte: ok
+07/11 09:32:40 [app] hop nhap chu (kieu 0, toi da 500)

@@ -1,0 +1,19 @@
+
+sleep 7000
+shot t1_cauhinh
+key -5
+sleep 3000
+shot t2_amthanh
+key -6
+sleep 5000
+shot t3_gioithieu
+key -7
+sleep 5000
+shot t4_dangnhap
+tap 188 276
+sleep 1500
+text:tbot6
+sleep 1500
+shot t5_da_nhap_ten
+sleep 10000
+shot t6_10giay
