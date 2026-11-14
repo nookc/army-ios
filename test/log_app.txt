@@ -1,0 +1,3 @@
+14/11 12:29:09 [app] khoi dong 2.5.0 (79), man 320x470, iOS 26.2
+14/11 12:29:09 [gc] khoi dong: 471 thu vien da nap, GC xet 1020 vung du lieu (giu 3 cua app, bo 1017 cua he thong)
+14/11 12:29:09 [Boot] khoi dong coreLG.TerrainMidlet
