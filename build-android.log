@@ -1,0 +1,74 @@
+NDK /usr/local/lib/android/sdk/ndk/27.3.13750724
+build-tools /usr/local/lib/android/sdk/build-tools/37.0.0
+platform /usr/local/lib/android/sdk/platforms/android-37.2-beta3
+warning: refs/tags/v8.2.8 d54010c33189bfac434d85d315ad69783be7ea9b is not a commit!
+Note: switching to 'ee59af3722e56de8404de6cd0c21c2493cc4d855'.
+
+You are in 'detached HEAD' state. You can look around, make experimental
+changes and commit them, and you can discard any commits you make in this
+state without impacting any branches by switching back to a branch.
+
+If you want to create a new branch to retain commits you create, you may
+do so (now or later) by using -c with the switch command. Example:
+
+  git switch -c <new-branch-name>
+
+Or undo this operation with:
+
+  git switch -
+
+Turn off this advice by setting config variable advice.detachedHead to false
+
+j2c: 595 lop, 11 tep, 0 loi dich, 0 tham chieu thieu
+classes 595
+methods 4095
+literals 1536
+== bien dich arm64-v8a
+-rwxr-xr-x 1 runner runner 4574224 Nov 14 12:17 /home/runner/work/army-ios/army-ios/native/build/android/stage/lib/arm64-v8a/libarmy2.so
+== bien dich armeabi-v7a
+-rwxr-xr-x 1 runner runner 4031760 Nov 14 12:18 /home/runner/work/army-ios/army-ios/native/build/android/stage/lib/armeabi-v7a/libarmy2.so
+== bien dich x86_64
+-rwxr-xr-x 1 runner runner 4758272 Nov 14 12:18 /home/runner/work/army-ios/army-ios/native/build/android/stage/lib/x86_64/libarmy2.so
+== java
+Note: Some input files use or override a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+MainActivity$1.class
+MainActivity$2.class
+MainActivity$3.class
+MainActivity$4.class
+MainActivity$5.class
+MainActivity$6$1.class
+MainActivity$6.class
+MainActivity$7.class
+MainActivity$GameView$1.class
+MainActivity$GameView.class
+MainActivity$TextReq.class
+MainActivity.class
+Native$1.class
+Native$2.class
+Native$3.class
+Native$4.class
+Native$5.class
+Native$6.class
+Native.class
+PadLabels.class
+Sound.class
+== apk
+     1352  1980-01-01 00:00   resources.arsc
+ 20840113  1980-01-01 00:00   assets/Army250.jar
+    26288  2026-11-14 12:18   classes.dex
+        0  2026-11-14 12:18   lib/
+        0  2026-11-14 12:18   lib/x86_64/
+  4758272  2026-11-14 12:18   lib/x86_64/libarmy2.so
+        0  2026-11-14 12:17   lib/arm64-v8a/
+  4574224  2026-11-14 12:17   lib/arm64-v8a/libarmy2.so
+        0  2026-11-14 12:18   lib/armeabi-v7a/
+  4031760  2026-11-14 12:18   lib/armeabi-v7a/libarmy2.so
+---------                     -------
+ 34286616                     16 files
+V3.0 Signer: certificate DN: CN=Army250 Test
+V3.0 Signer: certificate SHA-256 digest: c7ce5d51f2552ffa5d36066b94f7189fa39aa02fc810c9187dc9795e10d74943
+V3.0 Signer: certificate SHA-1 digest: a37d46af9d4c6c4ff1ebcaedcdb7ed027ac1180e
+-rw-r--r-- 1 runner runner 25945235 Nov 14 12:18 /home/runner/work/army-ios/army-ios/native/build/android/Army250-test.apk
+-rw-r--r-- 1 runner runner 25936191 Nov 14 12:18 /home/runner/work/army-ios/army-ios/native/build/android/Army250-unsigned.apk
+-rw-r--r-- 1 runner runner 25936179 Nov 14 12:18 /home/runner/work/army-ios/army-ios/native/build/android/base.apk
