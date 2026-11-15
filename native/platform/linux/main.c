@@ -141,6 +141,12 @@ static void run_cmd(char *line) {
         j2n_post(J2N_POINTER_PRESS, a, b);
         msleep(60);
         j2n_post(J2N_POINTER_RELEASE, a, b);
+    } else if (!strcmp(op, "pdown")) {
+        j2n_post(J2N_POINTER_PRESS, a, b);
+    } else if (!strcmp(op, "pmove")) {
+        j2n_post(J2N_POINTER_DRAG, a, b);
+    } else if (!strcmp(op, "pup")) {
+        j2n_post(J2N_POINTER_RELEASE, a, b);
     } else if (!strcmp(op, "drag")) {
         j2n_post(J2N_POINTER_PRESS, a, b);
         for (int i = 1; i <= 10; i++) {
@@ -170,6 +176,12 @@ static void *vsync_thread(void *arg) {
         j2n_vsync((int64_t)ts.tv_sec * 1000000000LL + ts.tv_nsec);
     }
     return 0;
+}
+
+static void kb_hook_log(int show, int area_bottom) {
+    char b[96];
+    snprintf(b, sizeof b, "[banphim] %s (vung game toi y=%d)", show ? "hien" : "an", area_bottom);
+    plat_log(b);
 }
 
 int main(int argc, char **argv) {
@@ -208,6 +220,7 @@ int main(int argc, char **argv) {
         }
         j2n_set_hd(hb, sc);
     }
+    j2n_set_keyboard_hook(kb_hook_log);
     if (!j2n_start(argv[2], W, H)) {
         fprintf(stderr, "khong khoi dong duoc\n");
         return 1;

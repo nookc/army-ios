@@ -214,7 +214,7 @@ int j2n_vsync_mode = 1;
 static pthread_mutex_t vs_mu = PTHREAD_MUTEX_INITIALIZER;
 static pthread_cond_t vs_cv;
 static pthread_once_t vs_once = PTHREAD_ONCE_INIT;
-static int64_t vs_tick, vs_next, vs_last_ns, vs_period_ns, vs_seen_ms, vs_due_ns;
+static int64_t vs_tick, vs_next, vs_last_ns, vs_period_ns, vs_seen_ms, vs_due_ns, vs_wake_ms;
 static void *volatile vs_game;
 static volatile int vs_mark;
 
@@ -259,10 +259,14 @@ void N_j2n_Disp_frameMark(jctx *t) {
 
 /* rt_sleep: lan ngu giua 2 khung cua luong game -> doi nhip quet. 1 = da doi, 0 = ngu theo dong ho nhu cu */
 int j2n_frame_sleep(void *t, int64_t ms) {
-    if (!j2n_vsync_mode || !t || t != vs_game || !vs_mark || ms <= 0 || ms > 40) {
+    if (!j2n_vsync_mode || !t || t != vs_game || !vs_mark || ms <= 0 || ms > 100) {
         return 0;
     }
     vs_mark = 0;
+    /* chu ky khung game muon = thoi gian da chay tu lan thuc day truoc + thoi gian xin ngu
+       (Army 30 ms -> 2 nhip 60 Hz nhu cu, Avatar 50 ms -> 3 nhip deu, ban ban ca 16 ms -> moi nhip) */
+    int64_t now_ms = vs_mono_ms();
+    int64_t want_ms = ms + ((vs_wake_ms > 0 && now_ms - vs_wake_ms < 250) ? now_ms - vs_wake_ms : 0);
     pthread_once(&vs_once, vs_init);
     pthread_mutex_lock(&vs_mu);
     int64_t per = vs_period_ns;
@@ -293,9 +297,12 @@ int j2n_frame_sleep(void *t, int64_t ms) {
         }
         vs_due_ns += 30000000LL;
     } else {
-        int k = (int)((33333333LL + per / 2) / per);
+        int k = (int)((want_ms * 1000000LL + per / 2) / per);
         if (k < 1) {
             k = 1;
+        }
+        if (k > 12) {
+            k = 12;
         }
         /* khung nang qua K nhip / lan dau: khung sau bat dau o nhip ke tiep (khong don khung) */
         if (vs_next <= vs_tick || vs_next > vs_tick + k) {
@@ -309,7 +316,22 @@ int j2n_frame_sleep(void *t, int64_t ms) {
         vs_next = vs_tick + k;
     }
     pthread_mutex_unlock(&vs_mu);
+    vs_wake_ms = vs_mono_ms();
     return 1;
+}
+
+/* Avatar: ban phim he thong theo o go chu cua game */
+static void (*kb_hook)(int, int);
+
+void j2n_set_keyboard_hook(void (*fn)(int show, int area_bottom)) {
+    kb_hook = fn;
+}
+
+void N_j2n_Disp_wantKeyboard(jctx *t, int32_t show, int32_t area_bottom) {
+    (void)t;
+    if (kb_hook) {
+        kb_hook(show, area_bottom);
+    }
 }
 
 void N_j2n_Disp_showTextBox(jctx *t, jobj title, jobj text, int32_t max, int32_t cons) {

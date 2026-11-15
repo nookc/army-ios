@@ -55,6 +55,11 @@ final class Native {
         MainActivity.requestTextBox(title, text, max, cons);
     }
 
+    /** game vao / ra o go chu (KbHook trong client) -> bat / tat ban phim dien thoai */
+    static void wantKeyboard(int show, int areaBottom) {
+        MainActivity.wantKeyboard(show != 0, areaBottom);
+    }
+
     static int soundCreate(byte[] data, String type) {
         return Sound.create(data, type);
     }

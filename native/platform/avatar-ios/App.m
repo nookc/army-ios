@@ -328,7 +328,10 @@ static void type_text(NSString *text) {
     BOOL sizeChanged = nvw != savedWidth();
     [prefs() setObject:s forKey:@"server"];
     [prefs() setBool:_skip.on forKey:@"skip"];
-    [prefs() setInteger:nvw forKey:@"vw"];
+    if (sizeChanged || [prefs() boolForKey:@"vwSet"]) {
+        [prefs() setInteger:nvw forKey:@"vw"];
+        [prefs() setBool:YES forKey:@"vwSet"]; /* nguoi choi tu chon co giao dien */
+    }
     gArgServer = nil;
     j2n_set_server(s.UTF8String);
     [self.view endEditing:YES];
@@ -361,10 +364,18 @@ static void type_text(NSString *text) {
 @end
 
 /* ============================================================ view controller game */
+static CGFloat screen_scale(void) {
+    CGFloat sc = UIScreen.mainScreen.nativeScale;
+    return sc > 0 ? sc : UIScreen.mainScreen.scale;
+}
+
+static void ios_kb_hook(int show, int area);
+
 @interface GameVC : UIViewController
 @property (nonatomic, readonly) KeyView *keyView;
 - (void)showTextBox:(NSString *)title text:(NSString *)text max:(int)max cons:(int)cons;
 - (void)showSettings:(BOOL)starting;
+- (void)gameKeyboard:(int)show area:(int)area;
 @end
 
 @implementation GameVC {
@@ -373,6 +384,8 @@ static void type_text(NSString *text) {
     UIButton *_aa;
     CADisplayLink *_link;
     CGFloat _kbTop;          /* mep tren ban phim (toa do view), 0 = khong co ban phim */
+    int _px;                 /* > 0: moi diem game = _px x _px diem anh that (net, khong rung khi cuon) */
+    int _gameKbArea;         /* > 0: game o o go chu, day vung game (diem anh Canvas) dat ngay tren ban phim */
     BOOL _settingsShown;
     int _shownW;
 }
@@ -419,7 +432,8 @@ static void type_text(NSString *text) {
 - (void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
     if (gStarted || _settingsShown) return;
-    if (!gAutotest && [prefs() boolForKey:@"skip"] && savedServer().length) {
+    if (!gAutotest && savedServer().length) {
+        /* co dia chi may chu (dien san trong app / da luu): vao thang game (giu nut Aa 1 giay de doi) */
         [self startGame];
     } else {
         [self showSettings:YES];
@@ -465,10 +479,23 @@ static void type_text(NSString *text) {
     UIEdgeInsets in = self.view.safeAreaInsets;
     CGSize s = self.view.bounds.size;
     CGFloat sw = MAX(1, s.width - in.left - in.right), sh = MAX(1, s.height - in.top - in.bottom);
-    gW = savedWidth();
-    int h = (int)lround(gW * sh / sw);
+    int h;
+    if ([prefs() boolForKey:@"vwSet"]) {
+        gW = savedWidth();
+        h = (int)lround(gW * sh / sw);
+        _px = 0;
+    } else {
+        /* moi diem anh game = n x n diem anh that (n nguyen): net deu, khong nhoe / rung khi cuon ban do */
+        CGFloat sc = screen_scale();
+        int pw = (int)floor(sw * sc), ph = (int)floor(sh * sc);
+        int n = MAX(2, pw / 220);
+        gW = pw / n;
+        h = ph / n;
+        _px = n;
+    }
     h = MAX(gW * 4 / 3, MIN(gW * 12 / 5, h));
     gH = h - (h % 2);
+    j2n_set_keyboard_hook(ios_kb_hook);
     j2n_set_server(savedServer().UTF8String);
     j2n_set_hd(HD_CANVAS, 2);
     plat_log([[NSString stringWithFormat:@"[app] vao game: may chu '%@', man %dx%d (vung an toan %.0fx%.0f diem)",
@@ -491,11 +518,25 @@ static void type_text(NSString *text) {
     UIEdgeInsets in = self.view.safeAreaInsets;
     CGSize s = self.view.bounds.size;
     CGFloat top = in.top, bottom = s.height - in.bottom;
+    CGFloat fullH = MAX(1, bottom - top);
     if (_kbTop > 0 && _kbTop < bottom) bottom = _kbTop;
     CGFloat availW = s.width - in.left - in.right, availH = MAX(1, bottom - top);
-    CGFloat k = MIN(availW / gW, availH / gH);
-    CGFloat dw = round(gW * k), dh = round(gH * k);
-    _screen.frame = CGRectMake(in.left + round((availW - dw) / 2), top + round((availH - dh) / 2), dw, dh);
+    CGFloat sc = screen_scale();
+    if (_px > 0 && gW > 0 && gH > 0 && (_kbTop <= 0 || _gameKbArea > 0)) {
+        /* dung n x n diem anh that moi diem game, goc khung dat dung ranh diem anh */
+        CGFloat dw = gW * _px / sc, dh = gH * _px / sc;
+        CGFloat x = in.left + floor((availW - dw) / 2 * sc) / sc;
+        CGFloat y = top + floor((fullH - dh) / 2 * sc) / sc;
+        if (_kbTop > 0 && _gameKbArea > 0) {
+            /* o chat ngay tren ban phim: day khung game len (vung duoi cua game nam sau ban phim) */
+            y = MIN(y, floor((_kbTop - _gameKbArea * _px / sc) * sc) / sc);
+        }
+        _screen.frame = CGRectMake(x, y, dw, dh);
+    } else {
+        CGFloat k = MIN(availW / gW, availH / gH);
+        CGFloat dw = round(gW * k), dh = round(gH * k);
+        _screen.frame = CGRectMake(in.left + round((availW - dw) / 2), top + round((availH - dh) / 2), dw, dh);
+    }
     CGFloat aw = 38, ah = 34;
     CGFloat ay = in.top + (s.height - in.top - in.bottom) * 0.42;
     if (_kbTop > 0) ay = MIN(ay, _kbTop - ah - 8);
@@ -517,6 +558,20 @@ static void type_text(NSString *text) {
     _kbTop = 0;
     double dur = [n.userInfo[UIKeyboardAnimationDurationUserInfoKey] doubleValue];
     [UIView animateWithDuration:dur animations:^{
+        [self layoutScreen];
+    }];
+}
+
+/* game vao / ra o go chu (KbHook): bat / tat ban phim iPhone, dat o chat ngay tren ban phim */
+- (void)gameKeyboard:(int)show area:(int)area {
+    if (!gStarted) return;
+    _gameKbArea = show ? MAX(1, area) : 0;
+    if (show) {
+        if (!_keys.isFirstResponder) [_keys becomeFirstResponder];
+    } else if (_keys.isFirstResponder) {
+        [_keys resignFirstResponder];
+    }
+    [UIView animateWithDuration:0.2 animations:^{
         [self layoutScreen];
     }];
 }
@@ -585,6 +640,13 @@ static void type_text(NSString *text) {
     [top presentViewController:a animated:YES completion:nil];
 }
 @end
+
+/* luong game (KbHook trong client) -> luong giao dien */
+static void ios_kb_hook(int show, int area) {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [gVC gameKeyboard:show area:area];
+    });
+}
 
 /* ============================================================ nen tang */
 void plat_present(const uint32_t *fb, int w, int h) {

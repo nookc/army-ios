@@ -104,6 +104,10 @@ public final class Ui {
     }
 
     public static void serviceRepaints(Displayable c) {
+        if (c != cur) {
+            // Canvas khong hien (vd vong lap thanh pho chay ngam khi dang o ban ban ca): khong gianh nhip quet cua man dang hien
+            return;
+        }
         if (Thread.currentThread() != evThread) {
             // v8h-31: vong lap game ve xong 1 khung -> ngu giua 2 khung theo nhip quet man hinh (neu nen tang co)
             Disp.frameMark();

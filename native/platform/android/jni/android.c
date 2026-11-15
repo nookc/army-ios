@@ -125,6 +125,15 @@ static void clear_exc(JNIEnv *e) {
     }
 }
 
+static jmethodID mWantKb;
+
+static void kb_hook(int show, int area_bottom) {
+    JNIEnv *e = env();
+    if (!e || !mWantKb) return;
+    (*e)->CallStaticVoidMethod(e, gBridge, mWantKb, (jint)show, (jint)area_bottom);
+    clear_exc(e);
+}
+
 jint JNI_OnLoad(JavaVM *vm, void *reserved) {
     (void)reserved;
     gVm = vm;
@@ -145,6 +154,13 @@ jint JNI_OnLoad(JavaVM *vm, void *reserved) {
     mVibrate = (*e)->GetStaticMethodID(e, c, "vibrate", "(I)V");
     mExit = (*e)->GetStaticMethodID(e, c, "exitApp", "()V");
     clear_exc(e);
+    /* Avatar: cau noi co wantKeyboard(II)V -> game xin ban phim dien thoai khi vao o go chu (ban Army khong co: bo qua) */
+    mWantKb = (*e)->GetStaticMethodID(e, c, "wantKeyboard", "(II)V");
+    if ((*e)->ExceptionCheck(e)) {
+        (*e)->ExceptionClear(e);
+        mWantKb = 0;
+    }
+    if (mWantKb) j2n_set_keyboard_hook(kb_hook);
     return JNI_VERSION_1_6;
 }
 

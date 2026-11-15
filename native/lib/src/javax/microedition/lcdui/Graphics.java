@@ -222,11 +222,42 @@ public class Graphics {
         if (src == null) {
             throw new NullPointerException();
         }
-        if (xs < 0 || ys < 0 || w < 0 || h < 0 || xs + w > src.w || ys + h > src.h) {
+        if (w < 0 || h < 0) {
             throw new IllegalArgumentException("drawRegion");
         }
         if (transform < 0 || transform > 7) {
             throw new IllegalArgumentException("transform");
+        }
+        if (xs < 0 || ys < 0 || xs + w > src.w || ys + h > src.h) {
+            // May that (Nokia...) cat phan vung nam ngoai anh thay vi nem loi; client Avatar co man (tao nhan vat...) dua
+            // vung lo ra -> truoc day ca khung ve bi huy (hinh thieu, nhap nhay). Cat vung, giu dung vi tri phan con lai.
+            if (w == 0 || h == 0) {
+                return;
+            }
+            boolean swap = transform >= 4; // ROT90 / ROT270 / MIRROR_ROT90 / MIRROR_ROT270: rong <-> cao
+            int dw = swap ? h : w, dh = swap ? w : h;
+            int x = xd, y = yd;
+            if ((anchor & HCENTER) != 0) {
+                x -= dw / 2;
+            } else if ((anchor & RIGHT) != 0) {
+                x -= dw;
+            }
+            if ((anchor & VCENTER) != 0) {
+                y -= dh / 2;
+            } else if ((anchor & BOTTOM) != 0) {
+                y -= dh;
+            }
+            int x0 = xs < 0 ? 0 : xs, y0 = ys < 0 ? 0 : ys;
+            int x1 = xs + w > src.w ? src.w : xs + w, y1 = ys + h > src.h ? src.h : ys + h;
+            if (x1 <= x0 || y1 <= y0) {
+                return;
+            }
+            if (transform == 0) {
+                x += x0 - xs;
+                y += y0 - ys;
+            }
+            drawRegion0(src, x0, y0, x1 - x0, y1 - y0, transform, x, y, TOP | LEFT);
+            return;
         }
         drawRegion0(src, xs, ys, w, h, transform, xd, yd, anchor);
     }

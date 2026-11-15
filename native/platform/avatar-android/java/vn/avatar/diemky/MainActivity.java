@@ -58,6 +58,7 @@ public final class MainActivity extends Activity {
 
     SharedPreferences prefs;
     GameView view;
+    int pxScale; // > 0: canvas hien dung n x n diem anh moi diem game
     AlertDialog dialog;
     EditText dialogEdit;
     TextReq dialogReq;
@@ -79,12 +80,48 @@ public final class MainActivity extends Activity {
             prefs.edit().putString("server", normalizeServer(extra)).apply();
         }
         Log.i(TAG, "[app] activity tao (game " + (started ? "dang chay" : "chua chay") + ")");
-        if (started || (extra != null && extra.length() > 0)
-                || (prefs.getBoolean("skip", false) && server().length() > 0)) {
+        immersive();
+        // co dia chi may chu (dien san trong APK / da luu) -> vao thang game, khong hien cai dat (giu nut Aa 2 giay de doi)
+        if (started || (extra != null && extra.length() > 0) || server().length() > 0) {
             startGame();
         } else {
             serverDialog(true);
         }
+    }
+
+    /** toan man hinh: an thanh trang thai + thanh dieu huong (vuot tu mep de hien tam) */
+    @SuppressWarnings("deprecation")
+    void immersive() {
+        try {
+            getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                    | View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                    | View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                    | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
+        } catch (Throwable t) {
+        }
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        if (hasFocus) {
+            immersive();
+        }
+    }
+
+    /** goi tu luong game (KbHook): game vao / ra o go chu -> bat / tat ban phim dien thoai */
+    static void wantKeyboard(final boolean show, final int areaBottom) {
+        final MainActivity a = Native.act;
+        if (a == null) {
+            return;
+        }
+        a.runOnUiThread(new Runnable() {
+            public void run() {
+                if (a.view != null) {
+                    a.view.gameKeyboard(show, areaBottom);
+                }
+            }
+        });
     }
 
     @Override
@@ -263,7 +300,11 @@ public final class MainActivity extends Activity {
                 }
                 int sel = rg.getCheckedRadioButtonId() - 1000;
                 int nvw = SIZES[sel >= 0 && sel < SIZES.length ? sel : 0];
-                prefs.edit().putString("server", s).putBoolean("skip", cb.isChecked()).putInt("vw", nvw).apply();
+                SharedPreferences.Editor pe = prefs.edit().putString("server", s).putBoolean("skip", cb.isChecked());
+                if (nvw != curVw || prefs.getBoolean("vwSet", false)) {
+                    pe.putInt("vw", nvw).putBoolean("vwSet", true); // nguoi choi tu chon co giao dien
+                }
+                pe.apply();
                 if (started) {
                     Native.setServer(s);
                 }
@@ -302,9 +343,19 @@ public final class MainActivity extends Activity {
         if (started) {
             return;
         }
-        int vw = savedWidth();
-        int vh = Math.max(vw * 4 / 3, Math.round(vw * (float) h / Math.max(1, w)));
-        vh = Math.min(vh, vw * 12 / 5);
+        int vw, vh;
+        if (prefs.getBoolean("vwSet", false)) {
+            vw = savedWidth();
+            vh = Math.max(vw * 4 / 3, Math.round(vw * (float) h / Math.max(1, w)));
+            pxScale = 0;
+        } else {
+            // moi diem anh game = n x n diem anh man hinh (n nguyen): net deu, khong nhoe / rung khi cuon ban do
+            int n = Math.max(2, w / 220);
+            vw = w / n;
+            vh = h / n;
+            pxScale = n;
+        }
+        vh = Math.max(vw * 4 / 3, Math.min(vh, vw * 12 / 5));
         vh -= vh % 2;
         gW = vw;
         gH = vh;
@@ -577,6 +628,7 @@ public final class MainActivity extends Activity {
         boolean framesOn, onTab, kbShown;
         long tabDown;
         float k = 1f;
+        int gameKbArea; // > 0: game dang o go chu (ban phim dien thoai do game xin)
         int ptr = -1;
         String lastLayout;
 
@@ -670,9 +722,20 @@ public final class MainActivity extends Activity {
             } catch (Throwable t) {
             }
             kbShown = avail < h * 0.85f;
-            k = Math.min(w / (float) gW, avail / (float) gH);
+            int n = act.pxScale;
+            if (n > 0 && gW * n <= w && gH * n <= h && (!kbShown || gameKbArea > 0)) {
+                k = n;
+            } else {
+                k = Math.min(w / (float) gW, avail / (float) gH);
+            }
             int dw = Math.round(gW * k), dh = Math.round(gH * k);
-            int ox = (w - dw) / 2, oy = Math.max(0, (avail - dh) / 2);
+            int ox = (w - dw) / 2, oy = Math.max(0, (h - dh) / 2);
+            if (kbShown && gameKbArea > 0) {
+                // o chat ngay tren ban phim: day khung game len, phan duoi (vung ban phim cu cua game) nam sau ban phim
+                oy = Math.min(oy, avail - Math.round(gameKbArea * k));
+            } else if (kbShown) {
+                oy = Math.max(0, (avail - dh) / 2);
+            }
             if (dst.left != ox || dst.top != oy || dst.width() != dw || dst.height() != dh) {
                 dst.set(ox, oy, ox + dw, oy + dh);
                 invalidate();
@@ -775,6 +838,21 @@ public final class MainActivity extends Activity {
                     break;
             }
             return true;
+        }
+
+        /** game xin / tra ban phim (o go chu): areaBottom = day vung game con dung (diem anh Canvas) */
+        void gameKeyboard(boolean show, int areaBottom) {
+            InputMethodManager im = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+            gameKbArea = show ? Math.max(1, areaBottom) : 0;
+            if (im != null) {
+                if (show) {
+                    requestFocus();
+                    im.showSoftInput(this, InputMethodManager.SHOW_FORCED);
+                } else {
+                    im.hideSoftInputFromWindow(getWindowToken(), 0);
+                }
+            }
+            relayout();
         }
 
         void toggleKeyboard() {

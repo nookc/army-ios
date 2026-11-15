@@ -56,4 +56,8 @@ public final class Disp {
 
     /** trinh bay khung ve san trong mang diem anh (man phong to) */
     public static native void presentImage(int[] argb, int w, int h);
+
+    /** Avatar: game vao / ra che do go chu -> nen tang bat / tat ban phim he thong.
+     *  show 1/0; areaBottom = day vung game con dung duoc (diem anh Canvas, 0 = ca man) de dat ngay tren ban phim */
+    public static native void wantKeyboard(int show, int areaBottom);
 }

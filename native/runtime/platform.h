@@ -67,6 +67,9 @@ void j2n_set_hd(const char *names, int scale);
    NULL / "" = khong chuyen. Goi luc nao cung duoc (ap dung tu lan ket noi sau) */
 void j2n_set_server(const char *spec);
 int j2n_frames(void);
+/* Avatar: nen tang dang ky ham bat/tat ban phim he thong khi game vao/ra o go chu (show 1/0, area_bottom: day vung game
+   con dung duoc tinh bang diem anh Canvas, 0 = ca man). Khong dang ky = bo qua */
+void j2n_set_keyboard_hook(void (*fn)(int show, int area_bottom));
 /* so vung du lieu tinh GC da xet / da nhan lam goc (iOS: chi giu cua app) */
 void rt_gc_roots_stats(unsigned *seen, unsigned *kept);
 
