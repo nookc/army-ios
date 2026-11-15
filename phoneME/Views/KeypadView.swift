@@ -1865,8 +1865,12 @@ struct AvatarControlsOverlay: View {
                 .font(.system(size: 15, weight: .bold))
                 .foregroundColor(.white)
                 .frame(width: 38, height: 38)
-                .background(Color.black.opacity(typing ? 0.65 : 0.35))
+                .background(Color.black.opacity(typing ? 0.7 : 0.4))
                 .clipShape(RoundedRectangle(cornerRadius: 9, style: .continuous))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 9, style: .continuous)
+                        .stroke(Color.white.opacity(typing ? 0.9 : 0.55), lineWidth: 1.5)
+                )
                 .contentShape(Rectangle())
                 .onTapGesture {
                     typing.toggle()
