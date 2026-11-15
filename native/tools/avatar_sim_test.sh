@@ -64,7 +64,13 @@ xcrun simctl spawn "$DEV" defaults write -g AppleLocale -string vi_VN || true
 xcrun simctl install "$DEV" "$APP"
 xcrun simctl launch --console-pty "$DEV" "$BID" -autotest -avatar.server 127.0.0.1:19129 > "$OUT/console.log" 2>&1 &
 LP=$!
-for i in $(seq 1 150); do
+# simulator moi bat lan dau rat cham (Data Migration, System App): doi app thuc su khoi dong roi moi tinh gio tu kiem thu
+for i in $(seq 1 600); do
+  sleep 1
+  grep -q "khoi dong Avatar" "$OUT/console.log" 2>/dev/null && break
+done
+echo "app khoi dong sau ${i} giay"
+for i in $(seq 1 240); do
   sleep 1
   grep -q "\[autotest\] xong" "$OUT/console.log" 2>/dev/null && break
 done

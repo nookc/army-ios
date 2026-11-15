@@ -1,6 +1,9 @@
 /*
  * rt.c - loi runtime: cap phat (Boehm GC), lop, ngoai le, monitor, luong, chuoi.
  */
+#if defined(__ANDROID__) && !defined(_GNU_SOURCE)
+#define _GNU_SOURCE 1   /* dladdr / Dl_info (tim ten thu vien cua chinh runtime) */
+#endif
 #define GC_THREADS 1
 #include "gc.h"
 #include <pthread.h>
@@ -760,17 +763,29 @@ static int GC_CALLBACK rt_roots_filter(const char *name, void *start, size_t siz
 #endif
 
 #ifdef __ANDROID__
-/* Android: tien trinh app co hang tram thu vien he thong (ART...) - chi quet du lieu cua libarmy2.so */
+/* Android: tien trinh app co hang tram thu vien he thong (ART...) - chi quet du lieu cua thu vien chua runtime nay
+   (libarmy2.so / libavatar.so...: ten lay bang dladdr luc khoi dong, khong viet cung - viet cung "libarmy2.so" lam ban
+   Avatar mat het goc tinh -> GC thu hoi doi tuong con dung -> sap) */
+#include <dlfcn.h>
 static unsigned g_roots_seen, g_roots_kept;
+static char g_self_lib[256];
 static int GC_CALLBACK rt_roots_filter(const char *name, void *start, size_t size) {
     (void)start;
     (void)size;
     g_roots_seen++;
-    if (name && strstr(name, "libarmy2.so")) {
+    if (!g_self_lib[0] || (name && strstr(name, g_self_lib))) {
         g_roots_kept++;
         return 1;
     }
     return 0;
+}
+
+static void rt_find_self_lib(void) {
+    Dl_info di;
+    if (dladdr((void *)&rt_find_self_lib, &di) && di.dli_fname && di.dli_fname[0]) {
+        const char *b = strrchr(di.dli_fname, '/');
+        snprintf(g_self_lib, sizeof g_self_lib, "%s", b ? b + 1 : di.dli_fname);
+    }
 }
 #endif
 
@@ -787,6 +802,7 @@ void rt_init(void) {
     GC_set_warn_proc(gc_warn);
     GC_set_abort_func(gc_abort);
 #ifdef __ANDROID__
+    rt_find_self_lib();
     GC_register_has_static_roots_callback(rt_roots_filter);
 #endif
 #ifdef __APPLE__
