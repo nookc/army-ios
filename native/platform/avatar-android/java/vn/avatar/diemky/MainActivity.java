@@ -116,20 +116,45 @@ public final class MainActivity extends Activity {
     }
 
     // ------------------------------------------------------------------ may chu + cai dat
-    String bundledServer() {
-        try {
-            InputStream in = getAssets().open("server.txt");
-            ByteArrayOutputStream bo = new ByteArrayOutputStream();
-            byte[] buf = new byte[256];
-            int n;
-            while ((n = in.read(buf)) > 0) {
-                bo.write(buf, 0, n);
-            }
-            in.close();
-            return new String(bo.toByteArray(), "UTF-8").trim();
-        } catch (Exception e) {
-            return "";
+    static String readAll(InputStream in) throws java.io.IOException {
+        ByteArrayOutputStream bo = new ByteArrayOutputStream();
+        byte[] buf = new byte[256];
+        int n;
+        while ((n = in.read(buf)) > 0) {
+            bo.write(buf, 0, n);
         }
+        in.close();
+        return new String(bo.toByteArray(), "UTF-8").trim();
+    }
+
+    /** dia chi dien san: assets/server.txt (luc build / DoiMayChu moi), neu trong thi server.txt o goc APK (DoiMayChu cu) */
+    String bundledServer() {
+        String s = "";
+        try {
+            s = readAll(getAssets().open("server.txt"));
+        } catch (Exception e) {
+            s = "";
+        }
+        if (s.length() == 0) {
+            java.util.zip.ZipFile z = null;
+            try {
+                z = new java.util.zip.ZipFile(getApplicationInfo().sourceDir);
+                java.util.zip.ZipEntry e = z.getEntry("server.txt");
+                if (e != null) {
+                    s = readAll(z.getInputStream(e));
+                }
+            } catch (Exception e) {
+                s = "";
+            } finally {
+                try {
+                    if (z != null) {
+                        z.close();
+                    }
+                } catch (Exception e) {
+                }
+            }
+        }
+        return s;
     }
 
     String server() {
