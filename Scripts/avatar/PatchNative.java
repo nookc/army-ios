@@ -29,6 +29,7 @@ public class PatchNative {
                 if (e.getName().equals("main/a.class")) d = patchMain(d);
                 else if (e.getName().equals("b.class")) d = patchPad(d);
                 else if (e.getName().equals("ba.class")) d = patchWeather(d);
+                else if (e.getName().equals("do.class")) d = patchCamera(d);
                 if (e.getName().equals("KbHook.class")) continue;
                 ZipEntry ne = new ZipEntry(e.getName());
                 ne.setTime(e.getTime());
@@ -41,7 +42,8 @@ public class PatchNative {
             zo.write(hook);
             zo.closeEntry();
         }
-        String[] need = { "keyPressed", "pointerDragged", "pointerReleased", "main.b", "pad.tick", "pad.paint", "pad.fields", "ba.removeAt" };
+        String[] need = { "keyPressed", "pointerDragged", "pointerReleased", "main.b", "pad.tick", "pad.paint", "pad.fields", "ba.removeAt", "pointerPressed" };
+        if (done.get("camera") == null || done.get("camera") != 2) throw new IllegalStateException("camera: " + done);
         for (String n : need) {
             Integer c = done.get(n);
             if (c == null || (c != 1 && !n.equals("pad.fields"))) throw new IllegalStateException("va that bai: " + n + " = " + c + " " + done);
@@ -105,6 +107,10 @@ public class PatchNative {
                     mark("pointerReleased");
                     return beforeReturn(mv, "release");
                 }
+                if (name.equals("pointerPressed") && desc.equals("(II)V")) {
+                    mark("pointerPressed");
+                    return beforeReturn(mv, "press");
+                }
                 if (name.equals("b") && desc.equals("()V") && (acc & Opcodes.ACC_STATIC) == 0) {
                     mark("main.b");
                     return beforeReturn(mv, "sync");
@@ -146,6 +152,65 @@ public class PatchNative {
                         }
                         super.visitMethodInsn(op, owner, n, d, itf);
                     }
+                };
+            }
+        }, 0);
+        return cw.toByteArray();
+    }
+
+    /** do.c() (camera theo nhan vat): moi khung keo camera 1/8 khoang con lai -> tha nut roi ma nen van troi them ~1 giay
+     *  (nhin nhu nhan vat tu chay). Doi thanh 1/4: van muot nhung bam sat, dung nhanh. (x << 1 -> x << 2, ca truc x va y) */
+    static byte[] patchCamera(byte[] in) {
+        ClassReader cr = new ClassReader(in);
+        ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS);
+        cr.accept(new ClassVisitor(Opcodes.ASM9, cw) {
+            @Override
+            public MethodVisitor visitMethod(int acc, String name, String desc, String sig, String[] ex) {
+                MethodVisitor mv = super.visitMethod(acc, name, desc, sig, ex);
+                if (!name.equals("c") || !desc.equals("()V") || (acc & Opcodes.ACC_STATIC) != 0) return mv;
+                return new MethodVisitor(Opcodes.ASM9, mv) {
+                    boolean pending; // vua gap ICONST_1, cho xem lenh sau co phai ISHL
+
+                    void flush() {
+                        if (pending) {
+                            pending = false;
+                            super.visitInsn(Opcodes.ICONST_1);
+                        }
+                    }
+
+                    @Override
+                    public void visitInsn(int op) {
+                        if (pending && op == Opcodes.ISHL) {
+                            pending = false;
+                            mark("camera");
+                            super.visitInsn(Opcodes.ICONST_2);
+                            super.visitInsn(Opcodes.ISHL);
+                            return;
+                        }
+                        flush();
+                        if (op == Opcodes.ICONST_1) {
+                            pending = true;
+                            return;
+                        }
+                        super.visitInsn(op);
+                    }
+
+                    @Override public void visitIntInsn(int op, int v) { flush(); super.visitIntInsn(op, v); }
+                    @Override public void visitVarInsn(int op, int v) { flush(); super.visitVarInsn(op, v); }
+                    @Override public void visitTypeInsn(int op, String t) { flush(); super.visitTypeInsn(op, t); }
+                    @Override public void visitFieldInsn(int op, String o, String n, String d) { flush(); super.visitFieldInsn(op, o, n, d); }
+                    @Override public void visitMethodInsn(int op, String o, String n, String d, boolean i) { flush(); super.visitMethodInsn(op, o, n, d, i); }
+                    @Override public void visitJumpInsn(int op, Label l) { flush(); super.visitJumpInsn(op, l); }
+                    @Override public void visitLabel(Label l) { flush(); super.visitLabel(l); }
+                    @Override public void visitLdcInsn(Object v) { flush(); super.visitLdcInsn(v); }
+                    @Override public void visitIincInsn(int v, int inc) { flush(); super.visitIincInsn(v, inc); }
+                    @Override public void visitTableSwitchInsn(int a, int b, Label d, Label... l) { flush(); super.visitTableSwitchInsn(a, b, d, l); }
+                    @Override public void visitLookupSwitchInsn(Label d, int[] k, Label[] l) { flush(); super.visitLookupSwitchInsn(d, k, l); }
+                    @Override public void visitMultiANewArrayInsn(String d, int n) { flush(); super.visitMultiANewArrayInsn(d, n); }
+                    @Override public void visitLineNumber(int line, Label start) { flush(); super.visitLineNumber(line, start); }
+                    @Override public void visitFrame(int t, int nl, Object[] l, int ns, Object[] st) { flush(); super.visitFrame(t, nl, l, ns, st); }
+                    @Override public void visitMaxs(int a, int b) { flush(); super.visitMaxs(a, b); }
+                    @Override public void visitEnd() { flush(); super.visitEnd(); }
                 };
             }
         }, 0);

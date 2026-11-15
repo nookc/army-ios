@@ -95,16 +95,49 @@ public final class KbHook {
         main.a.a.keyPressed(p.u[nv]);
     }
 
-    /** sau main.a.pointerReleased: nhan trong d-pad ma tha tay ngoai -> dua diem tha ve o dang nhan de game nha phim */
+    /** sau main.a.pointerPressed: nhan vao o d-pad -> nhan phim NGAY tren luong su kien.
+     *  Truoc day ban phim ao chi xu ly co nhan/tha (main.a.e / f) 1 lan moi khung o dau vong lap; cham toi giua khung thi
+     *  man ban do xu ly truoc (coi la cham ban do de di toi) va xoa co -> phim khong duoc nhan/nha, nhan vat tu chay. */
+    public static void press() {
+        b p = main.a.z;
+        if (p == null || p.a || p.u == null || p.f <= 0 || p.g <= 0 || p.l <= 0) {
+            return;
+        }
+        if (!inPad(p, main.a.h, main.a.i)) {
+            return;
+        }
+        int v = (main.a.i - p.c) / p.g * p.l + (main.a.h - p.b) / p.f;
+        if (v < 0 || v >= p.u.length || v == 2) { // o "ABC" (giu de doi kieu go): de game tu xu ly
+            return;
+        }
+        if (p.v >= 0 && p.v < p.u.length && p.v != v) {
+            main.a.a.keyReleased(p.u[p.v]); // phim cu con giu (lo mat lan tha) -> nha truoc
+        }
+        p.v = v;
+        main.a.e = false; // lan nhan nay thuoc ve d-pad, man ban do khong duoc coi la cham de di
+        main.a.a.keyPressed(p.u[v]);
+    }
+
+    /** sau main.a.pointerReleased: nhan bat dau trong d-pad -> nha phim NGAY (tha o dau cung dung lai) */
     public static void release() {
         b p = main.a.z;
-        if (p == null || p.a || p.v < 0 || p.f <= 0 || p.g <= 0 || p.l <= 0) {
+        if (p == null || p.a || p.u == null) {
             return;
         }
-        if (!inPad(p, main.a.j, main.a.k) || inPad(p, main.a.h, main.a.i)) {
+        if (!inPad(p, main.a.j, main.a.k)) {
             return;
         }
-        main.a.h = p.b + (p.v % p.l) * p.f + p.f / 2;
-        main.a.i = p.c + (p.v / p.l) * p.g + p.g / 2;
+        if (p.v >= 0 && p.v < p.u.length && p.v != 2) {
+            int k = p.u[p.v];
+            p.v = -1;
+            main.a.f = false; // lan tha thuoc ve d-pad
+            main.a.a.keyReleased(k);
+            return;
+        }
+        if (p.v >= 0 && p.f > 0 && p.g > 0 && p.l > 0 && !inPad(p, main.a.h, main.a.i)) {
+            // o ABC: dua diem tha ve o dang nhan de game xu ly nhu cu
+            main.a.h = p.b + (p.v % p.l) * p.f + p.f / 2;
+            main.a.i = p.c + (p.v / p.l) * p.g + p.g / 2;
+        }
     }
 }
