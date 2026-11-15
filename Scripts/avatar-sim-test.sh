@@ -48,18 +48,16 @@ waitfor() {
   echo "khong thay '$1' sau $2 giay"
   return 1
 }
-waitfor "\[autotest\] bat dau" 90 && sleep 7
-shot 1_man_dau
-waitfor "xuong o mat khau" 30 && sleep 2.6
-shot 2_go_tai_khoan
-waitfor "OK luu tai khoan" 20 && sleep 1.8
-shot 3_menu_choi_tiep
-waitfor "OK nhom thanh pho" 20 && sleep 1.2
-shot 4_chon_thanh_pho
-waitfor "OK thanh pho" 20 && sleep 7
-shot 5_ket_noi
-waitfor "\[autotest\] xong" 40
-shot 6_cuoi
+waitfor "\[autotest\] game chay" 150 && sleep 4
+shot man_hinh_game
+waitfor "\[autotest\] luu 3_go_xong" 60
+shot man_hinh_go_chu
+waitfor "\[autotest\] xong" 90
+shot man_hinh_cuoi
+C=$(xcrun simctl get_app_container "$DEV" "$BID" data 2>/dev/null)
+if [ -n "$C" ]; then
+  cp "$C"/Documents/autotest/*.png "$OUT/" 2>/dev/null || true
+fi
 if pgrep -f "phoneME.app/phoneME" >/dev/null 2>&1; then
   echo "app con chay" > "$OUT/trang_thai_app.txt"
 else

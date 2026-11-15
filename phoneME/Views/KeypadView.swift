@@ -1892,8 +1892,9 @@ struct AvatarControlsOverlay: View {
     }
 }
 
-/// Chay thu tu dong tren Simulator (CI): AVATAR_AUTOTEST=1. Bam "Doi tai khoan", go ten/mat khau
-/// bang duong ban phim iPhone (ma -1000 + ky tu), luu, roi vao chon thanh pho de thu ket noi may chu.
+/// Chay thu tu dong tren Simulator (CI): AVATAR_AUTOTEST=1. Doi game chay, bam "Doi tai khoan",
+/// go ten/mat khau bang duong ban phim iPhone (ma -1000 + ky tu), luu, chon thanh pho de thu ket noi.
+/// Moi buoc luu hinh J2ME vao Documents/autotest/*.png (script CI lay ra).
 @MainActor
 enum AvatarAutotest {
     private static var started = false
@@ -1902,46 +1903,76 @@ enum AvatarAutotest {
         guard !started else { return }
         started = true
         print("[autotest] bat dau h=\(screenHeight)")
-        let menuY = Int32(screenHeight / 2 + 5)
-        var steps: [(Double, String, () -> Void)] = []
-        func key(_ code: Int32) -> () -> Void {
-            return {
-                session.sendRawKey(code, pressed: true)
-                session.sendRawKey(code, pressed: false)
-            }
-        }
-        func typeText(_ text: String, at start: Double, label: String) {
-            var t = start
-            steps.append((t, label + " (-1000)", key(-1000)))
-            for scalar in text.unicodeScalars {
-                t += 0.15
-                steps.append((t, label + " " + String(scalar), key(Int32(scalar.value))))
-            }
-        }
-        steps.append((9.0, "cham Doi tai khoan y=\(menuY)", {
-            session.sendPointer(x: 120, y: menuY, action: 1)
-        }))
-        steps.append((9.1, "nha", {
-            session.sendPointer(x: 120, y: menuY, action: 2)
-        }))
-        typeText("test1", at: 11.0, label: "go ten")
-        steps.append((12.5, "xuong o mat khau", key(-2)))
-        typeText("123456", at: 13.0, label: "go mat khau")
-        steps.append((15.5, "OK luu tai khoan", key(-5)))
-        steps.append((18.0, "OK choi tiep", key(-5)))
-        steps.append((20.0, "OK nhom thanh pho", key(-5)))
-        steps.append((22.0, "OK thanh pho -> ket noi", key(-5)))
-        for (delay, label, action) in steps {
-            Task { @MainActor in
-                try? await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
-                print("[autotest] \(String(format: "%.1f", delay))s \(label)")
-                action()
-            }
-        }
         Task { @MainActor in
-            try? await Task.sleep(nanoseconds: 40_000_000_000)
+            var waited = 0
+            while waited < 240 {
+                if session.state == .running, session.frame != nil { break }
+                try? await Task.sleep(nanoseconds: 500_000_000)
+                waited += 1
+            }
+            print("[autotest] game chay sau \(waited / 2)s")
+            try? await Task.sleep(nanoseconds: 5_000_000_000)
+            save(session, "1_man_dau")
+            let menuY = Int32(screenHeight / 2 + 5)
+            print("[autotest] cham Doi tai khoan y=\(menuY)")
+            session.sendPointer(x: 120, y: menuY, action: 1)
+            try? await Task.sleep(nanoseconds: 120_000_000)
+            session.sendPointer(x: 120, y: menuY, action: 2)
+            try? await Task.sleep(nanoseconds: 1_500_000_000)
+            save(session, "2_form")
+            await typeText(session, "test1")
+            await press(session, -2)
+            await typeText(session, "123456")
+            try? await Task.sleep(nanoseconds: 800_000_000)
+            save(session, "3_go_xong")
+            print("[autotest] OK luu tai khoan")
+            await press(session, -5)
+            try? await Task.sleep(nanoseconds: 2_000_000_000)
+            save(session, "4_menu")
+            print("[autotest] OK choi tiep")
+            await press(session, -5)
+            try? await Task.sleep(nanoseconds: 2_000_000_000)
+            save(session, "5_thanh_pho")
+            print("[autotest] OK nhom thanh pho")
+            await press(session, -5)
+            try? await Task.sleep(nanoseconds: 1_500_000_000)
+            print("[autotest] OK thanh pho -> ket noi")
+            await press(session, -5)
+            try? await Task.sleep(nanoseconds: 6_000_000_000)
+            save(session, "6_ket_noi")
             print("[autotest] xong")
         }
+    }
+
+    private static func press(_ session: EmulatorSession, _ code: Int32) async {
+        session.sendRawKey(code, pressed: true)
+        try? await Task.sleep(nanoseconds: 90_000_000)
+        session.sendRawKey(code, pressed: false)
+        try? await Task.sleep(nanoseconds: 120_000_000)
+    }
+
+    private static func typeText(_ session: EmulatorSession, _ text: String) async {
+        print("[autotest] go \(text)")
+        await press(session, -1000)
+        for scalar in text.unicodeScalars {
+            await press(session, Int32(scalar.value))
+        }
+    }
+
+    private static func save(_ session: EmulatorSession, _ name: String) {
+#if canImport(UIKit)
+        guard let frame = session.frame, let image = frame.makeCGImage() else {
+            print("[autotest] khong co hinh \(name)")
+            return
+        }
+        let directory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+            .appendingPathComponent("autotest", isDirectory: true)
+        try? FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        if let data = UIImage(cgImage: image).pngData() {
+            try? data.write(to: directory.appendingPathComponent(name + ".png"))
+        }
+        print("[autotest] luu \(name) \(image.width)x\(image.height)")
+#endif
     }
 }
 
