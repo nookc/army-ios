@@ -48,4 +48,12 @@ public final class Disp {
 
     /** v8h-31: luong game vua xong 1 khung (serviceRepaints) - lan ngu tiep theo doi nhip quet man hinh (disp.c) */
     public static native void frameMark();
+
+    /** Avatar: Canvas co ten lop trong hdNames() (cach nhau dau phay) duoc ve phong to hdScale() lan (1 = tat) */
+    public static native int hdScale();
+
+    public static native String hdNames();
+
+    /** trinh bay khung ve san trong mang diem anh (man phong to) */
+    public static native void presentImage(int[] argb, int w, int h);
 }

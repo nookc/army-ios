@@ -27,7 +27,25 @@
 #include <unwind.h>
 #include "platform.h"
 
-#define TAG "Army250"
+/* dung chung cho nhieu game: ban Avatar build voi -DJ2N_JNI_CLASS=vn_avatar_diemky_Native -DJ2N_JNI_PATH=... */
+#ifndef J2N_JNI_CLASS
+#define J2N_JNI_CLASS vn_army250_thuan_Native
+#define J2N_JNI_PATH "vn/army250/thuan/Native"
+#endif
+#ifndef J2N_MIDLET
+#define J2N_MIDLET "coreLG.TerrainMidlet"
+#endif
+#ifndef J2N_JAR_ASSET
+#define J2N_JAR_ASSET "Army250.jar"
+#endif
+#ifndef J2N_TAG
+#define J2N_TAG "Army250"
+#endif
+#define JCAT_(a, b) a##_##b
+#define JCAT(a, b) JCAT_(a, b)
+#define JNIFN(n) JCAT(JCAT(Java, J2N_JNI_CLASS), n)
+
+#define TAG J2N_TAG
 
 #if defined(__arm__) || defined(__i386__)
 /* Boehm GC dung tkill() tren Android 32 bit API < 23 (USE_TKILL_ON_ANDROID) nhung libc API 21 cua NDK
@@ -37,7 +55,7 @@ int tkill(int tid, int sig) { return (int)syscall(__NR_tkill, tid, sig); }
 #endif
 
 static JavaVM *gVm;
-static jclass gBridge;                 /* vn/army250/thuan/Native */
+static jclass gBridge;                 /* J2N_JNI_PATH (vn/army250/thuan/Native) */
 static jmethodID mShowText, mSndCreate, mSndStart, mSndStop, mSndClose, mSndVolume, mOpenUrl, mSms, mVibrate, mExit;
 static pthread_key_t gEnvKey;
 static AAsset *gJarAsset;
@@ -47,8 +65,10 @@ static char gDataDir[1024];
 static int gW = 320, gH = 466;
 static int gStarted;
 
-/* khung trinh bay */
+/* khung trinh bay (kich thuoc theo khung moi nhat: man phong to cua Avatar lon hon gW x gH) */
 static uint32_t *gFront;
+static int gFrontW, gFrontH;
+static size_t gFrontCap;
 static pthread_mutex_t gFrontMu = PTHREAD_MUTEX_INITIALIZER;
 static volatile int gFrameNo;
 
@@ -111,7 +131,7 @@ jint JNI_OnLoad(JavaVM *vm, void *reserved) {
     pthread_key_create(&gEnvKey, env_detach);
     JNIEnv *e = 0;
     if ((*vm)->GetEnv(vm, (void *)&e, JNI_VERSION_1_6) != JNI_OK) return -1;
-    jclass c = (*e)->FindClass(e, "vn/army250/thuan/Native");
+    jclass c = (*e)->FindClass(e, J2N_JNI_PATH);
     if (!c) return -1;
     gBridge = (jclass)(*e)->NewGlobalRef(e, c);
     mShowText = (*e)->GetStaticMethodID(e, c, "showTextBox", "(Ljava/lang/String;Ljava/lang/String;II)V");
@@ -223,9 +243,18 @@ const uint8_t *plat_jar_mem(size_t *len) {
 
 /* ============================================================ khung hinh */
 void plat_present(const uint32_t *fb, int w, int h) {
+    size_t n = (size_t)w * (size_t)h;
     pthread_mutex_lock(&gFrontMu);
-    if (!gFront) gFront = (uint32_t *)malloc((size_t)w * h * 4);
-    memcpy(gFront, fb, (size_t)w * h * 4);
+    if (!gFront || n > gFrontCap) {
+        free(gFront);
+        gFront = (uint32_t *)malloc(n * 4);
+        gFrontCap = gFront ? n : 0;
+    }
+    if (gFront) {
+        memcpy(gFront, fb, n * 4);
+        gFrontW = w;
+        gFrontH = h;
+    }
     __atomic_add_fetch(&gFrameNo, 1, __ATOMIC_RELEASE);
     pthread_mutex_unlock(&gFrontMu);
 }
@@ -333,13 +362,12 @@ void plat_exit(void) {
 static void *game_main(void *arg) {
     (void)arg;
     plat_log("[app] luong game bat dau");
-    j2n_run("coreLG.TerrainMidlet", gW, gH);
+    j2n_run(J2N_MIDLET, gW, gH);
     plat_log("[app] game ket thuc");
     return 0;
 }
 
-JNIEXPORT jboolean JNICALL Java_vn_army250_thuan_Native_start(JNIEnv *e, jclass cls, jobject assets, jstring dataDir,
-                                                                   jint w, jint h) {
+JNIEXPORT jboolean JNICALL JNIFN(start)(JNIEnv *e, jclass cls, jobject assets, jstring dataDir, jint w, jint h) {
     (void)cls;
     if (gStarted) return JNI_TRUE;
     const char *d = (*e)->GetStringUTFChars(e, dataDir, 0);
@@ -352,19 +380,19 @@ JNIEXPORT jboolean JNICALL Java_vn_army250_thuan_Native_start(JNIEnv *e, jclass 
     snprintf(p, sizeof p, "%s/../crash.txt", gDataDir);
     gCrashFd = open(p, O_WRONLY | O_CREAT | O_APPEND, 0644);
     AAssetManager *am = AAssetManager_fromJava(e, assets);
-    gJarAsset = am ? AAssetManager_open(am, "Army250.jar", AASSET_MODE_BUFFER) : 0;
+    gJarAsset = am ? AAssetManager_open(am, J2N_JAR_ASSET, AASSET_MODE_BUFFER) : 0;
     if (gJarAsset) {
         gJar = (const uint8_t *)AAsset_getBuffer(gJarAsset);
         gJarLen = (size_t)AAsset_getLength(gJarAsset);
     }
     if (!gJar) {
-        plat_log("[app] khong doc duoc Army250.jar trong apk");
+        plat_log("[app] khong doc duoc " J2N_JAR_ASSET " trong apk");
         return JNI_FALSE;
     }
     gW = w;
     gH = h;
     char b[200];
-    snprintf(b, sizeof b, "[app] khoi dong Army2.5.0 (Android), man %dx%d, jar %zu byte", gW, gH, gJarLen);
+    snprintf(b, sizeof b, "[app] khoi dong %s (Android), man %dx%d, jar %zu byte", J2N_MIDLET, gW, gH, gJarLen);
     plat_log(b);
     crash_install();
     pthread_attr_t at;
@@ -379,13 +407,13 @@ JNIEXPORT jboolean JNICALL Java_vn_army250_thuan_Native_start(JNIEnv *e, jclass 
     return JNI_TRUE;
 }
 
-JNIEXPORT void JNICALL Java_vn_army250_thuan_Native_post(JNIEnv *e, jclass cls, jint type, jint a, jint b) {
+JNIEXPORT void JNICALL JNIFN(post)(JNIEnv *e, jclass cls, jint type, jint a, jint b) {
     (void)e;
     (void)cls;
     j2n_post(type, a, b);
 }
 
-JNIEXPORT void JNICALL Java_vn_army250_thuan_Native_textDone(JNIEnv *e, jclass cls, jboolean ok, jstring text) {
+JNIEXPORT void JNICALL JNIFN(textDone)(JNIEnv *e, jclass cls, jboolean ok, jstring text) {
     (void)cls;
     if (!ok || !text) {
         j2n_text_done(0, 0);
@@ -425,20 +453,27 @@ JNIEXPORT void JNICALL Java_vn_army250_thuan_Native_textDone(JNIEnv *e, jclass c
 }
 
 /* chep khung moi nhat vao Bitmap ARGB_8888 (bo nho RGBA) neu co khung moi; tra ve so khung */
-JNIEXPORT jint JNICALL Java_vn_army250_thuan_Native_copyFrame(JNIEnv *e, jclass cls, jobject bmp, jint last) {
+JNIEXPORT jint JNICALL JNIFN(copyFrame)(JNIEnv *e, jclass cls, jobject bmp, jint last) {
     (void)cls;
     int f = __atomic_load_n(&gFrameNo, __ATOMIC_ACQUIRE);
     if (f == last || !gFront) return f;
     AndroidBitmapInfo bi;
-    if (AndroidBitmap_getInfo(e, bmp, &bi) != 0 || (int)bi.width != gW || (int)bi.height != gH) return last;
+    if (AndroidBitmap_getInfo(e, bmp, &bi) != 0) return last;
     void *px = 0;
     if (AndroidBitmap_lockPixels(e, bmp, &px) != 0 || !px) return last;
     pthread_mutex_lock(&gFrontMu);
+    if ((int)bi.width != gFrontW || (int)bi.height != gFrontH) {
+        /* khung moi khac kich thuoc (vao / ra ban ban ca): Java tao Bitmap moi theo frameSize() */
+        pthread_mutex_unlock(&gFrontMu);
+        AndroidBitmap_unlockPixels(e, bmp);
+        return last;
+    }
     f = gFrameNo;
-    for (int y = 0; y < gH; y++) {
-        const uint32_t *src = gFront + (size_t)y * gW;
+    int fw = gFrontW, fh = gFrontH;
+    for (int y = 0; y < fh; y++) {
+        const uint32_t *src = gFront + (size_t)y * fw;
         uint32_t *dst = (uint32_t *)((uint8_t *)px + (size_t)y * bi.stride);
-        for (int x = 0; x < gW; x++) {
+        for (int x = 0; x < fw; x++) {
             uint32_t c = src[x];   /* 0xAARRGGBB -> bo nho R,G,B,A (0xAABBGGRR) */
             dst[x] = 0xFF000000u | ((c & 0xFF) << 16) | (c & 0xFF00) | ((c >> 16) & 0xFF);
         }
@@ -449,23 +484,56 @@ JNIEXPORT jint JNICALL Java_vn_army250_thuan_Native_copyFrame(JNIEnv *e, jclass 
 }
 
 /* v8h-31: nhip quet man hinh (Choreographer.doFrame) -> vong lap game ve khung theo nhip (disp.c j2n_frame_sleep) */
-JNIEXPORT void JNICALL Java_vn_army250_thuan_Native_vsync(JNIEnv *e, jclass cls, jlong t) {
+JNIEXPORT void JNICALL JNIFN(vsync)(JNIEnv *e, jclass cls, jlong t) {
     (void)e;
     (void)cls;
     j2n_vsync((int64_t)t);
 }
 
-JNIEXPORT jint JNICALL Java_vn_army250_thuan_Native_frames(JNIEnv *e, jclass cls) {
+JNIEXPORT jint JNICALL JNIFN(frames)(JNIEnv *e, jclass cls) {
     (void)e;
     (void)cls;
     return __atomic_load_n(&gFrameNo, __ATOMIC_ACQUIRE);
 }
 
-JNIEXPORT jstring JNICALL Java_vn_army250_thuan_Native_gcStats(JNIEnv *e, jclass cls) {
+JNIEXPORT jstring JNICALL JNIFN(gcStats)(JNIEnv *e, jclass cls) {
     (void)cls;
     unsigned seen = 0, kept = 0;
     rt_gc_roots_stats(&seen, &kept);
     char b[160];
     snprintf(b, sizeof b, "GC xet %u vung du lieu (giu %u cua app)", seen, kept);
     return (*e)->NewStringUTF(e, b);
+}
+
+/* kich thuoc khung moi nhat: (rong << 16) | cao; 0 = chua co khung */
+JNIEXPORT jint JNICALL JNIFN(frameSize)(JNIEnv *e, jclass cls) {
+    (void)e;
+    (void)cls;
+    pthread_mutex_lock(&gFrontMu);
+    jint r = gFront ? (jint)(((uint32_t)gFrontW << 16) | ((uint32_t)gFrontH & 0xFFFF)) : 0;
+    pthread_mutex_unlock(&gFrontMu);
+    return r;
+}
+
+/* Avatar: may chu thay cho 127.0.0.1 ("host" hoac "host:cong") - goi luc nao cung duoc */
+JNIEXPORT void JNICALL JNIFN(setServer)(JNIEnv *e, jclass cls, jstring spec) {
+    (void)cls;
+    if (!spec) {
+        j2n_set_server(0);
+        return;
+    }
+    const char *s = (*e)->GetStringUTFChars(e, spec, 0);
+    j2n_set_server(s);
+    char b[300];
+    snprintf(b, sizeof b, "[app] may chu: %s", s);
+    plat_log(b);
+    (*e)->ReleaseStringUTFChars(e, spec, s);
+}
+
+/* Avatar: Canvas ve phong to (vd "FishGame", 2) - goi truoc start */
+JNIEXPORT void JNICALL JNIFN(setHd)(JNIEnv *e, jclass cls, jstring names, jint scale) {
+    (void)cls;
+    const char *s = names ? (*e)->GetStringUTFChars(e, names, 0) : 0;
+    j2n_set_hd(s, scale);
+    if (s) (*e)->ReleaseStringUTFChars(e, names, s);
 }

@@ -26,8 +26,10 @@ static pthread_cond_t cv = PTHREAD_COND_INITIALIZER;
 static char *text_result;
 static int text_active;
 
-/* bo dem trinh bay (de chup / nen tang doc) */
+/* bo dem trinh bay (de chup / nen tang doc); kich thuoc theo khung moi nhat (man phong to co the lon hon) */
 static uint32_t *front;
+static size_t front_cap;
+static int front_w, front_h;
 static pthread_mutex_t fmu = PTHREAD_MUTEX_INITIALIZER;
 static int frames;
 
@@ -124,22 +126,78 @@ void N_j2n_Disp_postEvent(jctx *t, int32_t type, int32_t a, int32_t b) {
     push(type, a, b);
 }
 
-void N_j2n_Disp_present(jctx *t) {
-    (void)t;
+static void present_px(const uint32_t *px, int w, int h) {
+    size_t n = (size_t)w * (size_t)h;
     pthread_mutex_lock(&fmu);
-    if (!front) front = (uint32_t *)malloc((size_t)gfx_w * gfx_h * 4);
-    memcpy(front, gfx_fb, (size_t)gfx_w * gfx_h * 4);
+    if (!front || n > front_cap) {
+        free(front);
+        front = (uint32_t *)malloc(n * 4);
+        front_cap = front ? n : 0;
+    }
+    if (front) {
+        memcpy(front, px, n * 4);
+        front_w = w;
+        front_h = h;
+    }
     frames++;
     pthread_mutex_unlock(&fmu);
-    plat_present(gfx_fb, gfx_w, gfx_h);
+    plat_present(px, w, h);
+}
+
+void N_j2n_Disp_present(jctx *t) {
+    (void)t;
+    present_px(gfx_fb, gfx_w, gfx_h);
+}
+
+/* ------------------------------------------------------------ Avatar: Canvas ve phong to (ban ban ca)
+ * Nen tang dat ten lop (cach nhau dau phay) + so lan phong to truoc khi chay game. Canvas do bao kich thuoc
+ * rong x cao gap 'scale' lan, ve vao anh rieng; cham duoc nhan len trong j2n.Ui. Khung trinh bay lon hon man thuong. */
+static char hd_names[256];
+static int hd_scale = 1;
+
+void j2n_set_hd(const char *names, int scale) {
+    snprintf(hd_names, sizeof hd_names, "%s", names ? names : "");
+    hd_scale = scale < 1 ? 1 : scale > 4 ? 4 : scale;
+}
+
+int32_t N_j2n_Disp_hdScale(jctx *t) {
+    (void)t;
+    return hd_names[0] ? hd_scale : 1;
+}
+
+jobj N_j2n_Disp_hdNames(jctx *t) { return hd_names[0] ? rt_str_utf8(t, hd_names) : 0; }
+
+void N_j2n_Disp_presentImage(jctx *t, jobj argb, int32_t w, int32_t h) {
+    if (!argb) {
+        rt_npe(t);
+        return;
+    }
+    if (w <= 0 || h <= 0 || (int64_t)w * h > (int64_t)ALEN(argb)) return;
+    present_px((const uint32_t *)AD(argb, int32_t), w, h);
 }
 
 int j2n_snapshot(uint32_t *out, int w, int h) {
     pthread_mutex_lock(&fmu);
     int f = frames;
-    if (front && w == gfx_w && h == gfx_h) memcpy(out, front, (size_t)w * h * 4);
+    if (front && w == front_w && h == front_h) memcpy(out, front, (size_t)w * h * 4);
     pthread_mutex_unlock(&fmu);
     return f;
+}
+
+uint32_t *j2n_snapshot_any(int *w, int *h, int *frame_no) {
+    uint32_t *r = 0;
+    pthread_mutex_lock(&fmu);
+    if (frame_no) *frame_no = frames;
+    if (front && front_w > 0 && front_h > 0) {
+        r = (uint32_t *)malloc((size_t)front_w * front_h * 4);
+        if (r) {
+            memcpy(r, front, (size_t)front_w * front_h * 4);
+            *w = front_w;
+            *h = front_h;
+        }
+    }
+    pthread_mutex_unlock(&fmu);
+    return r;
 }
 
 int j2n_frames(void) { return frames; }

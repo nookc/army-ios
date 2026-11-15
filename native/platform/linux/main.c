@@ -78,20 +78,20 @@ static void msleep(int ms) {
 }
 
 static void shot(const char *name) {
-    uint32_t *buf = (uint32_t *)malloc((size_t)W * H * 4);
-    int f = j2n_snapshot(buf, W, H);
+    int w = 0, h = 0, f = 0;
+    uint32_t *buf = j2n_snapshot_any(&w, &h, &f);   /* kich thuoc that (man phong to co the lon hon W x H) */
     char p[1200];
     snprintf(p, sizeof p, "%s/%s.ppm", g_out, name);
-    FILE *o = fopen(p, "wb");
+    FILE *o = buf ? fopen(p, "wb") : 0;
     if (o) {
-        fprintf(o, "P6\n%d %d\n255\n", W, H);
-        for (int i = 0; i < W * H; i++) {
+        fprintf(o, "P6\n%d %d\n255\n", w, h);
+        for (int i = 0; i < w * h; i++) {
             uint8_t px[3] = {(uint8_t)(buf[i] >> 16), (uint8_t)(buf[i] >> 8), (uint8_t)buf[i]};
             fwrite(px, 1, 3, o);
         }
         fclose(o);
     }
-    fprintf(stderr, "[harness] shot %s (khung %d)\n", name, f);
+    fprintf(stderr, "[harness] shot %s %dx%d (khung %d)\n", name, w, h, f);
     free(buf);
 }
 
@@ -193,6 +193,21 @@ int main(int argc, char **argv) {
     mkdir(g_out, 0755);
     snprintf(g_data, sizeof g_data, "%s/data", g_out);
     mkdir(g_data, 0755);
+    /* Avatar: J2N_SERVER=host[:cong] chuyen ket noi 127.0.0.1; J2N_HD=TenLop[,TenLop]:lan (vd FishGame:2) */
+    const char *srv = getenv("J2N_SERVER");
+    if (srv && srv[0]) j2n_set_server(srv);
+    const char *hd = getenv("J2N_HD");
+    if (hd && hd[0]) {
+        char hb[256];
+        snprintf(hb, sizeof hb, "%s", hd);
+        char *c = strrchr(hb, ':');
+        int sc = 2;
+        if (c) {
+            sc = atoi(c + 1);
+            *c = 0;
+        }
+        j2n_set_hd(hb, sc);
+    }
     if (!j2n_start(argv[2], W, H)) {
         fprintf(stderr, "khong khoi dong duoc\n");
         return 1;

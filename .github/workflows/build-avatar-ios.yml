@@ -1,7 +1,8 @@
 name: Build Avatar iOS
 
-# App iOS cho client Avatar 2.5.8 (Ban Ban Ca 3D), dung bo chay J2ME phoneME.
-# Chay khi push len nhanh avatar-ios. Ket qua: release "avatar-ios-moi-nhat" + nhanh "avatar-ban-build".
+# App iOS cho client Avatar 2.5.8 (Ban Ban Ca 3D), dung bo chay J2ME phoneME (GIA LAP - ban cu).
+# Ban chinh bay gio la ban "thuan" (ma may, khong gia lap): .github/workflows/build-avatar-native.yml
+# Workflow nay chi chay tay. Ket qua: release "avatar-ios-moi-nhat" + nhanh "avatar-ban-build".
 on:
   workflow_dispatch:
     inputs:
@@ -9,8 +10,6 @@ on:
         description: "Build them file .tipa cho TrollStore (co JIT, chay muot hon)"
         type: boolean
         default: true
-  push:
-    branches: [avatar-ios]
 
 permissions:
   contents: write

@@ -399,12 +399,63 @@ static int64_t net_now_ms(void) {
 #endif
 }
 
+/* Avatar: chuyen ket noi 127.0.0.1 / localhost sang may chu nguoi choi chon (client goc noi vao may minh) */
+static pthread_mutex_t srv_mu = PTHREAD_MUTEX_INITIALIZER;
+static char srv_host[256];
+static int srv_port;
+
+void j2n_set_server(const char *spec) {
+    char b[256];
+    snprintf(b, sizeof b, "%s", spec ? spec : "");
+    /* bo khoang trang, http://, duong dan */
+    char *p = b;
+    while (*p == ' ' || *p == '\t') p++;
+    char *sch = strstr(p, "://");
+    if (sch) p = sch + 3;
+    char *sl = strchr(p, '/');
+    if (sl) *sl = 0;
+    size_t n = strlen(p);
+    while (n && (p[n - 1] == ' ' || p[n - 1] == '\t' || p[n - 1] == '\r' || p[n - 1] == '\n')) p[--n] = 0;
+    int port = 0;
+    char *c = strrchr(p, ':');
+    if (p[0] == '[') {                       /* [IPv6]:cong */
+        char *e = strchr(p, ']');
+        if (e) {
+            if (e[1] == ':') port = atoi(e + 2);
+            *e = 0;
+            p++;
+        }
+    } else if (c && c == strchr(p, ':')) {   /* dung 1 dau ':' -> host:cong */
+        port = atoi(c + 1);
+        *c = 0;
+    }
+    pthread_mutex_lock(&srv_mu);
+    snprintf(srv_host, sizeof srv_host, "%s", p);
+    srv_port = port > 0 && port < 65536 ? port : 0;
+    pthread_mutex_unlock(&srv_mu);
+}
+
 int32_t N_j2n_Net_connect(jctx *t, jobj host, int32_t port) {
     (void)t;
 #ifdef _WIN32
     pthread_once(&wsa_once, wsa_init);
 #endif
     char *h = rt_str_cstr(host);
+    char rh[256];
+    if (h && (strcmp(h, "127.0.0.1") == 0 || strcmp(h, "localhost") == 0)) {
+        int rp;
+        pthread_mutex_lock(&srv_mu);
+        snprintf(rh, sizeof rh, "%s", srv_host);
+        rp = srv_port;
+        pthread_mutex_unlock(&srv_mu);
+        if (rh[0]) {
+            char lb[400];
+            snprintf(lb, sizeof lb, "[mang] %s:%d -> %s:%d", h, (int)port, rh, rp > 0 ? rp : (int)port);
+            plat_log(lb);
+            h = rh;
+            if (rp > 0) port = rp;
+        }
+    }
     char ps[16];
     snprintf(ps, sizeof ps, "%d", port);
     struct addrinfo hints, *res = 0;

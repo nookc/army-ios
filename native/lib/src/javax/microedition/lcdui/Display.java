@@ -121,4 +121,13 @@ public class Display {
     public static void resetGraphics(Graphics g, int w, int h) {
         g.reset(w, h);
     }
+
+    /* Avatar: Canvas ve phong to (ban ban ca) */
+    public static int scaleOf(Displayable d) {
+        return d.scale();
+    }
+
+    public static void presentImage(Image i) {
+        j2n.Disp.presentImage(i.argb, i.w, i.h);
+    }
 }

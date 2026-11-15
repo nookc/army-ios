@@ -59,6 +59,13 @@ void j2n_vsync(int64_t t_ns);
 extern int j2n_vsync_mode;
 /* chup khung hinh hien tai (cho kiem thu): copy vao out (w*h) neu kich thuoc khop, tra ve so khung da ve */
 int j2n_snapshot(uint32_t *out, int w, int h);
+/* chup khung hien tai voi kich thuoc that (man phong to lon hon w x h): tra ve bo dem malloc (nguoi goi free) hoac NULL */
+uint32_t *j2n_snapshot_any(int *w, int *h, int *frame_no);
+/* Avatar: Canvas co ten lop trong 'names' (cach nhau dau phay, vd "FishGame") ve phong to 'scale' lan - goi truoc j2n_start */
+void j2n_set_hd(const char *names, int scale);
+/* Avatar: ket noi toi 127.0.0.1 / localhost duoc chuyen sang may chu nay: "host" (giu cong cua game) hoac "host:cong";
+   NULL / "" = khong chuyen. Goi luc nao cung duoc (ap dung tu lan ket noi sau) */
+void j2n_set_server(const char *spec);
 int j2n_frames(void);
 /* so vung du lieu tinh GC da xet / da nhan lam goc (iOS: chi giu cua app) */
 void rt_gc_roots_stats(unsigned *seen, unsigned *kept);
