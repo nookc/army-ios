@@ -1218,6 +1218,11 @@ final class PhoneMECAPI: @unchecked Sendable {
         phoneme_send_key(runtime?.rawValue, key.rawValue, pressed ? 1 : 0)
     }
 
+    /// Avatar: gui ma phim bat ky (ky tu Unicode tu ban phim iPhone, ma rieng -1000)
+    func sendRawKey(_ runtime: RuntimeHandle?, code: Int32, pressed: Bool) {
+        phoneme_send_key(runtime?.rawValue, code, pressed ? 1 : 0)
+    }
+
     func sendPointer(
         _ runtime: RuntimeHandle?,
         x: Int32,

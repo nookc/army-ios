@@ -670,6 +670,11 @@ final class EmulatorSession: ObservableObject {
         engine.sendKey(key, pressed: pressed)
     }
 
+    /// Avatar: gui ma phim bat ky (chu go tu ban phim iPhone)
+    func sendRawKey(_ code: Int32, pressed: Bool) {
+        engine.sendRawKey(code, pressed: pressed)
+    }
+
     func sendPointer(x: Int32, y: Int32, action: Int32) {
         engine.sendPointer(x: x, y: y, action: action)
     }

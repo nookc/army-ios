@@ -11,7 +11,7 @@ rm -rf "$GENERATED_ROOT"
 mkdir -p "$ICON_SET" "$OUTPUT_DIR"
 
 if [ -f "$SRCROOT/Bundled/AppIcon.png" ]; then
-  # Army2.5.0: icon vuong 1024x1024 khong trong suot, dung thang
+  # icon vuong 1024x1024 khong trong suot, dung thang
   cp "$SRCROOT/Bundled/AppIcon.png" "$ICON_SET/AppIcon.png"
 else
 # Recover the original 1860962.png payload embedded in the SVG.
@@ -60,7 +60,11 @@ JSON
   --output-partial-info-plist "$GENERATED_ROOT/AppIcon-Info.plist" \
   --warnings --errors --notices
 
-# Army2.5.0: goi kem client J2ME vao app (lan dau mo app tu nhap vao thu vien)
-if [ -f "$SRCROOT/Bundled/Army250.jar" ]; then
-  cp "$SRCROOT/Bundled/Army250.jar" "$OUTPUT_DIR/Army250.jar"
+# Avatar: goi kem client J2ME vao app (lan dau mo app tu nhap vao thu vien)
+if [ -f "$SRCROOT/Bundled/Avatar258.jar" ]; then
+  cp "$SRCROOT/Bundled/Avatar258.jar" "$OUTPUT_DIR/Avatar258.jar"
+fi
+# Avatar: dia chi may chu mac dinh (trong = hoi nguoi choi lan dau mo app)
+if [ -f "$SRCROOT/Bundled/server.txt" ]; then
+  cp "$SRCROOT/Bundled/server.txt" "$OUTPUT_DIR/server.txt"
 fi

@@ -1733,3 +1733,321 @@ final class Army2PadHostView: UIView {
     }
 }
 #endif
+
+// MARK: - Avatar: nut "Aa" (ban phim iPhone go chu vao game) + cai dat may chu
+
+/// Dia chi may chu Avatar. Client goc ket noi 127.0.0.1; Core (PosixNetworkAdapter) doi
+/// ket noi 127.0.0.1 / localhost sang PHONEME_LOOPBACK_REDIRECT_HOST[:PORT] dat o day.
+enum AvatarServerSettings {
+    static let defaultsKey = "avatar.server"
+
+    /// dia chi dang dung: nguoi choi da luu, neu chua thi lay Bundled/server.txt goi kem app
+    static var current: String {
+        if let saved = UserDefaults.standard.string(forKey: defaultsKey) {
+            return saved
+        }
+        return bundledDefault
+    }
+
+    static var bundledDefault: String {
+        guard let url = Bundle.main.url(forResource: "server", withExtension: "txt"),
+              let text = try? String(contentsOf: url, encoding: .utf8) else {
+            return ""
+        }
+        return normalize(text)
+    }
+
+    /// bo http://, duong dan, khoang trang neu nguoi choi dan ca link
+    static func normalize(_ raw: String) -> String {
+        var value = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        if let range = value.range(of: "://") {
+            value = String(value[range.upperBound...])
+        }
+        if let slash = value.firstIndex(of: "/") {
+            value = String(value[..<slash])
+        }
+        return value.replacingOccurrences(of: " ", with: "")
+    }
+
+    static func applyEnvironment() {
+        let value = current
+        var host = value
+        var port = ""
+        if let colon = value.lastIndex(of: ":"), value.firstIndex(of: ":") == colon {
+            host = String(value[..<colon])
+            port = String(value[value.index(after: colon)...])
+        }
+        if host.isEmpty {
+            unsetenv("PHONEME_LOOPBACK_REDIRECT_HOST")
+            unsetenv("PHONEME_LOOPBACK_REDIRECT_PORT")
+            return
+        }
+        setenv("PHONEME_LOOPBACK_REDIRECT_HOST", host, 1)
+        if let number = Int(port), number > 0, number < 65536 {
+            setenv("PHONEME_LOOPBACK_REDIRECT_PORT", String(number), 1)
+        } else {
+            unsetenv("PHONEME_LOOPBACK_REDIRECT_PORT")
+        }
+    }
+
+    static func presentPromptIfNeeded() {
+        guard current.isEmpty else { return }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
+            if current.isEmpty {
+                presentPrompt(force: false)
+            }
+        }
+    }
+
+    static func presentPrompt(force: Bool) {
+#if canImport(UIKit)
+        guard let top = topViewController(), !(top is UIAlertController) else {
+            return
+        }
+        let alert = UIAlertController(
+            title: "Máy chủ Avatar",
+            message: "Nhập IP hoặc tên miền máy chủ, có thể kèm :cổng\nVí dụ 123.45.67.89:19128\n(giữ nút Aa 1 giây để đổi lại)",
+            preferredStyle: .alert
+        )
+        alert.addTextField { field in
+            field.text = current
+            field.placeholder = "vd 192.168.1.5:19128"
+            field.keyboardType = .URL
+            field.autocapitalizationType = .none
+            field.autocorrectionType = .no
+            field.clearButtonMode = .whileEditing
+        }
+        alert.addAction(UIAlertAction(title: force ? "Đóng" : "Để sau", style: .cancel))
+        alert.addAction(UIAlertAction(title: "Lưu", style: .default) { [weak alert] _ in
+            let value = normalize(alert?.textFields?.first?.text ?? "")
+            UserDefaults.standard.set(value, forKey: defaultsKey)
+            applyEnvironment()
+        })
+        top.present(alert, animated: true)
+#endif
+    }
+
+#if canImport(UIKit)
+    private static func topViewController() -> UIViewController? {
+        let windows = UIApplication.shared.connectedScenes
+            .compactMap { $0 as? UIWindowScene }
+            .flatMap(\.windows)
+        var top = (windows.first(where: \.isKeyWindow) ?? windows.first)?.rootViewController
+        while let presented = top?.presentedViewController {
+            top = presented
+        }
+        return top
+    }
+#endif
+}
+
+/// Nut "Aa" o mep phai man hinh game: cham = bat/tat ban phim iPhone, giu 1 giay = doi may chu.
+struct AvatarControlsOverlay: View {
+    @EnvironmentObject private var session: EmulatorSession
+    @State private var typing = false
+    private let screenHeight: Int
+
+    init(screenHeight: Int) {
+        self.screenHeight = screenHeight
+    }
+
+    var body: some View {
+#if canImport(UIKit)
+        ZStack {
+            AvatarKeyInputRepresentable(isActive: $typing) { code, pressed in
+                session.sendRawKey(code, pressed: pressed)
+            }
+            .frame(width: 1, height: 1)
+            .opacity(0.02)
+            .allowsHitTesting(false)
+
+            Text("Aa")
+                .font(.system(size: 15, weight: .bold))
+                .foregroundColor(.white)
+                .frame(width: 38, height: 38)
+                .background(Color.black.opacity(typing ? 0.65 : 0.35))
+                .clipShape(RoundedRectangle(cornerRadius: 9, style: .continuous))
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    typing.toggle()
+                }
+                .onLongPressGesture(minimumDuration: 1.0) {
+                    typing = false
+                    AvatarServerSettings.presentPrompt(force: true)
+                }
+        }
+        .padding(.trailing, 4)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .trailing)
+        .offset(y: -36)
+        .onAppear {
+            if ProcessInfo.processInfo.environment["AVATAR_AUTOTEST"] == "1" {
+                AvatarAutotest.run(session: session, screenHeight: screenHeight)
+            } else {
+                AvatarServerSettings.presentPromptIfNeeded()
+            }
+        }
+#else
+        EmptyView()
+#endif
+    }
+}
+
+/// Chay thu tu dong tren Simulator (CI): AVATAR_AUTOTEST=1. Bam "Doi tai khoan", go ten/mat khau
+/// bang duong ban phim iPhone (ma -1000 + ky tu), luu, roi vao chon thanh pho de thu ket noi may chu.
+@MainActor
+enum AvatarAutotest {
+    private static var started = false
+
+    static func run(session: EmulatorSession, screenHeight: Int) {
+        guard !started else { return }
+        started = true
+        print("[autotest] bat dau h=\(screenHeight)")
+        let menuY = Int32(screenHeight / 2 + 5)
+        var steps: [(Double, String, () -> Void)] = []
+        func key(_ code: Int32) -> () -> Void {
+            return {
+                session.sendRawKey(code, pressed: true)
+                session.sendRawKey(code, pressed: false)
+            }
+        }
+        func typeText(_ text: String, at start: Double, label: String) {
+            var t = start
+            steps.append((t, label + " (-1000)", key(-1000)))
+            for scalar in text.unicodeScalars {
+                t += 0.15
+                steps.append((t, label + " " + String(scalar), key(Int32(scalar.value))))
+            }
+        }
+        steps.append((9.0, "cham Doi tai khoan y=\(menuY)", {
+            session.sendPointer(x: 120, y: menuY, action: 1)
+        }))
+        steps.append((9.1, "nha", {
+            session.sendPointer(x: 120, y: menuY, action: 2)
+        }))
+        typeText("test1", at: 11.0, label: "go ten")
+        steps.append((12.5, "xuong o mat khau", key(-2)))
+        typeText("123456", at: 13.0, label: "go mat khau")
+        steps.append((15.5, "OK luu tai khoan", key(-5)))
+        steps.append((18.0, "OK choi tiep", key(-5)))
+        steps.append((20.0, "OK nhom thanh pho", key(-5)))
+        steps.append((22.0, "OK thanh pho -> ket noi", key(-5)))
+        for (delay, label, action) in steps {
+            Task { @MainActor in
+                try? await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
+                print("[autotest] \(String(format: "%.1f", delay))s \(label)")
+                action()
+            }
+        }
+        Task { @MainActor in
+            try? await Task.sleep(nanoseconds: 40_000_000_000)
+            print("[autotest] xong")
+        }
+    }
+}
+
+#if canImport(UIKit)
+private struct AvatarKeyInputRepresentable: UIViewRepresentable {
+    @Binding var isActive: Bool
+    let onKey: (Int32, Bool) -> Void
+
+    func makeUIView(context: Context) -> AvatarKeyInputView {
+        let view = AvatarKeyInputView(frame: CGRect(x: 0, y: 0, width: 1, height: 1))
+        view.onKey = onKey
+        return view
+    }
+
+    func updateUIView(_ uiView: AvatarKeyInputView, context: Context) {
+        uiView.onKey = onKey
+        let binding = $isActive
+        uiView.onEnded = {
+            DispatchQueue.main.async {
+                if binding.wrappedValue {
+                    binding.wrappedValue = false
+                }
+            }
+        }
+        if isActive, !uiView.isFirstResponder {
+            DispatchQueue.main.async {
+                _ = uiView.becomeFirstResponder()
+            }
+        } else if !isActive, uiView.isFirstResponder {
+            DispatchQueue.main.async {
+                _ = uiView.resignFirstResponder()
+            }
+        }
+    }
+
+    static func dismantleUIView(_ uiView: AvatarKeyInputView, coordinator: Void) {
+        if uiView.isFirstResponder {
+            _ = uiView.resignFirstResponder()
+        }
+        AvatarKeyInputView.isTyping = false
+        uiView.onKey = nil
+        uiView.onEnded = nil
+    }
+}
+
+/// Nhan chu tu ban phim iPhone, gui vao game thanh ma phim J2ME (ky tu Unicode, xoa = -8, xuong dong = -5).
+/// Truoc chu dau tien gui ma rieng -1000: client (da va them) chuyen o chu sang go thang, khong T9.
+final class AvatarKeyInputView: UIView, UIKeyInput {
+    static var isTyping = false
+
+    var onKey: ((Int32, Bool) -> Void)?
+    var onEnded: (() -> Void)?
+    private var directModeSent = false
+
+    var autocorrectionType: UITextAutocorrectionType = .no
+    var autocapitalizationType: UITextAutocapitalizationType = .none
+    var spellCheckingType: UITextSpellCheckingType = .no
+    var smartQuotesType: UITextSmartQuotesType = .no
+    var smartDashesType: UITextSmartDashesType = .no
+    var smartInsertDeleteType: UITextSmartInsertDeleteType = .no
+    var keyboardType: UIKeyboardType = .default
+    var returnKeyType: UIReturnKeyType = .done
+
+    override var canBecomeFirstResponder: Bool { true }
+
+    var hasText: Bool { true }
+
+    override func becomeFirstResponder() -> Bool {
+        Self.isTyping = true
+        directModeSent = false
+        let became = super.becomeFirstResponder()
+        if !became {
+            Self.isTyping = false
+            onEnded?()
+        }
+        return became
+    }
+
+    override func resignFirstResponder() -> Bool {
+        let resigned = super.resignFirstResponder()
+        Self.isTyping = false
+        onEnded?()
+        return resigned
+    }
+
+    private func tap(_ code: Int32) {
+        onKey?(code, true)
+        onKey?(code, false)
+    }
+
+    func insertText(_ text: String) {
+        if !directModeSent {
+            tap(-1000)
+            directModeSent = true
+        }
+        for scalar in text.unicodeScalars {
+            if scalar == "\n" || scalar == "\r" {
+                tap(-5)
+            } else if scalar.value >= 32 {
+                tap(Int32(scalar.value))
+            }
+        }
+    }
+
+    func deleteBackward() {
+        tap(-8)
+    }
+}
+#endif

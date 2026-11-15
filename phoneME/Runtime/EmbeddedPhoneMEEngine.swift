@@ -1952,6 +1952,15 @@ final class EmbeddedPhoneMEEngine: NSObject {
         }
     }
 
+    /// Avatar: ma phim bat ky (chu tu ban phim iPhone)
+    func sendRawKey(_ code: Int32, pressed: Bool) {
+        guard foregroundAppID != nil, let api, let runtime else { return }
+        wakeCanvasPollingForHostActivity()
+        inputQueue.async {
+            api.sendRawKey(runtime, code: code, pressed: pressed)
+        }
+    }
+
     func sendPointer(x: Int32, y: Int32, action: Int32) {
         guard foregroundAppID != nil, let api, let runtime else { return }
         wakeCanvasPollingForHostActivity()

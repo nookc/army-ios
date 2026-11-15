@@ -206,6 +206,15 @@ struct EmulatorView: View {
                                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                                         .transition(.opacity)
                                     }
+
+                                    // Avatar: nut "Aa" mep phai (ban phim iPhone; giu 1 giay de doi may chu)
+                                    if runtimeProfile.avatarControls == true,
+                                       keyboardAdjustmentMode == .none {
+                                        AvatarControlsOverlay(
+                                            screenHeight: runtimeProfile.screenHeight
+                                        )
+                                            .environmentObject(session)
+                                    }
                                 }
                             }
 
@@ -1906,14 +1915,16 @@ private final class PhoneMEHardwareKeyboardHostView: UIView {
     }
 
     func requestFocusIfNeeded() {
-        guard window != nil, !isFirstResponder, !focusRequestPending else {
+        guard window != nil, !isFirstResponder, !focusRequestPending,
+              !AvatarKeyInputView.isTyping else {
             return
         }
         focusRequestPending = true
         DispatchQueue.main.async { [weak self] in
             guard let self else { return }
             self.focusRequestPending = false
-            guard self.window != nil, !self.isFirstResponder else { return }
+            guard self.window != nil, !self.isFirstResponder,
+                  !AvatarKeyInputView.isTyping else { return }
             _ = self.becomeFirstResponder()
         }
     }

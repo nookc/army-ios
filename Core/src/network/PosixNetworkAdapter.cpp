@@ -598,8 +598,28 @@ void resolve_addresses_on_dispatch_queue(void* opaque) {
     const OperationDeadline& deadline,
     const CancellationCheck& cancelled = {}) {
     if (cancellation_requested(cancelled)) return cancelled_operation();
+    // Avatar: client J2ME goc ket noi 127.0.0.1; app dat may chu that qua
+    // PHONEME_LOOPBACK_REDIRECT_HOST (+ _PORT tuy chon). Chi doi dia chi
+    // loopback, cac ket noi khac giu nguyen.
+    std::string target_host(url.host);
+    u16 target_port = url.effective_port();
+    if (target_host == "127.0.0.1" || target_host == "localhost") {
+        const char* redirect_host =
+            std::getenv("PHONEME_LOOPBACK_REDIRECT_HOST");
+        if (redirect_host != nullptr && redirect_host[0] != '\0') {
+            target_host.assign(redirect_host);
+            const char* redirect_port =
+                std::getenv("PHONEME_LOOPBACK_REDIRECT_PORT");
+            if (redirect_port != nullptr && redirect_port[0] != '\0') {
+                const long parsed = std::strtol(redirect_port, nullptr, 10);
+                if (parsed > 0 && parsed < 65536) {
+                    target_port = static_cast<u16>(parsed);
+                }
+            }
+        }
+    }
     auto addresses = resolve_addresses(
-        url.host, url.effective_port(), SOCK_STREAM, false,
+        target_host, target_port, SOCK_STREAM, false,
         deadline, cancelled);
     if (!addresses) return std::unexpected(addresses.error());
     if (cancellation_requested(cancelled)) return cancelled_operation();

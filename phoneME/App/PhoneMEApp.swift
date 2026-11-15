@@ -57,6 +57,8 @@ struct PhoneMEApp: App {
 #if os(iOS)
         PhoneMEFrameRendererPrewarmer.prewarm()
 #endif
+        // Avatar: client goc ket noi 127.0.0.1 -> chuyen sang may chu da cai trong app
+        AvatarServerSettings.applyEnvironment()
     }
 
     var body: some Scene {

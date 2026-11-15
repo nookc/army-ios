@@ -51,7 +51,7 @@ private final class LibraryDebugAutolaunchGate {
 }
 #endif
 
-/// Army2.5.0: tu vao game 1 lan moi lan chay app.
+/// Avatar: tu vao game 1 lan moi lan chay app.
 private final class Army250AutolaunchGate {
     static let shared = Army250AutolaunchGate()
 
@@ -251,8 +251,8 @@ struct LibraryView: View {
             }
         }
         .task {
-            // Army2.5.0: nhap client goi kem roi vao game ngay khi mo app (1 lan moi lan chay app).
-            // Thoat game thi ve thu vien, bam "Army2.5.0" de vao lai.
+            // Avatar: nhap client goi kem roi vao game ngay khi mo app (1 lan moi lan chay app).
+            // Thoat game thi ve thu vien, bam "Avatar" de vao lai.
             guard activeGame == nil,
                   Army250AutolaunchGate.shared.claimRequest(),
                   let game = library.seedBundledGame() else {
@@ -260,9 +260,9 @@ struct LibraryView: View {
             }
             let defaults = UserDefaults.standard
             if !profiles.hasProfile(for: game) ||
-                defaults.integer(forKey: Self.army250ProfileVersionKey) < Self.army250ProfileVersion {
-                profiles.save(army250Profile(), for: game)
-                defaults.set(Self.army250ProfileVersion, forKey: Self.army250ProfileVersionKey)
+                defaults.integer(forKey: Self.avatarProfileVersionKey) < Self.avatarProfileVersion {
+                profiles.save(avatarProfile(), for: game)
+                defaults.set(Self.avatarProfileVersion, forKey: Self.avatarProfileVersionKey)
             }
             activeGame = game
         }
@@ -682,17 +682,17 @@ struct LibraryView: View {
         return String(baseName.prefix(80)) + "-RMS"
     }
 
-    /// Phien ban cau hinh Army2.5.0. Tang so nay de app ghi de cau hinh cu 1 lan khi cap nhat.
-    /// 1: man ngang (ban dau). 2: man doc + ban phim 4x2 duoi man hinh.
-    static let army250ProfileVersion = 2
-    static let army250ProfileVersionKey = "army250.profileVersion"
+    /// Phien ban cau hinh Avatar. Tang so nay de app ghi de cau hinh cu 1 lan khi cap nhat.
+    static let avatarProfileVersion = 1
+    static let avatarProfileVersionKey = "avatar258.profileVersion"
 
-    /// Cau hinh mac dinh cho Army2.5.0: man doc, rong 320, cao vua phan tren ban phim 4x2
-    /// (o vuong, chiem nua be rong man hinh), dung cam ung + vuot cuon.
-    private func army250Profile() -> GameProfile {
+    /// Cau hinh mac dinh cho Avatar: man doc, rong 240 (giao dien to, de doc nhu tren dien thoai Java),
+    /// cao vua het man hinh (game tu ve them phan troi phia tren), dung cam ung. Khong ban phim ao:
+    /// Avatar co san mui ten, phim mem cam ung; go chu bang nut "Aa" (ban phim iPhone).
+    private func avatarProfile() -> GameProfile {
         var profile = GameProfile()
-        let width = 320
-        var height = 460
+        let width = 240
+        var height = 426
 #if os(iOS)
         let bounds = UIScreen.main.bounds
         let shortSide = Double(max(min(bounds.width, bounds.height), 1))
@@ -709,11 +709,10 @@ struct LibraryView: View {
         let hasHomeIndicator = largest > 24
         let topInset = hasHomeIndicator ? max(largest, 47) : 20
         let bottomInset = hasHomeIndicator ? 34.0 : 0
-        let keypadHeight = shortSide / 2      // 4 cot x 2 hang o vuong
-        let canvasPoints = longSide - topInset - bottomInset - keypadHeight
+        let canvasPoints = longSide - topInset - bottomInset
         var computed = Int((Double(width) * canvasPoints / shortSide).rounded())
         computed -= computed % 2
-        height = min(max(computed, 360), 600)
+        height = min(max(computed, 320), 640)
 #endif
         profile.screenWidth = width
         profile.screenHeight = height
@@ -722,7 +721,8 @@ struct LibraryView: View {
         profile.scaleType = .fit
         profile.touchInput = true
         profile.showVirtualKeyboard = false
-        profile.army2Keypad = true
+        profile.army2Keypad = false
+        profile.avatarControls = true
         profile.showAppBar = false
         profile.showStatusBar = true
         return profile

@@ -240,16 +240,16 @@ final class GameLibrary: ObservableObject {
         try? saveRetainedData()
     }
 
-    // MARK: - Army2.5.0: client J2ME goi kem trong app
+    // MARK: - Avatar: client J2ME goi kem trong app
 
-    static let bundledGameTitle = "Army2.5.0"
-    private static let bundledStampKey = "army250.bundledJarStamp"
+    static let bundledGameTitle = "Avatar"
+    private static let bundledStampKey = "avatar258.bundledJarStamp"
 
-    /// Nhap Army250.jar goi kem trong app vao thu vien (lan dau mo app),
+    /// Nhap Avatar258.jar goi kem trong app vao thu vien (lan dau mo app),
     /// hoac cap nhat khi ban app moi chua client moi hon. RMS (luu dang nhap) giu nguyen.
     @discardableResult
     func seedBundledGame() -> Game? {
-        guard let url = Bundle.main.url(forResource: "Army250", withExtension: "jar") else {
+        guard let url = Bundle.main.url(forResource: "Avatar258", withExtension: "jar") else {
             return nil
         }
         let attributes = try? fileManager.attributesOfItem(atPath: url.path)

@@ -455,7 +455,7 @@
 					ImageIO,
 					"-Wl,-force_load,$(DERIVED_FILE_DIR)/libphoneMECoreNoMain.a",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = vn.army250.game;
+				PRODUCT_BUNDLE_IDENTIFIER = vn.avatar.diemky;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -497,7 +497,7 @@
 					"-flto=thin",
 					"-Wl,-force_load,$(DERIVED_FILE_DIR)/libphoneMECoreNoMain.a",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = vn.army250.game;
+				PRODUCT_BUNDLE_IDENTIFIER = vn.avatar.diemky;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";

@@ -1,0 +1,124 @@
+name: Build Avatar iOS
+
+# App iOS cho client Avatar 2.5.8 (Ban Ban Ca 3D), dung bo chay J2ME phoneME.
+# Chay khi push len nhanh avatar-ios. Ket qua: release "avatar-ios-moi-nhat" + nhanh "avatar-ban-build".
+on:
+  workflow_dispatch:
+    inputs:
+      trollstore:
+        description: "Build them file .tipa cho TrollStore (co JIT, chay muot hon)"
+        type: boolean
+        default: true
+  push:
+    branches: [avatar-ios]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: avatar-ios
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: macos-15
+    timeout-minutes: 150
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Chon Xcode moi nhat
+        run: |
+          XC=$(ls -d /Applications/Xcode_*.app | grep -vi beta | sort -V | tail -1)
+          echo "Dung $XC"
+          sudo xcode-select -s "$XC/Contents/Developer"
+          xcodebuild -version
+          command -v rg >/dev/null || brew install ripgrep
+
+      - name: Build IPA (chua ky)
+        run: |
+          set -o pipefail
+          xcodebuild -project phoneME.xcodeproj -scheme phoneME -configuration Release \
+            -destination 'generic/platform=iOS' -derivedDataPath .build/device \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY='' \
+            build 2>&1 | tee build-ipa.log | grep -E "error:|\*\* BUILD" || true
+          test "${PIPESTATUS[0]}" = "0"
+          APP=$(find .build/device/Build/Products -type d -path '*-iphoneos/phoneME.app' | head -1)
+          test -n "$APP"
+          test -f "$APP/Avatar258.jar"
+          rm -rf out && mkdir -p out/Payload && cp -R "$APP" out/Payload/
+          (cd out && zip -qry ../Avatar.ipa Payload)
+          ls -la Avatar.ipa
+
+      - name: Build ban Simulator
+        id: sim
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          xcodebuild -project phoneME.xcodeproj -scheme phoneME -configuration Debug \
+            -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath .build/sim ARCHS=arm64 ONLY_ACTIVE_ARCH=NO \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY='' \
+            build 2>&1 | tee build-sim.log | grep -E "error:|\*\* BUILD" || true
+          test "${PIPESTATUS[0]}" = "0"
+          APP=$(find .build/sim/Build/Products -type d -path '*-iphonesimulator/phoneME.app' | head -1)
+          test -n "$APP"
+          echo "app=$APP" >> "$GITHUB_OUTPUT"
+
+      - name: Chay thu tren iOS Simulator (tu bam, chup man hinh)
+        if: steps.sim.outcome == 'success'
+        continue-on-error: true
+        run: |
+          codesign -s - --force --deep "${{ steps.sim.outputs.app }}" || true
+          bash Scripts/avatar-sim-test.sh "${{ steps.sim.outputs.app }}" "$PWD/sim-test" 2>&1 | tee sim-test.log
+
+      - name: Build TrollStore (.tipa)
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.trollstore }}
+        continue-on-error: true
+        run: |
+          brew install ldid
+          bash Scripts/build-trollstore-tipa.sh --output "$PWD/Avatar-TrollStore.tipa" \
+            --derived-data "$PWD/.build/trollstore" 2>&1 | tail -40
+
+      - name: Day IPA, anh chup, log len nhanh avatar-ban-build
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          rm -rf /tmp/pub && mkdir -p /tmp/pub/test
+          for f in Avatar.ipa Avatar-TrollStore.tipa; do [ -f "$f" ] && cp "$f" /tmp/pub/; done
+          cp sim-test/* /tmp/pub/test/ 2>/dev/null || true
+          for f in build-ipa.log build-sim.log sim-test.log; do
+            [ -f "$f" ] || continue
+            grep -E "error:|warning: unable|BUILD (SUCCEEDED|FAILED)|\*\* " "$f" | tail -200 > "/tmp/pub/$(basename "$f" .log)-loi.txt" || true
+            tail -400 "$f" > "/tmp/pub/$(basename "$f" .log)-cuoi.txt"
+          done
+          echo "run ${GITHUB_RUN_NUMBER} sha ${GITHUB_SHA} status ${{ job.status }}" > /tmp/pub/KET_QUA.txt
+          cd /tmp/pub
+          git init -q -b avatar-ban-build
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git add -A
+          git commit -q -m "Avatar build ${GITHUB_RUN_NUMBER} (${GITHUB_SHA::7}) ${{ job.status }}"
+          git push -q -f "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" avatar-ban-build
+
+      - name: Tao Release de tai IPA
+        if: success()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          FILES=""
+          for f in Avatar.ipa Avatar-TrollStore.tipa; do [ -f "$f" ] && FILES="$FILES $f"; done
+          gh release delete avatar-ios-moi-nhat -y --cleanup-tag || true
+          gh release create avatar-ios-moi-nhat $FILES --target "${GITHUB_SHA}" \
+            --title "Avatar iOS - build ${GITHUB_RUN_NUMBER}" --latest=false \
+            --notes "IPA chua ky: ky bang eSign, Scarlet, AltStore hoac Sideloadly. File .tipa (neu co): cai bang TrollStore. Lan dau mo app nhap dia chi may chu (giu nut Aa 1 giay de doi lai)."
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: Avatar-iOS
+          path: |
+            Avatar.ipa
+            Avatar-TrollStore.tipa
+            sim-test/*.png
+          if-no-files-found: warn
