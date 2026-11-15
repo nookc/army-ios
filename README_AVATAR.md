@@ -1,4 +1,38 @@
-# Avatar cho iOS (nhánh `avatar-ios`)
+# Avatar cho iOS + Android (nhánh `avatar-ios`)
+
+## Bản chính: bản "thuần" (mã máy, không giả lập) – 11/2026
+
+Client J2ME **Avatar 2.5.8** (có Bàn Bắn Cá 3D) được dịch sẵn sang C rồi biên dịch thành **mã máy** của điện thoại
+bằng bộ dịch `native/` của repo (cùng bộ với bản Army thuần): không có bộ thông dịch / giả lập J2ME nào chạy trên máy,
+nên mượt và nhẹ hơn hẳn bản phoneME bên dưới.
+
+| | iPhone | Android |
+|---|---|---|
+| Vỏ app | `native/platform/avatar-ios/App.m` | `native/platform/avatar-android/` (Java) + `native/platform/android/jni/android.c` (JNI dùng chung) |
+| Build | `native/tools/build_avatar_ios.sh` | `native/tools/build_avatar_android.sh` |
+| Chạy thử CI | `native/tools/avatar_sim_test.sh` (iOS Simulator) | `native/tools/avatar_android_test.sh` (emulator Android 11) |
+| Kết quả | `Avatar-Thuan.ipa` (ARM64, iOS 15+, chưa ký) | `Avatar-unsigned.apk` (arm64-v8a, armeabi-v7a, x86_64; Android 5.0+) |
+
+- Workflow **Build Avatar iOS + Android (thuan)** (`.github/workflows/build-avatar-native.yml`) tự chạy khi push thay đổi
+  trong `native/`, `Bundled/Avatar258.jar`, `Bundled/server.txt`. Kết quả ở nhánh **avatar-thuan-build** (IPA, APK, ảnh chạy thử,
+  log) và release **avatar-thuan-moi-nhat** (IPA). Chạy thử trên Simulator / emulator: app tự nhập máy chủ giả của CI,
+  bấm "Đổi tài khoản", gõ tên + mật khẩu qua đường bàn phím thật, chọn thành phố và kết nối (máy chủ giả ghi lại gói tin).
+- APK trên CI **chưa ký** (`Avatar-test.apk` chỉ ký khóa tạm để chạy emulator). Bản phát hành ký bằng khóa `avatar.jks`
+  (giữ ngoài repo vì repo công khai) để cài đè lên bản Android cũ cùng gói `vn.avatar.diemky`.
+- Màn hình: Canvas rộng 240 / 320 / 360 (chọn ở màn cài đặt), cao theo tỉ lệ màn hình. **Bàn bắn cá (`FishGame`) vẽ ở
+  độ phân giải gấp đôi** (runtime: `j2n_set_hd("FishGame", 2)`), chạm được nhân lên tương ứng.
+- Máy chủ: client gốc nối `127.0.0.1`; runtime chuyển sang máy chủ người chơi chọn (`j2n_set_server("host[:cổng]")`, có cổng
+  thì mọi thành phố đều vào cổng đó). Địa chỉ điền sẵn: `Bundled/server.txt` (iOS) / `assets/server.txt` (Android, `DoiMayChu.jar`
+  ghi được).
+- Nút **Aa** mép phải: chạm = bàn phím điện thoại (gửi `-1000` rồi từng ký tự, xóa `-8`, xuống dòng `-5`); giữ (iPhone 1 giây,
+  Android 2 giây) = cài đặt máy chủ / cỡ giao diện.
+- Thử nhanh trên Linux (không cần điện thoại): `cd native && make JAR=../Bundled/Avatar258.jar`, rồi
+  `J2N_SERVER=127.0.0.1:19128 J2N_HD=FishGame:2 build/army2n ../Bundled/Avatar258.jar main.GameMidlet 240 533 lenh.live ra/`
+  (lệnh: `tap X Y`, `key N`, `type:abc`, `shot TEN`, `sleep MS`, `quit` – xem `native/platform/linux/main.c`).
+
+---
+
+## Bản cũ: phoneME (giả lập J2ME)
 
 App iOS chạy client J2ME **Avatar 2.5.8** (có Bàn Bắn Cá 3D), dựng trên bộ chạy **phoneME iOS** của repo này (GPL-3.0, tác giả gốc Duy Pham: https://github.com/phd051199/phoneME-iOS). Nhánh này tách riêng, không đụng nhánh `main` (Army2.5.0).
 
@@ -14,7 +48,7 @@ So với bản Army trên `main`:
 
 ## Build ra file IPA
 
-Push lên nhánh `avatar-ios` là GitHub Actions (**Build Avatar iOS**) tự build trên máy Mac của GitHub (khoảng 20–40 phút):
+Workflow **Build Avatar iOS** (bản phoneME) nay **chỉ chạy tay** (Actions → Build Avatar iOS → Run workflow). Nó build trên máy Mac của GitHub (khoảng 20–40 phút):
 
 - Release **avatar-ios-moi-nhat**: file `Avatar.ipa` chưa ký, ký bằng eSign, Scarlet, AltStore hoặc Sideloadly.
 - Nhánh **avatar-ban-build**: IPA, log build, ảnh chụp chạy thử trên iOS Simulator (`test/*.png`: app tự bấm Đổi tài khoản, gõ tên/mật khẩu bằng đường bàn phím iPhone, chọn thành phố, thử kết nối).
