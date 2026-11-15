@@ -1,0 +1,23 @@
+[autotest] bat dau h=464
+[autotest] game chay sau 18s
+2026-11-15 04:43:28.234 phoneME[26646:70895] [phoneME-thermal] thermal=0 target_fps=60 polls_per_s=42.73 polls=215 active=210 idle_canvas=5 idle_native=0 frames=45 uploads=45 staged=0 full=45 regions=0 uploaded_kb=19575.0 acquire_ms=0.45 stage_ms=0.00 upload_ms=38.55
+[autotest] luu 1_man_dau 240x464
+[autotest] cham Doi tai khoan y=237
+[autotest] luu 2_form 240x464
+[autotest] go test1
+[autotest] go 123456
+2026-11-15 04:43:33.243 phoneME[26646:70895] [phoneME-thermal] thermal=0 target_fps=60 polls_per_s=83.45 polls=418 active=418 idle_canvas=0 idle_native=0 frames=84 uploads=84 staged=0 full=84 regions=0 uploaded_kb=36540.0 acquire_ms=1.04 stage_ms=0.00 upload_ms=56.07
+[autotest] luu 3_go_xong 240x464
+[autotest] OK luu tai khoan
+[autotest] luu 4_menu 240x464
+[autotest] OK choi tiep
+2026-11-15 04:43:38.244 phoneME[26646:72994] [phoneME-thermal] thermal=0 target_fps=60 polls_per_s=82.39 polls=412 active=412 idle_canvas=0 idle_native=0 frames=87 uploads=87 staged=0 full=87 regions=0 uploaded_kb=37845.0 acquire_ms=1.09 stage_ms=0.00 upload_ms=45.12
+[autotest] luu 5_thanh_pho 240x464
+[autotest] OK nhom thanh pho
+[autotest] OK thanh pho -> ket noi
+2026-11-15 04:43:43.248 phoneME[26646:70895] [phoneME-thermal] thermal=0 target_fps=60 polls_per_s=82.13 polls=411 active=411 idle_canvas=0 idle_native=0 frames=88 uploads=88 staged=0 full=88 regions=0 uploaded_kb=38280.0 acquire_ms=0.98 stage_ms=0.00 upload_ms=65.52
+[autotest] luu 6_ket_noi 240x464
+[autotest] xong
+2026-11-15 04:43:48.261 phoneME[26646:70895] [phoneME-thermal] thermal=0 target_fps=60 polls_per_s=81.99 polls=411 active=411 idle_canvas=0 idle_native=0 frames=87 uploads=87 staged=0 full=87 regions=0 uploaded_kb=37845.0 acquire_ms=0.88 stage_ms=0.00 upload_ms=49.81
+2026-11-15 04:43:53.275 phoneME[26646:70897] [phoneME-thermal] thermal=0 target_fps=60 polls_per_s=80.96 polls=406 active=405 idle_canvas=1 idle_native=0 frames=86 uploads=86 staged=0 full=86 regions=0 uploaded_kb=37410.0 acquire_ms=0.89 stage_ms=0.00 upload_ms=43.41
+vn.avatar.diemky: 26646
