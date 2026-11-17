@@ -3,8 +3,8 @@
  * KHONG chay qua gia lap / bo thong dich.
  *   - man hinh game phu vung an toan: Canvas rong 240 / 320 / 360 (cai dat), cao theo ti le man hinh
  *   - ban ban ca ve gap doi (vd 480 x 930) cho net
- *   - nut "Aa": cham = bat/tat ban phim iPhone (go thang vao o chu cua game), giu 1 giay = cai dat
- *   - mo app: hoi dia chi may chu (client noi 127.0.0.1 -> runtime chuyen sang may chu nay)
+ *   - nut "Aa": cham = bat/tat ban phim iPhone (go thang vao o chu cua game), giu 1 giay = cai dat (chi co giao dien)
+ *   - may chu: dien san trong app (server.txt do DoiMayChu / trang cai VPS ghi); khong co o nhap, khong hien IP o dau
  *   - hop nhap chu cua game (Form / TextBox) = UIAlertController
  *   - "-autotest": tu dang nhap + chup man hinh (CI iOS Simulator), "-avatar.server host:cong" dat may chu
  */
@@ -53,10 +53,14 @@ static NSString *bundledServer(void) {
     return [s stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceAndNewlineCharacterSet] ?: @"";
 }
 
+/* may chu: tham so -avatar.server (CI) > dien san trong app (server.txt, luon dung) > da luu (chi ban chua dien san).
+   Trong app khong co o nhap va khong hien dia chi may chu o dau (chu server khong muon lo IP). */
 static NSString *savedServer(void) {
     if (gArgServer.length) return gArgServer;
+    NSString *b = bundledServer();
+    if (b.length) return b;
     NSString *s = [prefs() stringForKey:@"server"];
-    return s ?: bundledServer();
+    return s ?: @"";
 }
 
 /* bo http://, duong dan, khoang trang neu nguoi choi dan ca link */
@@ -187,19 +191,13 @@ static void type_text(NSString *text) {
 - (UIKeyboardAppearance)keyboardAppearance { return UIKeyboardAppearanceDark; }
 @end
 
-/* ============================================================ man cai dat (may chu, co giao dien) */
-@interface SettingsVC : UIViewController <UITextFieldDelegate>
-@property (nonatomic) BOOL starting;
-@property (nonatomic, copy) void (^onDone)(BOOL go);
-- (void)fillServer:(NSString *)s;
-- (void)pressGo;
+/* ============================================================ man cai dat (chi co giao dien, giu nut Aa 1 giay) */
+@interface SettingsVC : UIViewController
+@property (nonatomic, copy) void (^onDone)(void);
 @end
 
 @implementation SettingsVC {
-    UITextField *_server;
     UISegmentedControl *_size;
-    UISwitch *_skip;
-    UILabel *_err;
     UIScrollView *_scroll;
 }
 
@@ -229,7 +227,6 @@ static void type_text(NSString *text) {
     self.view.backgroundColor = [UIColor colorWithRed:0.05 green:0.16 blue:0.30 alpha:0.97];
     _scroll = [UIScrollView new];
     _scroll.translatesAutoresizingMaskIntoConstraints = NO;
-    _scroll.keyboardDismissMode = UIScrollViewKeyboardDismissModeInteractive;
     [self.view addSubview:_scroll];
     UIStackView *st = [UIStackView new];
     st.axis = UILayoutConstraintAxisVertical;
@@ -239,7 +236,7 @@ static void type_text(NSString *text) {
     UILayoutGuide *g = self.view.safeAreaLayoutGuide;
     [NSLayoutConstraint activateConstraints:@[
         [_scroll.topAnchor constraintEqualToAnchor:g.topAnchor],
-        [_scroll.bottomAnchor constraintEqualToAnchor:self.view.keyboardLayoutGuide.topAnchor],
+        [_scroll.bottomAnchor constraintEqualToAnchor:g.bottomAnchor],
         [_scroll.leadingAnchor constraintEqualToAnchor:g.leadingAnchor],
         [_scroll.trailingAnchor constraintEqualToAnchor:g.trailingAnchor],
         [st.topAnchor constraintEqualToAnchor:_scroll.contentLayoutGuide.topAnchor constant:24],
@@ -249,32 +246,6 @@ static void type_text(NSString *text) {
     ]];
 
     [st addArrangedSubview:[self label:@"Avatar 250" size:26 bold:YES]];
-    NSString *hint = self.starting
-        ? @"Địa chỉ máy chủ (IP hoặc tên miền, có thể kèm :cổng)\nVí dụ 123.45.67.89:19128"
-        : @"Địa chỉ máy chủ mới có hiệu lực khi kết nối lại (thoát ra màn đăng nhập hoặc mở lại app).\nVí dụ 123.45.67.89:19128";
-    [st addArrangedSubview:[self label:hint size:15 bold:NO]];
-    _server = [UITextField new];
-    _server.borderStyle = UITextBorderStyleRoundedRect;
-    _server.backgroundColor = UIColor.whiteColor;
-    _server.textColor = UIColor.blackColor;
-    _server.font = [UIFont systemFontOfSize:20];
-    _server.keyboardType = UIKeyboardTypeURL;
-    _server.autocorrectionType = UITextAutocorrectionTypeNo;
-    _server.autocapitalizationType = UITextAutocapitalizationTypeNone;
-    _server.spellCheckingType = UITextSpellCheckingTypeNo;
-    _server.clearButtonMode = UITextFieldViewModeWhileEditing;
-    _server.returnKeyType = UIReturnKeyGo;
-    _server.delegate = self;
-    _server.attributedPlaceholder = [[NSAttributedString alloc] initWithString:@"vd 192.168.1.5:19128"
-        attributes:@{NSForegroundColorAttributeName: UIColor.grayColor}];
-    _server.text = savedServer();
-    [_server.heightAnchor constraintEqualToConstant:46].active = YES;
-    [st addArrangedSubview:_server];
-    _err = [self label:@"" size:14 bold:YES];
-    _err.textColor = [UIColor colorWithRed:1 green:0.55 blue:0.5 alpha:1];
-    _err.hidden = YES;
-    [st addArrangedSubview:_err];
-
     [st addArrangedSubview:[self label:@"Cỡ giao diện" size:15 bold:YES]];
     _size = [[UISegmentedControl alloc] initWithItems:@[SIZE_NAMES[0], SIZE_NAMES[1], SIZE_NAMES[2]]];
     int vw = savedWidth();
@@ -282,79 +253,39 @@ static void type_text(NSString *text) {
     [_size setTitleTextAttributes:@{NSForegroundColorAttributeName: UIColor.whiteColor} forState:UIControlStateNormal];
     [_size setTitleTextAttributes:@{NSForegroundColorAttributeName: UIColor.blackColor} forState:UIControlStateSelected];
     [st addArrangedSubview:_size];
-
-    UIStackView *row = [UIStackView new];
-    row.axis = UILayoutConstraintAxisHorizontal;
-    row.spacing = 10;
-    row.alignment = UIStackViewAlignmentCenter;
-    _skip = [UISwitch new];
-    _skip.on = [prefs() boolForKey:@"skip"];
-    [row addArrangedSubview:_skip];
-    [row addArrangedSubview:[self label:@"Không hỏi lại (giữ nút Aa 1 giây để đổi)" size:15 bold:NO]];
-    [st addArrangedSubview:row];
-
-    [st setCustomSpacing:22 afterView:row];
-    NSString *goTitle = self.starting ? @"Vào game" : @"Lưu";
-    NSString *cancelTitle = self.starting ? @"Thoát" : @"Đóng";
-    [st addArrangedSubview:[self button:goTitle primary:YES action:@selector(pressGo)]];
-    [st addArrangedSubview:[self button:cancelTitle primary:NO action:@selector(pressCancel)]];
-    if (!self.starting) {
-        [st addArrangedSubview:[self button:@"Thoát game" primary:NO action:@selector(pressQuit)]];
-    }
+    [st setCustomSpacing:22 afterView:_size];
+    [st addArrangedSubview:[self button:@"Lưu" primary:YES action:@selector(pressSave)]];
+    [st addArrangedSubview:[self button:@"Đóng" primary:NO action:@selector(pressCancel)]];
+    [st addArrangedSubview:[self button:@"Thoát game" primary:NO action:@selector(pressQuit)]];
 }
 
 - (UIStatusBarStyle)preferredStatusBarStyle { return UIStatusBarStyleLightContent; }
 
-- (void)fillServer:(NSString *)s {
-    [self loadViewIfNeeded];
-    _server.text = s;
-}
-
-- (BOOL)textFieldShouldReturn:(UITextField *)tf {
-    [self pressGo];
-    return NO;
-}
-
-- (void)pressGo {
-    NSString *s = normalizeServer(_server.text ?: @"");
-    if (!s.length) {
-        _err.text = @"Nhập địa chỉ máy chủ (hỏi admin)";
-        _err.hidden = NO;
-        [_server becomeFirstResponder];
-        return;
-    }
+- (void)pressSave {
     NSInteger sel = _size.selectedSegmentIndex;
     int nvw = SIZES[sel >= 0 && sel < 3 ? sel : 0];
     BOOL sizeChanged = nvw != savedWidth();
-    [prefs() setObject:s forKey:@"server"];
-    [prefs() setBool:_skip.on forKey:@"skip"];
     if (sizeChanged || [prefs() boolForKey:@"vwSet"]) {
         [prefs() setInteger:nvw forKey:@"vw"];
         [prefs() setBool:YES forKey:@"vwSet"]; /* nguoi choi tu chon co giao dien */
     }
-    gArgServer = nil;
-    j2n_set_server(s.UTF8String);
-    [self.view endEditing:YES];
-    BOOL starting = self.starting;
-    void (^done)(BOOL) = self.onDone;
+    void (^done)(void) = self.onDone;
     UIViewController *parent = self.presentingViewController;
     [self dismissViewControllerAnimated:YES completion:^{
-        if (!starting && sizeChanged && parent) {
+        if (sizeChanged && parent) {
             UIAlertController *a = [UIAlertController alertControllerWithTitle:nil
                 message:@"Mở lại app để đổi cỡ giao diện" preferredStyle:UIAlertControllerStyleAlert];
             [a addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil]];
             [parent presentViewController:a animated:YES completion:nil];
         }
-        if (done) done(YES);
+        if (done) done();
     }];
 }
 
 - (void)pressCancel {
-    if (self.starting) exit(0);
-    [self.view endEditing:YES];
-    void (^done)(BOOL) = self.onDone;
+    void (^done)(void) = self.onDone;
     [self dismissViewControllerAnimated:YES completion:^{
-        if (done) done(NO);
+        if (done) done();
     }];
 }
 
@@ -374,7 +305,7 @@ static void ios_kb_hook(int show, int area);
 @interface GameVC : UIViewController
 @property (nonatomic, readonly) KeyView *keyView;
 - (void)showTextBox:(NSString *)title text:(NSString *)text max:(int)max cons:(int)cons;
-- (void)showSettings:(BOOL)starting;
+- (void)showSettings;
 - (void)gameKeyboard:(int)show area:(int)area;
 @end
 
@@ -432,45 +363,38 @@ static void ios_kb_hook(int show, int area);
 - (void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
     if (gStarted || _settingsShown) return;
-    if (!gAutotest && savedServer().length) {
-        /* co dia chi may chu (dien san trong app / da luu): vao thang game (giu nut Aa 1 giay de doi) */
+    if (savedServer().length) {
+        /* may chu dien san trong app: vao thang game (khong co man nhap dia chi) */
         [self startGame];
     } else {
-        [self showSettings:YES];
+        [self showNoServer];
     }
 }
 
-- (void)showSettings:(BOOL)starting {
+/* ban app chua gan may chu (chua qua DoiMayChu / trang cai dat VPS): bao tai app tu trang web, khong co o nhap IP */
+- (void)showNoServer {
+    _settingsShown = YES;
+    UIAlertController *a = [UIAlertController alertControllerWithTitle:@"Avatar 250"
+        message:@"Bản app này chưa được gắn máy chủ.\nHãy tải app ở trang web của máy chủ rồi cài lại."
+        preferredStyle:UIAlertControllerStyleAlert];
+    [a addAction:[UIAlertAction actionWithTitle:@"Thoát" style:UIAlertActionStyleDefault handler:^(UIAlertAction *x) { exit(0); }]];
+    [self presentViewController:a animated:YES completion:nil];
+    plat_log("[app] chua gan may chu");
+}
+
+- (void)showSettings {
     if (_settingsShown) return;
     _settingsShown = YES;
     [_keys resignFirstResponder];
     SettingsVC *s = [SettingsVC new];
-    s.starting = starting;
     s.modalPresentationStyle = UIModalPresentationOverFullScreen;
     s.modalTransitionStyle = UIModalTransitionStyleCrossDissolve;
     __weak GameVC *ws = self;
-    s.onDone = ^(BOOL go) {
+    s.onDone = ^{
         GameVC *me = ws;
-        if (!me) return;
-        me->_settingsShown = NO;
-        if (starting && go) [me startGame];
+        if (me) me->_settingsShown = NO;
     };
-    [self presentViewController:s animated:!gAutotest completion:nil];
-    if (gAutotest && starting) {
-        /* tu kiem thu: chup man cai dat roi bam "Vao game" nhu nguoi choi */
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-            UIWindow *w = ws.view.window;
-            if (w) {
-                UIGraphicsImageRenderer *r = [[UIGraphicsImageRenderer alloc] initWithBounds:w.bounds];
-                UIImage *img = [r imageWithActions:^(UIGraphicsImageRendererContext *ctx) {
-                    [w drawViewHierarchyInRect:w.bounds afterScreenUpdates:YES];
-                }];
-                [UIImagePNGRepresentation(img) writeToFile:[gDataDir stringByAppendingPathComponent:@"t0_cai_dat.png"] atomically:YES];
-            }
-            [s fillServer:savedServer()];
-            [s pressGo];
-        });
-    }
+    [self presentViewController:s animated:YES completion:nil];
 }
 
 /* Canvas: rong theo cai dat, cao theo ti le vung an toan (giong ban Android) */
@@ -583,7 +507,7 @@ static void ios_kb_hook(int show, int area);
 }
 
 - (void)aaHold:(UILongPressGestureRecognizer *)g {
-    if (g.state == UIGestureRecognizerStateBegan) [self showSettings:NO];
+    if (g.state == UIGestureRecognizerStateBegan) [self showSettings];
 }
 
 - (void)tick {

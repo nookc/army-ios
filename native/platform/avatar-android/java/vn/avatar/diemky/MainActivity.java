@@ -46,7 +46,9 @@ import java.io.InputStream;
  * Avatar 250 (client 2.5.8) - ban Android "thuan": client J2ME da dich san sang ma may (libavatar.so),
  * KHONG chay qua gia lap / J2ME Loader.
  * Man hinh: khung game toan man (rong 240 / 320 / 360 tuy chon, cao theo ti le man), ban ban ca ve gap doi cho net;
- * nut "Aa" mep phai: cham = ban phim Android go thang vao o chu cua game, giu 2 giay = cai dat (may chu, co giao dien).
+ * nut "Aa" mep phai: cham = ban phim Android go thang vao o chu cua game, giu 2 giay = cai dat (chi co giao dien).
+ * May chu: chi lay tu ban app (assets/server.txt do DoiMayChu / trang cai dat VPS ghi san). Khong co o nhap va khong hien
+ * dia chi may chu o dau trong app (chu server khong muon lo IP).
  */
 public final class MainActivity extends Activity {
     static final String TAG = "Avatar";
@@ -81,11 +83,11 @@ public final class MainActivity extends Activity {
         }
         Log.i(TAG, "[app] activity tao (game " + (started ? "dang chay" : "chua chay") + ")");
         immersive();
-        // co dia chi may chu (dien san trong APK / da luu) -> vao thang game, khong hien cai dat (giu nut Aa 2 giay de doi)
-        if (started || (extra != null && extra.length() > 0) || server().length() > 0) {
+        // may chu dien san trong APK -> vao thang game; ban chua gan may chu -> bao tai app tu trang web (khong co o nhap IP)
+        if (started || server().length() > 0) {
             startGame();
         } else {
-            serverDialog(true);
+            noServer();
         }
     }
 
@@ -194,9 +196,28 @@ public final class MainActivity extends Activity {
         return s;
     }
 
+    /** dien san trong APK luon duoc dung (bo qua dia chi cu da luu); da luu chi dung cho ban chua dien san (CI: --es server) */
     String server() {
+        String b = bundledServer();
+        if (b.length() > 0) {
+            return b;
+        }
         String s = prefs.getString("server", null);
-        return s != null ? s : bundledServer();
+        return s != null ? s : "";
+    }
+
+    void noServer() {
+        AlertDialog.Builder bd = new AlertDialog.Builder(this);
+        bd.setTitle("Avatar 250");
+        bd.setMessage("Bản app này chưa được gắn máy chủ.\nHãy tải app ở trang web của máy chủ rồi cài lại.");
+        bd.setCancelable(false);
+        bd.setPositiveButton("Thoát", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface d, int which) {
+                exitApp();
+            }
+        });
+        bd.show();
+        Log.i(TAG, "[app] chua gan may chu");
     }
 
     int savedWidth() {
@@ -227,26 +248,16 @@ public final class MainActivity extends Activity {
         return (int) (v * getResources().getDisplayMetrics().density + 0.5f);
     }
 
-    void serverDialog(final boolean starting) {
+    /** giu nut Aa 2 giay: cai dat co giao dien + thoat game (khong co / khong hien dia chi may chu) */
+    void settingsDialog() {
         if (settingsDlg != null && settingsDlg.isShowing()) {
             return;
         }
         LinearLayout box = new LinearLayout(this);
         box.setOrientation(LinearLayout.VERTICAL);
         box.setPadding(dp(20), dp(12), dp(20), dp(4));
-        TextView tv = new TextView(this);
-        tv.setText(starting ? "Địa chỉ máy chủ (IP hoặc tên miền, có thể kèm :cổng)\nVí dụ 123.45.67.89:19128"
-                : "Địa chỉ máy chủ mới có hiệu lực khi kết nối lại (thoát ra màn đăng nhập hoặc mở lại app).\nVí dụ 123.45.67.89:19128");
-        box.addView(tv);
-        final EditText ed = new EditText(this);
-        ed.setSingleLine(true);
-        ed.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_URI);
-        ed.setText(server());
-        ed.setHint("vd 192.168.1.5:19128");
-        box.addView(ed);
         TextView tv2 = new TextView(this);
         tv2.setText("Cỡ giao diện");
-        tv2.setPadding(0, dp(8), 0, 0);
         box.addView(tv2);
         final RadioGroup rg = new RadioGroup(this);
         rg.setOrientation(LinearLayout.HORIZONTAL);
@@ -264,60 +275,31 @@ public final class MainActivity extends Activity {
             rg.check(1000);
         }
         box.addView(rg);
-        final CheckBox cb = new CheckBox(this);
-        cb.setText("Không hỏi lại (giữ nút Aa 2 giây để đổi)");
-        cb.setChecked(prefs.getBoolean("skip", false));
-        box.addView(cb);
         AlertDialog.Builder bd = new AlertDialog.Builder(this);
         bd.setTitle("Avatar 250");
         bd.setView(box);
-        bd.setCancelable(false);
-        bd.setPositiveButton(starting ? "Vào game" : "Lưu", null);
-        bd.setNegativeButton(starting ? "Thoát" : "Đóng", new DialogInterface.OnClickListener() {
+        bd.setCancelable(true);
+        bd.setPositiveButton("Lưu", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface d, int which) {
-                if (starting) {
-                    exitApp();
-                }
-            }
-        });
-        if (!starting) {
-            bd.setNeutralButton("Thoát game", new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface d, int which) {
-                    exitApp();
-                }
-            });
-        }
-        final AlertDialog dlg = bd.show();
-        settingsDlg = dlg;
-        Log.i(TAG, "[app] hop cai dat");
-        // tu xu ly nut Vao game de khong dong hop khi chua nhap dia chi
-        dlg.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                String s = normalizeServer(ed.getText().toString());
-                if (s.length() == 0) {
-                    ed.setError("Nhập địa chỉ máy chủ (hỏi admin)");
-                    return;
-                }
                 int sel = rg.getCheckedRadioButtonId() - 1000;
                 int nvw = SIZES[sel >= 0 && sel < SIZES.length ? sel : 0];
-                SharedPreferences.Editor pe = prefs.edit().putString("server", s).putBoolean("skip", cb.isChecked());
                 if (nvw != curVw || prefs.getBoolean("vwSet", false)) {
-                    pe.putInt("vw", nvw).putBoolean("vwSet", true); // nguoi choi tu chon co giao dien
+                    prefs.edit().putInt("vw", nvw).putBoolean("vwSet", true).apply(); // nguoi choi tu chon co giao dien
                 }
-                pe.apply();
-                if (started) {
-                    Native.setServer(s);
-                }
-                hideIme(ed);
-                dlg.dismiss();
                 settingsDlg = null;
-                if (starting) {
-                    startGame();
-                } else if (nvw != curVw) {
+                if (nvw != curVw) {
                     Toast.makeText(MainActivity.this, "Mở lại app để đổi cỡ giao diện", Toast.LENGTH_LONG).show();
                 }
             }
         });
+        bd.setNegativeButton("Đóng", null);
+        bd.setNeutralButton("Thoát game", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface d, int which) {
+                exitApp();
+            }
+        });
+        settingsDlg = bd.show();
+        Log.i(TAG, "[app] hop cai dat");
     }
 
     void startGame() {
@@ -798,7 +780,7 @@ public final class MainActivity extends Activity {
                 if (a == MotionEvent.ACTION_UP) {
                     onTab = false;
                     if (System.currentTimeMillis() - tabDown > 1800) {
-                        act.serverDialog(false);
+                        act.settingsDialog();
                     } else {
                         toggleKeyboard();
                     }
