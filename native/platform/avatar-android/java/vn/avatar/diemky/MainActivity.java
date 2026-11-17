@@ -43,7 +43,7 @@ import java.io.File;
 import java.io.InputStream;
 
 /**
- * Avatar 2.5.8 (Ban Ca 3D) - ban Android "thuan": client J2ME da dich san sang ma may (libavatar.so),
+ * Avatar 250 (client 2.5.8) - ban Android "thuan": client J2ME da dich san sang ma may (libavatar.so),
  * KHONG chay qua gia lap / J2ME Loader.
  * Man hinh: khung game toan man (rong 240 / 320 / 360 tuy chon, cao theo ti le man), ban ban ca ve gap doi cho net;
  * nut "Aa" mep phai: cham = ban phim Android go thang vao o chu cua game, giu 2 giay = cai dat (may chu, co giao dien).
@@ -269,7 +269,7 @@ public final class MainActivity extends Activity {
         cb.setChecked(prefs.getBoolean("skip", false));
         box.addView(cb);
         AlertDialog.Builder bd = new AlertDialog.Builder(this);
-        bd.setTitle("Avatar - Bắn Cá 3D");
+        bd.setTitle("Avatar 250");
         bd.setView(box);
         bd.setCancelable(false);
         bd.setPositiveButton(starting ? "Vào game" : "Lưu", null);

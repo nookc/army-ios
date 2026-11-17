@@ -1,5 +1,5 @@
 /*
- * App.m - app iOS "thuan" cho client Avatar 2.5.8 (Ban Ca 3D): client J2ME da dich san sang ma may ARM64,
+ * App.m - app iOS "thuan" cho client Avatar 250 (2.5.8): client J2ME da dich san sang ma may ARM64,
  * KHONG chay qua gia lap / bo thong dich.
  *   - man hinh game phu vung an toan: Canvas rong 240 / 320 / 360 (cai dat), cao theo ti le man hinh
  *   - ban ban ca ve gap doi (vd 480 x 930) cho net
@@ -248,7 +248,7 @@ static void type_text(NSString *text) {
         [st.trailingAnchor constraintEqualToAnchor:_scroll.frameLayoutGuide.trailingAnchor constant:-22],
     ]];
 
-    [st addArrangedSubview:[self label:@"Avatar - Bắn Cá 3D" size:26 bold:YES]];
+    [st addArrangedSubview:[self label:@"Avatar 250" size:26 bold:YES]];
     NSString *hint = self.starting
         ? @"Địa chỉ máy chủ (IP hoặc tên miền, có thể kèm :cổng)\nVí dụ 123.45.67.89:19128"
         : @"Địa chỉ máy chủ mới có hiệu lực khi kết nối lại (thoát ra màn đăng nhập hoặc mở lại app).\nVí dụ 123.45.67.89:19128";

@@ -1,8 +1,8 @@
-# Avatar cho iOS + Android (nhánh `avatar-ios`)
+# Avatar 250 cho iOS + Android (nhánh `avatar-ios`)
 
 ## Bản chính: bản "thuần" (mã máy, không giả lập) – 11/2026
 
-Client J2ME **Avatar 2.5.8** (có Bàn Bắn Cá 3D) được dịch sẵn sang C rồi biên dịch thành **mã máy** của điện thoại
+App **Avatar 250** (client J2ME Avatar 2.5.8, có Bàn Bắn Cá 3D) được dịch sẵn sang C rồi biên dịch thành **mã máy** của điện thoại
 bằng bộ dịch `native/` của repo (cùng bộ với bản Army thuần): không có bộ thông dịch / giả lập J2ME nào chạy trên máy,
 nên mượt và nhẹ hơn hẳn bản phoneME bên dưới.
 

@@ -1,5 +1,5 @@
 #!/bin/bash
-# Build APK Android "thuan" cho client Avatar 2.5.8 (Ban Ca 3D): client J2ME dich san sang C -> ma may ARM/x86,
+# Build APK Android "thuan" cho client Avatar 250 (2.5.8): client J2ME dich san sang C -> ma may ARM/x86,
 # KHONG gia lap / J2ME Loader. Dung chung runtime + lop JNI voi ban Army (platform/android/jni/android.c).
 # Can: ANDROID_HOME (build-tools, platforms), NDK (ANDROID_NDK_HOME / ANDROID_NDK_LATEST_HOME), JDK 17.
 #   bash native/tools/build_avatar_android.sh

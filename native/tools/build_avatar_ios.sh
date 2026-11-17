@@ -1,5 +1,5 @@
 #!/bin/bash
-# Build app iOS "thuan" cho client Avatar 2.5.8 (Ban Ca 3D): client J2ME dich san sang C -> ma may ARM64,
+# Build app iOS "thuan" cho client Avatar 250 (2.5.8): client J2ME dich san sang C -> ma may ARM64,
 # khong gia lap / khong bo thong dich. Chay tren macOS (CI GitHub Actions).
 #   bash native/tools/build_avatar_ios.sh [device|sim|ca-hai]
 # Ket qua: native/build/avatar-ios/Avatar-Thuan.ipa (chua ky), native/build/avatar-ios/sim/Avatar.app (simulator)
