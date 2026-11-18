@@ -220,27 +220,41 @@ chmod 640 "$DIR/server/database.properties"
 # ---------------------------------------------------------------- 6. trang web + file tai (ghi san dia chi may chu)
 buoc "Trang web + APK / IPA / JAR co san dia chi $DIACHI"
 W="$DIR/web.moi"
-( cd "$TMP" && "$JAVA" -jar "$DIR/client/DoiMayChu.jar" "$DIR/client/Avatar250.apk" "$W/Avatar250.apk" "$DIACHI" >/dev/null 2>&1 ) \
-  || { vang "  khong ghi duoc dia chi vao APK: dung APK goc (nguoi choi tu nhap)"; cp "$DIR/client/Avatar250.apk" "$W/"; }
+echo "$DIACHI" > "$DIR/client/DIA_CHI.txt"   # trang quan tri (tab Trang web) gan dia chi nay khi admin tai app moi len
+# app admin tai len tu trang quan tri (client/tai-len/) moi hon ban trong goi thi giu ban tai len
+nguon() { if [ -f "$DIR/client/tai-len/$1" ] && [ "$DIR/client/tai-len/$1" -nt "$G/client/$1" ]; then echo "$DIR/client/tai-len/$1"; else echo "$DIR/client/$1"; fi; }
+SA=$(nguon Avatar250.apk); SJ=$(nguon Avatar250.jar); SI=$(nguon Avatar.ipa)
+case "$SA$SJ$SI" in *tai-len*) echo "  dung app admin da tai len (moi hon ban trong goi): $(echo "$SA $SJ $SI" | tr ' ' '\n' | grep tai-len | xargs -n1 basename | tr '\n' ' ')";; esac
+# DoiMayChu nhan loai app theo duoi file: chep sang ten co duoi dung truoc khi gan
+gan() { cp -f "$1" "$TMP/vao.$3" && ( cd "$TMP" && "$JAVA" -jar "$DIR/client/DoiMayChu.jar" "$TMP/vao.$3" "$2" "$DIACHI" >/dev/null 2>&1 ); }
+gan "$SA" "$W/Avatar250.apk" apk \
+  || { vang "  khong ghi duoc dia chi vao APK: dung APK goc (nguoi choi tu nhap)"; cp "$SA" "$W/Avatar250.apk"; }
 ln -sf Avatar250.apk "$W/Avatar-BanCa3D.apk"   # link tai cu (da chia se truoc day) van tai duoc ban moi
-( cd "$TMP" && "$JAVA" -jar "$DIR/client/DoiMayChu.jar" "$DIR/client/Avatar250.jar" "$W/Avatar250.jar" "$DIACHI" >/dev/null 2>&1 ) \
-  || { vang "  khong ghi duoc dia chi vao JAR: dung JAR goc"; cp "$DIR/client/Avatar250.jar" "$W/"; }
+gan "$SJ" "$W/Avatar250.jar" jar \
+  || { vang "  khong ghi duoc dia chi vao JAR: dung JAR goc"; cp "$SJ" "$W/Avatar250.jar"; }
 ln -sf Avatar250.jar "$W/Avatar258.jar"   # link tai JAR cu van tai duoc ban moi
-( cd "$TMP" && "$JAVA" -jar "$DIR/client/DoiMayChu.jar" "$DIR/client/Avatar.ipa" "$W/Avatar.ipa" "$DIACHI" >/dev/null 2>&1 ) \
-  || { vang "  khong ghi duoc dia chi vao IPA: dung IPA goc"; cp "$DIR/client/Avatar.ipa" "$W/"; }
-# khong ghi dia chi may chu len trang web (app da gan san, tranh lo IP); giu link nhom (nhom: '...') chu server da dien
+gan "$SI" "$W/Avatar.ipa" ipa \
+  || { vang "  khong ghi duoc dia chi vao IPA: dung IPA goc"; cp "$SI" "$W/Avatar.ipa"; }
+rm -f "$TMP"/vao.*
+# khong ghi dia chi may chu len trang web (app da gan san, tranh lo IP); giu ten game + link nhom / Zalo / Facebook chu server da dien
 python3 - "$DIR/web/cau-hinh.js" "$W/cau-hinh.js" <<'PY' 2>/dev/null || true
 import re, sys
 try:
     old = open(sys.argv[1], encoding='utf-8').read()
 except Exception:
     sys.exit(0)
-m = re.search(r"nhom:\s*'([^']*)'", old)
-if m and m.group(1):
-    p = sys.argv[2]
-    s = open(p, encoding='utf-8').read()
-    s = re.sub(r"nhom:\s*'[^']*'", lambda _: "nhom: '%s'" % m.group(1), s, count=1)
-    open(p, 'w', encoding='utf-8').write(s)
+p = sys.argv[2]
+s = open(p, encoding='utf-8').read()
+for k in ('tenGame', 'nhom', 'zalo', 'zaloAdmin', 'facebook'):
+    m = re.search(r"\b%s:\s*'([^'\\]*)'" % k, old)
+    if not (m and m.group(1)):
+        continue
+    v = m.group(1)
+    if re.search(r"\b%s:\s*'" % k, s):
+        s = re.sub(r"\b%s:\s*'[^']*'" % k, lambda _: "%s: '%s'" % (k, v), s, count=1)
+    else:
+        s = s.replace('};', "  , %s: '%s'\n};" % (k, v), 1)
+open(p, 'w', encoding='utf-8').write(s)
 PY
 rm -rf "$DIR/web.cu"; [ -d "$DIR/web" ] && mv "$DIR/web" "$DIR/web.cu"; mv "$W" "$DIR/web"; rm -rf "$DIR/web.cu"
 chown -R avatar:avatar "$DIR"

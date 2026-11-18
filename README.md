@@ -18,3 +18,12 @@ Thêm `MAY_CHU=ten.mien.cua.ban` trước `bash`: APK / IPA / JAR trên trang t�
 
 Tên miền cho game phải trỏ thẳng về VPS (bản ghi A). Nếu dùng Cloudflare thì để **DNS only** (đám mây xám), vì game chạy cổng TCP 19128.
 Trang web có thể dùng tên miền khác bật proxy (đám mây cam); `web.py` tự lấy IP thật của người dùng qua `CF-Connecting-IP`.
+
+## Trang quản trị
+
+Vào `http://ten.mien.cua.ban/quan-tri/` bằng tài khoản admin (mật khẩu in ra lúc cài lần đầu, xem `/opt/avatar/THONG_TIN.txt`).
+
+- **Cài đặt game**: ô đất, cây khế, auto đập đồ, điểm danh. **Nâng cấp**: tỉ lệ / giá đập đồ (Thợ kim hoàn, Pay To Win, Chay To Win).
+- **Tặng quà**: tặng xu / lượng / vật phẩm cho một tài khoản (online nhận ngay, offline vào game nhận).
+- **Trang web**: link nhóm Zalo / Zalo admin / Facebook trên trang chủ; tải APK / IPA / JAR mới lên – máy chủ tự gắn địa chỉ (mã hóa) rồi thay file tải.
+  Chạy lại lệnh cài vẫn giữ các link này, và giữ app đã tải lên nếu nó mới hơn bản trong gói.
