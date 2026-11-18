@@ -226,16 +226,8 @@ ln -sf Avatar250.apk "$W/Avatar-BanCa3D.apk"   # link tai cu (da chia se truoc d
 ( cd "$TMP" && "$JAVA" -jar "$DIR/client/DoiMayChu.jar" "$DIR/client/Avatar250.jar" "$W/Avatar250.jar" "$DIACHI" >/dev/null 2>&1 ) \
   || { vang "  khong ghi duoc dia chi vao JAR: dung JAR goc"; cp "$DIR/client/Avatar250.jar" "$W/"; }
 ln -sf Avatar250.jar "$W/Avatar258.jar"   # link tai JAR cu van tai duoc ban moi
-python3 - "$DIR/client/Avatar.ipa" "$W/Avatar.ipa" "$DIACHI" <<'PY' || cp "$DIR/client/Avatar.ipa" "$W/"
-import sys, zipfile
-src, dst, addr = sys.argv[1:4]
-with zipfile.ZipFile(src) as zi, zipfile.ZipFile(dst, 'w', zipfile.ZIP_DEFLATED) as zo:
-    for it in zi.infolist():
-        data = zi.read(it.filename)
-        if it.filename.endswith('.app/server.txt'):
-            data = addr.encode()
-        zo.writestr(it, data)
-PY
+( cd "$TMP" && "$JAVA" -jar "$DIR/client/DoiMayChu.jar" "$DIR/client/Avatar.ipa" "$W/Avatar.ipa" "$DIACHI" >/dev/null 2>&1 ) \
+  || { vang "  khong ghi duoc dia chi vao IPA: dung IPA goc"; cp "$DIR/client/Avatar.ipa" "$W/"; }
 # khong ghi dia chi may chu len trang web (app da gan san, tranh lo IP); giu link nhom (nhom: '...') chu server da dien
 python3 - "$DIR/web/cau-hinh.js" "$W/cau-hinh.js" <<'PY' 2>/dev/null || true
 import re, sys
