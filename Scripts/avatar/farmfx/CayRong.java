@@ -7,8 +7,8 @@ import javax.microedition.lcdui.Image;
  * Cay khe 1000 cap - cang len cao cay cang dep, co than thu ho cay bay vong quanh:
  *   cap 100: Rong bang (xanh)           cap 300: + Phuong hoang lua
  *   cap 600: + Ky lan bay               cap 900: + Rong lua
- *   mau cay: cap 250 bac, 500 vang, 750 pha le (xanh bang), 1000 tim (dung yen, khong doi mau / khong nhap nhay)
- *   + vong hao quang tim xoay cham + canh tim roi nhe
+ *   dang cay (mau tu nhien, khong mau me, khong nhap nhay): cap 250 cay truong thanh, 500 cay lau nam (la xanh tham),
+ *   750 cay co thu (la xanh rung gia, vo cay xam co reu), 1000 co thu ngan nam (tan la xanh dam, vo xam reu) + la roi nhe
  *   cap toi da 1000: rong xanh + rong do thoi bay vong rieng, chuyen sang dua nhau (xoay quanh nhau) roi cung bay toi
  *   qua khe gia vo an (nhai, vun khe roi, bay tim) - qua that tren cay khong mat.
  * - Than thu bay theo elip quanh tan; nua tren elip = phia sau cay (ve truoc cay -> bi tan cay che), nua duoi = phia truoc.
@@ -35,19 +35,27 @@ public final class CayRong {
     private static long vt = 0;
     private static final Hashtable anhCay = new Hashtable();
 
-    // bac (250), vang (500), pha le (750), tim (1000) - moi cap mot mau co dinh, khong doi theo thoi gian
-    private static final int[][] MAU = {
-            {0x3C4650, 0xA0AAB4, 0xF0F5FF},
-            {0x5A3C0A, 0xDCA528, 0xFFF5A0},
-            {0x143C5A, 0x64BEF0, 0xE6FAFF},
-            {0x3C0A5A, 0xA050E6, 0xF0C8FF}};
+    // 4 nac mau (toi -> sang) cho la va vo cay theo bac: 250 truong thanh, 500 lau nam, 750 co thu, 1000 co thu ngan nam
+    private static final int[][] LA = {
+            {0x0E3410, 0x1F5A20, 0x3A8434, 0x69B24E},
+            {0x0C2C14, 0x1B4C24, 0x2F7034, 0x5C9A50},
+            {0x0B2612, 0x173F1F, 0x2A5E2C, 0x528646},
+            {0x0A2010, 0x15381C, 0x265429, 0x4C7E40}};
+    private static final int[][] VO = {
+            {0x24190C, 0x4A321A, 0x6C4C2C, 0x94704A},
+            {0x201912, 0x3E3024, 0x5C4A36, 0x806C54},
+            {0x1C1812, 0x352E24, 0x504536, 0x766A52},
+            {0x181510, 0x2F2920, 0x494032, 0x6C624C}};
+    /** % pha mau reu vao vo cay (cay co thu) */
+    private static final int[] REU = {0, 0, 35, 45};
+    private static final int MAU_REU = 0x5A6430;
 
     private CayRong() {
     }
 
     // ---------------------------------------------------------------- anh cay doi mau
 
-    /** Bac mau cay theo cap: -1 = goc, 0 bac, 1 vang, 2 pha le, 3 tim (cap 1000). */
+    /** Bac dang cay theo cap: -1 = goc (cay non), 0 truong thanh (250), 1 lau nam (500), 2 co thu (750), 3 co thu ngan nam (1000). */
     private static int bac(int cap) {
         if (cap >= 1000) {
             return 3;
@@ -80,8 +88,36 @@ public final class CayRong {
         gb.a(g, id, x, y, neo);
     }
 
-    private static int tron(int a, int b, int t) {
-        return a + (b - a) * t / 255;
+    /** Mau tren day 4 nac, t 0..1023. */
+    private static int doc(int[] st, int t) {
+        if (t < 0) {
+            t = 0;
+        } else if (t > 1023) {
+            t = 1023;
+        }
+        int seg = t * 3 / 1024;
+        if (seg > 2) {
+            seg = 2;
+        }
+        int u = (t - seg * 1024 / 3) * 3;
+        if (u < 0) {
+            u = 0;
+        } else if (u > 1023) {
+            u = 1023;
+        }
+        int a = st[seg], b = st[seg + 1];
+        int r = ((a >> 16) & 255) + (((((b >> 16) & 255) - ((a >> 16) & 255)) * u) >> 10);
+        int g = ((a >> 8) & 255) + (((((b >> 8) & 255) - ((a >> 8) & 255)) * u) >> 10);
+        int bl = (a & 255) + ((((b & 255) - (a & 255)) * u) >> 10);
+        return (r << 16) | (g << 8) | bl;
+    }
+
+    /** Pha mau m vao c, k phan tram. */
+    private static int pha(int c, int m, int k) {
+        int r = (((c >> 16) & 255) * (100 - k) + ((m >> 16) & 255) * k) / 100;
+        int g = (((c >> 8) & 255) * (100 - k) + ((m >> 8) & 255) * k) / 100;
+        int b = ((c & 255) * (100 - k) + (m & 255) * k) / 100;
+        return (r << 16) | (g << 8) | b;
     }
 
     private static Image toMau(Image goc, int id, int b) {
@@ -97,7 +133,6 @@ public final class CayRong {
             int w = goc.getWidth(), h = goc.getHeight();
             int[] px = new int[w * h];
             goc.getRGB(px, 0, w, 0, 0, w, h);
-            int[] p = MAU[b];
             for (int i = 0; i < px.length; i++) {
                 int a = px[i] >>> 24;
                 if (a == 0) {
@@ -105,24 +140,19 @@ public final class CayRong {
                 }
                 int r = (px[i] >> 16) & 255, gg = (px[i] >> 8) & 255, bb = px[i] & 255;
                 int l = (r * 30 + gg * 59 + bb * 11) / 100;
-                l = (l - 15) * 255 / 190;
-                if (l < 0) {
-                    l = 0;
-                } else if (l > 255) {
-                    l = 255;
-                }
-                int c1, c2, t;
-                if (l < 128) {
-                    c1 = p[0];
-                    c2 = p[1];
-                    t = l * 2;
+                int c;
+                if (gg > r && gg >= bb) {                       // la
+                    c = doc(LA[b], (l - 25) * 1024 / 105);
+                } else if (r > bb && r >= gg) {                 // vo cay, canh
+                    int t = (l - 22) * 1024 / 110;
+                    c = doc(VO[b], t);
+                    if (REU[b] > 0 && t > 250 && t < 850) {
+                        c = pha(c, MAU_REU, REU[b]);
+                    }
                 } else {
-                    c1 = p[1];
-                    c2 = p[2];
-                    t = (l - 128) * 2;
+                    continue;                                   // net vien, bong: giu nguyen
                 }
-                px[i] = (a << 24) | (tron((c1 >> 16) & 255, (c2 >> 16) & 255, t) << 16)
-                        | (tron((c1 >> 8) & 255, (c2 >> 8) & 255, t) << 8) | tron(c1 & 255, c2 & 255, t);
+                px[i] = (a << 24) | c;
             }
             Image im = Image.createRGBImage(px, w, h, true);
             anhCay.put(key, im);
@@ -427,24 +457,17 @@ public final class CayRong {
         }
     }
 
-    /** Cap 1000: vong hao quang tim xoay cham quanh tan cay + vai canh tim roi nhe (mau, co dinh, khong nhap nhay). */
+    /** Cay co thu ngan nam: vai chiec la gia roi cham, du dua (mau co dinh, khong nhap nhay). */
     private static void haoQuang(Graphics g, long t, int cx, int cy, int ra, int rb, int d) {
-        int n = 16;
-        int quay = (int) ((t / 110) & 63);
-        g.setColor(0xD9B8FF);
-        for (int i = 0; i < n; i++) {
-            int ph = (quay + i * 4) & 63;
-            int x = cx + ra * SIN[(ph + 16) & 63] / 1024;
-            int y = cy + rb * SIN[ph] / 1024;
-            g.fillRect(x - d, y - d, 2 * d, 2 * d);
-        }
-        g.setColor(0xC9A2F5);
         for (int i = 0; i < 5; i++) {
             int chu = 4200 + i * 470;
             int p = (int) ((t + i * 917) % chu);
             int x = cx + (((i * 7919) % (2 * ra + 1)) - ra) + SIN[(p * 64 / chu * 2) & 63] * 3 * d / 1024;
             int y = cy - rb + p * (rb * 3) / chu;
+            g.setColor((i & 1) == 0 ? 0x4C7E40 : 0x8C8A3C);
             g.fillRect(x, y, 2 * d, d);
+            g.setColor((i & 1) == 0 ? 0x2E5A2A : 0x6A6A2C);
+            g.fillRect(x + d, y + d, d, d);
         }
     }
 }
