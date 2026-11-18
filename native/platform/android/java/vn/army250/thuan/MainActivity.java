@@ -61,6 +61,7 @@ public final class MainActivity extends Activity {
         if (Build.VERSION.SDK_INT >= 21) {
             w.setStatusBarColor(0xFF63CCFF);
         }
+        anDieuHuong();   // dat truoc lan bo cuc dau: khung game tinh chieu cao tron toi mep duoi
         view = new GameView(this);
         setContentView(view);
         created++;
@@ -75,9 +76,33 @@ public final class MainActivity extends Activity {
         }
     }
 
+    /* v8h-75d: an thanh dieu huong Android (3 nut / vach vuot) -> ban phim ao sat mep duoi man hinh (giong iOS).
+       Vuot tu mep duoi len: thanh dieu huong hien tam roi tu an. Thanh trang thai (gio, pin) giu nhu cu.
+       LAYOUT_STABLE + LAYOUT_HIDE_NAVIGATION: bo cuc luon tron toi mep duoi, thanh hien / an khong lam doi kich thuoc khung game. */
+    static final int UI_AN_DIEU_HUONG = View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+            | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
+
+    void anDieuHuong() {
+        if (Build.VERSION.SDK_INT >= 19) {
+            View d = getWindow().getDecorView();
+            if (d.getSystemUiVisibility() != UI_AN_DIEU_HUONG) {
+                d.setSystemUiVisibility(UI_AN_DIEU_HUONG);
+            }
+        }
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        if (hasFocus) {
+            anDieuHuong();   // dong hop nhap chu / ban phim Android xong: an lai thanh dieu huong
+        }
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
+        anDieuHuong();
         view.resumeFrames();
         Native.soundPauseAll(false);
     }
