@@ -6,8 +6,9 @@ import javax.microedition.lcdui.Graphics;
 import javax.microedition.lcdui.Image;
 
 /**
- * O dat nong trai 10 cap: 1 thuong, 2 dat xop (tile goc), 3 dong, 4 bac, 5 vang anh kim, 6 ngoc luc bao, 7 hong ngoc,
- * 8 lam ngoc, 9 kim cuong, 10 tu ngoc (tim, hop voi cay khe cap 1000). Mau co dinh, khong doi mau / khong nhap nhay.
+ * O dat nong trai 10 cap, cap cang cao dat cang tot (mau dat that, khong mau me): 1 thuong, 2 dat xop (tile goc),
+ * 3 dat thit, 4 dat phu sa, 5 dat do bazan, 6 dat mun, 7 dat mun toi xop, 8 dat den, 9 dat den mau mo, 10 dat Than Nong.
+ * Moi cap mot mau co dinh, giu nguyen vien co xanh cua tile goc, khong doi mau / khong nhap nhay.
  * - May chu gui cap that bang lenh 118 ngay sau goi vao nong trai (goi 61 chi gui toi da 2 de app cu van gieo duoc).
  * - App goc chi biet cap 1 / 2: luat gieo hat va chon hinh dat so sanh p == 1 / p == 2, luat nang cap chi cho o dau
  *   khi o dau con cap 1. PatchFarmFx sua cac cho do trong lop go: p dung cho gieo / hinh dat qua logic(), luat nang cap
@@ -18,16 +19,16 @@ public final class LandFx {
 
     public static final int CAP_MAX = 10;
     private static final int MAP_NONG_TRAI = 24;
-    /** 3 nac mau (toi, giua, sang) cho cap 3..10 */
+    /** 3 nac mau dat (toi, giua, sang) cho cap 3..10: dam dan, mau mo dan */
     private static final int[][] MAU = {
-            {0x5A2814, 0xBE6432, 0xF5B478},     // 3 dong
-            {0x50555F, 0xAAB0BC, 0xF0F4FC},     // 4 bac
-            {0x6E460A, 0xE1AA28, 0xFFF096},     // 5 vang anh kim
-            {0x0A4628, 0x28B46E, 0xA0FFD2},     // 6 ngoc luc bao
-            {0x500A1E, 0xD2284B, 0xFFAABE},     // 7 hong ngoc
-            {0x0A1E5A, 0x2864D2, 0xAAD2FF},     // 8 lam ngoc
-            {0x284656, 0xA5E1F5, 0xFFFFFF},     // 9 kim cuong
-            {0x3C0A5A, 0xA050E6, 0xF0C8FF}};    // 10 tu ngoc (cung mau tim voi cay khe 1000)
+            {0x4D3112, 0x9A6224, 0xD78932},     // 3 dat thit
+            {0x472713, 0x8E4E26, 0xC66D35},     // 4 dat phu sa
+            {0x432015, 0x87412A, 0xBD5B3A},     // 5 dat do bazan
+            {0x352110, 0x6A4220, 0x9F6330},     // 6 dat mun
+            {0x2F170C, 0x5E2E18, 0x914725},     // 7 dat mun toi xop
+            {0x23170E, 0x4E3420, 0x7C5333},     // 8 dat den
+            {0x1B120A, 0x3E2818, 0x6C462A},     // 9 dat den mau mo
+            {0x160D08, 0x382216, 0x75472E}};    // 10 dat Than Nong
 
     private static final Hashtable anh = new Hashtable();
 
@@ -142,8 +143,11 @@ public final class LandFx {
                     continue;
                 }
                 int r = (px[i] >> 16) & 255, gg = (px[i] >> 8) & 255, b = px[i] & 255;
+                if (gg > r + 12 && gg > b + 12) {
+                    continue;                                   // vien co xanh cua tile goc: giu nguyen
+                }
                 int l = (r * 30 + gg * 59 + b * 11) / 100;
-                l = (l - 25) * 255 / 175;                       // tang tuong phan: dat toi -> ra mau kim loai ro
+                l = (l - 15) * 255 / 190;
                 if (l < 0) {
                     l = 0;
                 } else if (l > 255) {
