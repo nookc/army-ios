@@ -6,8 +6,8 @@ import javax.microedition.lcdui.Graphics;
 import javax.microedition.lcdui.Image;
 
 /**
- * O dat nong trai 10 cap: 1 thuong, 2 dat xop (tile goc), 3 dong, 4 bac, 5 vang, 6 ngoc luc bao, 7 hong ngoc, 8 lam ngoc,
- * 9 tu ngoc, 10 kim cuong cau vong (doi mau lien tuc). Tu cap 5: hat lap lanh + vet sang chay qua.
+ * O dat nong trai 10 cap: 1 thuong, 2 dat xop (tile goc), 3 dong, 4 bac, 5 vang anh kim, 6 ngoc luc bao, 7 hong ngoc,
+ * 8 lam ngoc, 9 kim cuong, 10 tu ngoc (tim, hop voi cay khe cap 1000). Mau co dinh, khong doi mau / khong nhap nhay.
  * - May chu gui cap that bang lenh 118 ngay sau goi vao nong trai (goi 61 chi gui toi da 2 de app cu van gieo duoc).
  * - App goc chi biet cap 1 / 2: luat gieo hat va chon hinh dat so sanh p == 1 / p == 2, luat nang cap chi cho o dau
  *   khi o dau con cap 1. PatchFarmFx sua cac cho do trong lop go: p dung cho gieo / hinh dat qua logic(), luat nang cap
@@ -18,7 +18,7 @@ public final class LandFx {
 
     public static final int CAP_MAX = 10;
     private static final int MAP_NONG_TRAI = 24;
-    /** 3 nac mau (toi, giua, sang): cap 3..9, roi 6 mau cau vong cho cap 10 */
+    /** 3 nac mau (toi, giua, sang) cho cap 3..10 */
     private static final int[][] MAU = {
             {0x5A2814, 0xBE6432, 0xF5B478},     // 3 dong
             {0x50555F, 0xAAB0BC, 0xF0F4FC},     // 4 bac
@@ -26,9 +26,8 @@ public final class LandFx {
             {0x0A4628, 0x28B46E, 0xA0FFD2},     // 6 ngoc luc bao
             {0x500A1E, 0xD2284B, 0xFFAABE},     // 7 hong ngoc
             {0x0A1E5A, 0x2864D2, 0xAAD2FF},     // 8 lam ngoc
-            {0x320A50, 0x8C3CD2, 0xE6BEFF},     // 9 tu ngoc
-            {0x5A0A1E, 0xF03C50, 0xFFC8C8}, {0x5A320A, 0xF0961E, 0xFFE6A0}, {0x464600, 0xE6DC28, 0xFFFFB4},
-            {0x0A4628, 0x32C86E, 0xBEFFD2}, {0x0A2864, 0x3C78F0, 0xBED7FF}, {0x3C0A5A, 0xA050E6, 0xF0C8FF}};
+            {0x284656, 0xA5E1F5, 0xFFFFFF},     // 9 kim cuong
+            {0x3C0A5A, 0xA050E6, 0xF0C8FF}};    // 10 tu ngoc (cung mau tim voi cay khe 1000)
 
     private static final Hashtable anh = new Hashtable();
 
@@ -112,13 +111,10 @@ public final class LandFx {
         if (c == null || c.p < 3) {
             return;
         }
-        int m = c.p >= CAP_MAX ? 7 + (int) ((System.currentTimeMillis() / 420 + tc + th) % 6) : Math.min(6, c.p - 3);
+        int m = Math.max(0, Math.min(MAU.length - 1, c.p - 3));
         Image im = toMau(h, cot, hang, m);
         if (im != null) {
             g.drawImage(im, x, y, 0);
-        }
-        if (c.p >= 5) {
-            lapLanh(g, x, y, s, tc, th, c.p >= CAP_MAX ? 5 : 3);
         }
     }
 
@@ -177,41 +173,4 @@ public final class LandFx {
         }
     }
 
-    /** Tu cap 5: vai hat lap lanh (sang dan roi tat) o vi tri rieng cua moi o + 1 vet sang cheo chay qua moi 3 giay. */
-    private static void lapLanh(Graphics g, int x, int y, int s, int tc, int th, int soHat) {
-        long t = System.currentTimeMillis();
-        int seed = (tc * 7919 + th * 104729) & 0x7fffffff;
-        int d = gy.Y > 0 ? gy.Y : 1;
-        for (int i = 0; i < soHat; i++) {
-            int chu = 1500 + ((seed >> (i * 3)) & 7) * 170;
-            int pha = (int) ((t + ((seed >> (i * 5)) & 1023) * 3) % chu);
-            int song = chu / 3;
-            if (pha >= song) {
-                continue;
-            }
-            int to = pha < song / 2 ? pha : song - pha;              // 0..song/2
-            int sz = (1 + to * 4 / (song / 2 + 1)) * d;              // 1..5
-            int px = x + 3 * d + ((seed / (i + 3)) * 31 & 0x7fffffff) % Math.max(1, s - 6 * d);
-            int py = y + 3 * d + ((seed / (i + 5)) * 17 & 0x7fffffff) % Math.max(1, s - 6 * d);
-            g.setColor(0xFFFFF0);
-            g.fillRect(px - sz / 2, py, sz, d);
-            g.fillRect(px, py - sz / 2, d, sz);
-            if (sz >= 3 * d) {
-                g.setColor(0xFFF6B0);
-                g.fillRect(px - d, py - d, 2 * d + 1, 2 * d + 1);
-            }
-        }
-        int chu = 3000;
-        int p = (int) ((t + tc * 420 + th * 260) % chu);
-        if (p < 700) {
-            int dd = p * (s * 2) / 700;
-            g.setColor(0xFFF8C8);
-            for (int j = 0; j < s; j += d) {
-                int xx = x + dd - j;
-                if (xx >= x && xx < x + s - d) {
-                    g.fillRect(xx, y + j, d, d);
-                }
-            }
-        }
-    }
 }

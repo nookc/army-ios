@@ -7,7 +7,8 @@ import javax.microedition.lcdui.Image;
  * Cay khe 1000 cap - cang len cao cay cang dep, co than thu ho cay bay vong quanh:
  *   cap 100: Rong bang (xanh)           cap 300: + Phuong hoang lua
  *   cap 600: + Ky lan bay               cap 900: + Rong lua
- *   mau cay: cap 250 bac, 500 vang, 750 pha le (xanh bang), 1000 cau vong doi mau + vong hao quang + hat roi
+ *   mau cay: cap 250 bac, 500 vang, 750 pha le (xanh bang), 1000 tim (dung yen, khong doi mau / khong nhap nhay)
+ *   + vong hao quang tim xoay cham + canh tim roi nhe
  *   cap toi da 1000: rong xanh + rong do thoi bay vong rieng, chuyen sang dua nhau (xoay quanh nhau) roi cung bay toi
  *   qua khe gia vo an (nhai, vun khe roi, bay tim) - qua that tren cay khong mat.
  * - Than thu bay theo elip quanh tan; nua tren elip = phia sau cay (ve truoc cay -> bi tan cay che), nua duoi = phia truoc.
@@ -34,24 +35,22 @@ public final class CayRong {
     private static long vt = 0;
     private static final Hashtable anhCay = new Hashtable();
 
-    // bac, vang, pha le; 6 mau doi cua cap 1000 (vang, non chuoi, ngoc bich, tim, hong canh sen, bac trang) - tranh
-    // xanh duong / do tuoi de rong xanh + rong do dau tren cay van noi bat
+    // bac (250), vang (500), pha le (750), tim (1000) - moi cap mot mau co dinh, khong doi theo thoi gian
     private static final int[][] MAU = {
             {0x3C4650, 0xA0AAB4, 0xF0F5FF},
             {0x5A3C0A, 0xDCA528, 0xFFF5A0},
             {0x143C5A, 0x64BEF0, 0xE6FAFF},
-            {0x5A3C0A, 0xE6B428, 0xFFF5A0}, {0x3C5000, 0xA0DC28, 0xF0FFB4}, {0x0A4628, 0x32C86E, 0xBEFFD2},
-            {0x3C0A5A, 0xA050E6, 0xF0C8FF}, {0x5A0A46, 0xE650B4, 0xFFC8F0}, {0x46505A, 0xB4C8DC, 0xFFFFFF}};
+            {0x3C0A5A, 0xA050E6, 0xF0C8FF}};
 
     private CayRong() {
     }
 
     // ---------------------------------------------------------------- anh cay doi mau
 
-    /** Bac mau cay theo cap: -1 = goc, 0 bac, 1 vang, 2 pha le, 3..8 cau vong (doi theo thoi gian). */
+    /** Bac mau cay theo cap: -1 = goc, 0 bac, 1 vang, 2 pha le, 3 tim (cap 1000). */
     private static int bac(int cap) {
         if (cap >= 1000) {
-            return 3 + (int) ((System.currentTimeMillis() / 450) % 6);
+            return 3;
         }
         if (cap >= 750) {
             return 2;
@@ -408,10 +407,13 @@ public final class CayRong {
         }
     }
 
-    private static final int[][] MAU_VET = {{0xA8F4FF, 0xFFFFFF}, {0xFFB43C, 0xFFF0A0}, {0xFFFFFF, 0xF0E0FF}, {0xFF6440, 0xFFD27C}};
+    /** Mau vet bay moi than thu (mot mau co dinh, khong nhap nhay). */
+    private static final int[] MAU_VET = {0xA8F4FF, 0xFFC864, 0xF4ECFF, 0xFF8C5A};
 
+    /** Vet bay: cac diem cu nho dan theo tuoi, dung yen cho, khong doi mau / khong rung. */
     private static void veVet(Graphics g, long t, int d, int k) {
         int n = vn[k] < VET ? vn[k] : VET;
+        g.setColor(MAU_VET[k]);
         for (int i = 1; i < n; i++) {
             int j = (vn[k] - 1 - i) % VET;
             if (j < 0) {
@@ -421,32 +423,28 @@ public final class CayRong {
             if (sz <= 0) {
                 continue;
             }
-            int lech = (int) (((t / 90) + i * 7) % 5) - 2;
-            g.setColor(MAU_VET[k][((i + (int) (t / 120)) & 1)]);
-            g.fillRect(vx[k][j] + lech * d - sz / 2, vy[k][j] + (i & 1) * 3 * d - sz / 2, sz, sz);
+            g.fillRect(vx[k][j] - sz / 2, vy[k][j] - sz / 2, sz, sz);
         }
     }
 
-    /** Cap 1000: vong hao quang hat sang xoay quanh tan cay + hat vang roi lap lanh. */
+    /** Cap 1000: vong hao quang tim xoay cham quanh tan cay + vai canh tim roi nhe (mau, co dinh, khong nhap nhay). */
     private static void haoQuang(Graphics g, long t, int cx, int cy, int ra, int rb, int d) {
         int n = 16;
-        int quay = (int) ((t / 60) & 63);
+        int quay = (int) ((t / 110) & 63);
+        g.setColor(0xD9B8FF);
         for (int i = 0; i < n; i++) {
             int ph = (quay + i * 4) & 63;
             int x = cx + ra * SIN[(ph + 16) & 63] / 1024;
             int y = cy + rb * SIN[ph] / 1024;
-            int m = 3 + (int) ((t / 160 + i) % 6);
-            g.setColor(MAU[m][2]);
-            int sz = ((i + (int) (t / 200)) % 3 == 0 ? 3 : 2) * d;
-            g.fillRect(x - sz / 2, y - sz / 2, sz, sz);
+            g.fillRect(x - d, y - d, 2 * d, 2 * d);
         }
-        for (int i = 0; i < 6; i++) {
-            int chu = 2200 + i * 230;
-            int p = (int) ((t + i * 517) % chu);
-            int x = cx + (((i * 7919) % (2 * ra + 1)) - ra);
+        g.setColor(0xC9A2F5);
+        for (int i = 0; i < 5; i++) {
+            int chu = 4200 + i * 470;
+            int p = (int) ((t + i * 917) % chu);
+            int x = cx + (((i * 7919) % (2 * ra + 1)) - ra) + SIN[(p * 64 / chu * 2) & 63] * 3 * d / 1024;
             int y = cy - rb + p * (rb * 3) / chu;
-            g.setColor((i & 1) == 0 ? 0xFFF0A0 : 0xFFFFFF);
-            g.fillRect(x, y, d, 2 * d);
+            g.fillRect(x, y, 2 * d, d);
         }
     }
 }
