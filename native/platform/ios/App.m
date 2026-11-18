@@ -135,10 +135,11 @@ static CGImageRef make_image(const uint32_t *px, int w, int h) {
     CGSize s = self.view.bounds.size;
     CGFloat w = s.width;
     CGFloat padH = round(w / 2);
-    CGFloat bottom = in.bottom;
-    _pad.frame = CGRectMake(0, s.height - bottom - padH, w, padH);
+    /* v8h-75d: ban phim dat sat mep duoi dien thoai (truoc chua khoang thanh Home ~34 pt -> ho 1 dai xanh duoi ban phim);
+       phim giu nguyen kich thuoc, man hinh game cao them dung khoang do (Canvas tinh botIn = 0 luc khoi dong) */
+    _pad.frame = CGRectMake(0, s.height - padH, w, padH);
     CGFloat top = in.top;
-    CGFloat avail = s.height - top - bottom - padH;
+    CGFloat avail = s.height - top - padH;
     CGFloat sh = MIN(avail, w * gH / (CGFloat)gW);
     CGFloat sw = sh * gW / (CGFloat)gH;
     _screen.frame = CGRectMake(round((w - sw) / 2), top + round((avail - sh) / 2), round(sw), round(sh));
@@ -507,6 +508,7 @@ static void autotest(void) {
             }
             if (steps[i].shot) save_png([NSString stringWithUTF8String:steps[i].shot]);
         }
+        save_window_png(@"t4b_toan_man_hinh"); /* ca cua so (man game + ban phim) - xem ban phim sat mep duoi */
         /* do toc do khi Canvas dang hien: dem khung trong 10 giay */
         int f0 = j2n_frames();
         usleep(10000000);
@@ -573,7 +575,8 @@ static void autotest(void) {
     }
     CGFloat largest = MAX(MAX(in.top, in.bottom), MAX(in.left, in.right));
     BOOL notch = largest > 24 || longSide / shortSide > 2.0;
-    CGFloat topIn = notch ? MAX(largest, 47) : 20, botIn = notch ? 34 : 0;
+    /* v8h-75d: ban phim nam sat mep duoi (khong chua khoang thanh Home) -> Canvas cao toi mep tren ban phim */
+    CGFloat topIn = notch ? MAX(largest, 47) : 20, botIn = 0;
     CGFloat canvasPts = longSide - topIn - botIn - shortSide / 2;
     int h = (int)lround(320.0 * canvasPts / shortSide);
     h -= h % 2;
