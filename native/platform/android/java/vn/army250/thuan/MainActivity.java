@@ -28,6 +28,7 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
+import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
@@ -444,8 +445,10 @@ public final class MainActivity extends Activity {
             super.onSizeChanged(w, h, ow, oh);
             if (!started) {
                 // chieu cao khung game: rong 320, cao vua phan tren ban phim ao (giong ban iOS)
-                int padH = padHeight(w, h);
-                int gh = Math.round(320f * (h - padH) / Math.max(1, w));
+                // v8h-75d: tru phan thanh trang thai o tren (bo cuc tron man hinh), ban phim sat mep duoi
+                int uh = h - Math.min(tren(), h / 4);
+                int padH = padHeight(w, uh);
+                int gh = Math.round(320f * (uh - padH) / Math.max(1, w));
                 gh -= gh % 2;
                 gh = Math.max(360, Math.min(600, gh));
                 act.startGame(gh);
@@ -460,17 +463,49 @@ public final class MainActivity extends Activity {
             return Math.min(ph, h * 42 / 100);
         }
 
+        /* v8h-75d: an thanh dieu huong (LAYOUT_HIDE_NAVIGATION) -> khung ve tron man hinh, ke ca duoi thanh trang thai:
+           tu chua phan thanh trang thai o tren (le tren cua cua so), ban phim van sat mep duoi */
+        int topIn = -1;
+
+        @Override
+        public WindowInsets onApplyWindowInsets(WindowInsets in) {
+            int t = Math.max(0, Math.max(in.getSystemWindowInsetTop(), in.getStableInsetTop()));
+            if (t != topIn) {
+                topIn = t;
+                if (getWidth() > 0 && getHeight() > 0) {
+                    layout(getWidth(), getHeight());
+                    invalidate();
+                }
+            }
+            return in;
+        }
+
+        int tren() {
+            if (topIn >= 0) {
+                return topIn;
+            }
+            // chua nhan le cua so (hiem): khung nam o mep tren man hinh thi tru chieu cao thanh trang thai
+            int[] o = new int[2];
+            getLocationOnScreen(o);
+            if (o[1] > 0) {
+                return 0;
+            }
+            int id = getResources().getIdentifier("status_bar_height", "dimen", "android");
+            return id > 0 ? getResources().getDimensionPixelSize(id) : 0;
+        }
+
         void layout(int w, int h) {
             if (w <= 0 || h <= 0) {
                 return;
             }
-            int ph = padHeight(w, h);
+            int t = Math.min(tren(), h / 4);
+            int ph = padHeight(w, h - t);
             padR.set(0, h - ph, w, h);
             padDirty = true;
-            int ah = h - ph;
+            int ah = h - ph - t;
             float s = Math.min(w / (float) gW, ah / (float) gH);
             int cw = Math.round(gW * s), ch = Math.round(gH * s);
-            int x = (w - cw) / 2, y = (ah - ch) / 2;
+            int x = (w - cw) / 2, y = t + (ah - ch) / 2;
             canvasR.set(x, y, x + cw, y + ch);
             arrow.setStrokeWidth(Math.max(2f, w / 160f));
             post(new Runnable() {
