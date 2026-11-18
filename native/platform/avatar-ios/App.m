@@ -4,7 +4,7 @@
  *   - man hinh game phu vung an toan: Canvas rong 240 / 320 / 360 (cai dat), cao theo ti le man hinh
  *   - ban ban ca ve gap doi (vd 480 x 930) cho net
  *   - nut "Aa": cham = bat/tat ban phim iPhone (go thang vao o chu cua game), giu 1 giay = cai dat (chi co giao dien)
- *   - may chu: dien san trong app (server.txt do DoiMayChu / trang cai VPS ghi); khong co o nhap, khong hien IP o dau
+ *   - may chu: dien san trong app (server.dat ma hoa do DoiMayChu / trang cai VPS ghi); khong co o nhap, khong hien IP o dau
  *   - hop nhap chu cua game (Form / TextBox) = UIAlertController
  *   - "-autotest": tu dang nhap + chup man hinh (CI iOS Simulator), "-avatar.server host:cong" dat may chu
  */
@@ -47,18 +47,20 @@ static NSString *const SIZE_NAMES[] = {@"To (240)", @"Vừa (320)", @"Nhỏ (360
 /* ============================================================ cai dat */
 static NSUserDefaults *prefs(void) { return NSUserDefaults.standardUserDefaults; }
 
-static NSString *bundledServer(void) {
-    NSString *p = [NSBundle.mainBundle pathForResource:@"server" ofType:@"txt"];
-    NSString *s = p ? [NSString stringWithContentsOfFile:p encoding:NSUTF8StringEncoding error:nil] : nil;
-    return [s stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceAndNewlineCharacterSet] ?: @"";
+/* may chu dien san trong app: server.dat (ma hoa + xac thuc, do DoiMayChu / trang cai dat VPS ghi). Giai ma o ma may C,
+   dia chi khong nam o dang chu trong IPA va khong ghi log. 1 = hop le (da dat may chu). */
+static BOOL gEncOk;
+static BOOL loadBundledEnc(void) {
+    NSString *p = [NSBundle.mainBundle pathForResource:@"server" ofType:@"dat"];
+    NSData *d = p ? [NSData dataWithContentsOfFile:p] : nil;
+    if (!d.length || d.length > 512) return NO;
+    return j2n_set_server_enc((const unsigned char *)d.bytes, (int)d.length) ? YES : NO;
 }
 
-/* may chu: tham so -avatar.server (CI) > dien san trong app (server.txt, luon dung) > da luu (chi ban chua dien san).
+/* chi cho ban chua gan may chu: tham so -avatar.server (CI chay thu) > da luu.
    Trong app khong co o nhap va khong hien dia chi may chu o dau (chu server khong muon lo IP). */
 static NSString *savedServer(void) {
     if (gArgServer.length) return gArgServer;
-    NSString *b = bundledServer();
-    if (b.length) return b;
     NSString *s = [prefs() stringForKey:@"server"];
     return s ?: @"";
 }
@@ -363,7 +365,8 @@ static void ios_kb_hook(int show, int area);
 - (void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
     if (gStarted || _settingsShown) return;
-    if (savedServer().length) {
+    gEncOk = gEncOk || loadBundledEnc();
+    if (gEncOk || savedServer().length) {
         /* may chu dien san trong app: vao thang game (khong co man nhap dia chi) */
         [self startGame];
     } else {
@@ -420,10 +423,10 @@ static void ios_kb_hook(int show, int area);
     h = MAX(gW * 4 / 3, MIN(gW * 12 / 5, h));
     gH = h - (h % 2);
     j2n_set_keyboard_hook(ios_kb_hook);
-    j2n_set_server(savedServer().UTF8String);
+    if (!gEncOk) j2n_set_server(savedServer().UTF8String);
     j2n_set_hd(HD_CANVAS, 2);
-    plat_log([[NSString stringWithFormat:@"[app] vao game: may chu '%@', man %dx%d (vung an toan %.0fx%.0f diem)",
-               savedServer(), gW, gH, sw, sh] UTF8String]);
+    plat_log([[NSString stringWithFormat:@"[app] vao game: man %dx%d (vung an toan %.0fx%.0f diem)",
+               gW, gH, sw, sh] UTF8String]);
     gStarted = YES;
     j2n_start(MIDLET, gW, gH);
     log_roots("khoi dong");

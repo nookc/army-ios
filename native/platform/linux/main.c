@@ -208,6 +208,15 @@ int main(int argc, char **argv) {
     /* Avatar: J2N_SERVER=host[:cong] chuyen ket noi 127.0.0.1; J2N_HD=TenLop[,TenLop]:lan (vd FishGame:2) */
     const char *srv = getenv("J2N_SERVER");
     if (srv && srv[0]) j2n_set_server(srv);
+    /* J2N_SERVER_DAT=tep: dia chi may chu ma hoa (giong server.dat trong APK / IPA) */
+    const char *sd = getenv("J2N_SERVER_DAT");
+    if (sd && sd[0]) {
+        unsigned char buf[512];
+        FILE *fd = fopen(sd, "rb");
+        int nr = fd ? (int)fread(buf, 1, sizeof buf, fd) : 0;
+        if (fd) fclose(fd);
+        fprintf(stderr, "[harness] server.dat: %s\n", j2n_set_server_enc(buf, nr) ? "hop le" : "KHONG hop le");
+    }
     const char *hd = getenv("J2N_HD");
     if (hd && hd[0]) {
         char hb[256];

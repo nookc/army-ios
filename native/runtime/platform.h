@@ -66,6 +66,8 @@ void j2n_set_hd(const char *names, int scale);
 /* Avatar: ket noi toi 127.0.0.1 / localhost duoc chuyen sang may chu nay: "host" (giu cong cua game) hoac "host:cong";
    NULL / "" = khong chuyen. Goi luc nao cung duoc (ap dung tu lan ket noi sau) */
 void j2n_set_server(const char *spec);
+/* dia chi may chu ma hoa (server.dat ghi boi DoiMayChu): 1 = hop le va da dat */
+int j2n_set_server_enc(const unsigned char *d, int n);
 int j2n_frames(void);
 /* Avatar: nen tang dang ky ham bat/tat ban phim he thong khi game vao/ra o go chu (show 1/0, area_bottom: day vung game
    con dung duoc tinh bang diem anh Canvas, 0 = ca man). Khong dang ky = bo qua */

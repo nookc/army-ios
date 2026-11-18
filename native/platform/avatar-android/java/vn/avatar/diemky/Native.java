@@ -44,6 +44,9 @@ final class Native {
     /** may chu thay cho 127.0.0.1 cua client: "host" hoac "host:cong" */
     static native void setServer(String spec);
 
+    /** dia chi may chu ma hoa trong APK (assets/server.dat): giai ma + kiem tra o ma may, true = hop le */
+    static native boolean setServerEnc(byte[] d);
+
     /** Canvas ve phong to (ten lop cach nhau dau phay, so lan) - goi truoc start */
     static native void setHd(String names, int scale);
 

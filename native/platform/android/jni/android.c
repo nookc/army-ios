@@ -540,10 +540,20 @@ JNIEXPORT void JNICALL JNIFN(setServer)(JNIEnv *e, jclass cls, jstring spec) {
     }
     const char *s = (*e)->GetStringUTFChars(e, spec, 0);
     j2n_set_server(s);
-    char b[300];
-    snprintf(b, sizeof b, "[app] may chu: %s", s);
-    plat_log(b);
     (*e)->ReleaseStringUTFChars(e, spec, s);
+}
+
+/* Avatar: dia chi may chu ma hoa (assets/server.dat) - giai ma o day, dia chi khong qua Java, khong ghi log */
+JNIEXPORT jboolean JNICALL JNIFN(setServerEnc)(JNIEnv *e, jclass cls, jbyteArray d) {
+    (void)cls;
+    if (!d) return JNI_FALSE;
+    jsize n = (*e)->GetArrayLength(e, d);
+    if (n <= 0 || n > 512) return JNI_FALSE;
+    jbyte buf[512];
+    (*e)->GetByteArrayRegion(e, d, 0, n, buf);
+    int ok = j2n_set_server_enc((const unsigned char *)buf, (int)n);
+    memset(buf, 0, sizeof buf);
+    return ok ? JNI_TRUE : JNI_FALSE;
 }
 
 /* Avatar: Canvas ve phong to (vd "FishGame", 2) - goi truoc start */

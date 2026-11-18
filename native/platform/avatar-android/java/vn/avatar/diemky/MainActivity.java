@@ -47,7 +47,7 @@ import java.io.InputStream;
  * KHONG chay qua gia lap / J2ME Loader.
  * Man hinh: khung game toan man (rong 240 / 320 / 360 tuy chon, cao theo ti le man), ban ban ca ve gap doi cho net;
  * nut "Aa" mep phai: cham = ban phim Android go thang vao o chu cua game, giu 2 giay = cai dat (chi co giao dien).
- * May chu: chi lay tu ban app (assets/server.txt do DoiMayChu / trang cai dat VPS ghi san). Khong co o nhap va khong hien
+ * May chu: chi lay tu ban app (assets/server.dat ma hoa, do DoiMayChu / trang cai dat VPS ghi san). Khong co o nhap va khong hien
  * dia chi may chu o dau trong app (chu server khong muon lo IP).
  */
 public final class MainActivity extends Activity {
@@ -83,8 +83,16 @@ public final class MainActivity extends Activity {
         }
         Log.i(TAG, "[app] activity tao (game " + (started ? "dang chay" : "chua chay") + ")");
         immersive();
-        // may chu dien san trong APK -> vao thang game; ban chua gan may chu -> bao tai app tu trang web (khong co o nhap IP)
-        if (started || server().length() > 0) {
+        // may chu dien san trong APK (ma hoa) -> vao thang game; ban chua gan may chu -> bao tai app tu trang web
+        if (!started) {
+            byte[] enc = bundledEnc();
+            try {
+                encOk = enc != null && Native.setServerEnc(enc);
+            } catch (Throwable t) {
+                encOk = false;
+            }
+        }
+        if (started || encOk || server().length() > 0) {
             startGame();
         } else {
             noServer();
@@ -166,45 +174,31 @@ public final class MainActivity extends Activity {
         return new String(bo.toByteArray(), "UTF-8").trim();
     }
 
-    /** dia chi dien san: assets/server.txt (luc build / DoiMayChu moi), neu trong thi server.txt o goc APK (DoiMayChu cu) */
-    String bundledServer() {
-        String s = "";
+    /** dia chi may chu dien san trong APK: assets/server.dat (ma hoa + xac thuc, DoiMayChu / trang cai dat VPS ghi).
+     *  Giai ma o ma may (Native.setServerEnc): dia chi khong nam o dang chu trong APK, khong qua Java, khong ghi log. */
+    byte[] bundledEnc() {
         try {
-            s = readAll(getAssets().open("server.txt"));
-        } catch (Exception e) {
-            s = "";
-        }
-        if (s.length() == 0) {
-            java.util.zip.ZipFile z = null;
-            try {
-                z = new java.util.zip.ZipFile(getApplicationInfo().sourceDir);
-                java.util.zip.ZipEntry e = z.getEntry("server.txt");
-                if (e != null) {
-                    s = readAll(z.getInputStream(e));
-                }
-            } catch (Exception e) {
-                s = "";
-            } finally {
-                try {
-                    if (z != null) {
-                        z.close();
-                    }
-                } catch (Exception e) {
-                }
+            java.io.InputStream in = getAssets().open("server.dat");
+            java.io.ByteArrayOutputStream bo = new java.io.ByteArrayOutputStream();
+            byte[] buf = new byte[256];
+            int n;
+            while ((n = in.read(buf)) > 0) {
+                bo.write(buf, 0, n);
             }
+            in.close();
+            return bo.toByteArray();
+        } catch (Exception e) {
+            return null;
         }
-        return s;
     }
 
-    /** dien san trong APK luon duoc dung (bo qua dia chi cu da luu); da luu chi dung cho ban chua dien san (CI: --es server) */
+    /** dia chi da luu (chi cho ban chua gan may chu: CI chay thu am start --es server ...) */
     String server() {
-        String b = bundledServer();
-        if (b.length() > 0) {
-            return b;
-        }
         String s = prefs.getString("server", null);
         return s != null ? s : "";
     }
+
+    static boolean encOk;
 
     void noServer() {
         AlertDialog.Builder bd = new AlertDialog.Builder(this);
@@ -343,7 +337,9 @@ public final class MainActivity extends Activity {
         gH = vh;
         File data = new File(getFilesDir(), "rms");
         data.mkdirs();
-        Native.setServer(server());
+        if (!encOk) {
+            Native.setServer(server());
+        }
         Native.setHd("FishGame", 2);
         if (!Native.start(getAssets(), data.getAbsolutePath(), gW, gH)) {
             Log.e(TAG, "khong khoi dong duoc runtime");
@@ -356,7 +352,7 @@ public final class MainActivity extends Activity {
             return;
         }
         started = true;
-        Log.i(TAG, "[app] vao game: may chu '" + server() + "', man " + gW + "x" + gH);
+        Log.i(TAG, "[app] vao game: man " + gW + "x" + gH);
     }
 
     void exitApp() {

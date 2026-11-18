@@ -435,6 +435,84 @@ void j2n_set_server(const char *spec) {
     pthread_mutex_unlock(&srv_mu);
 }
 
+/* ------------------------------------------------------------------ dia chi may chu ma hoa (server.dat)
+   XTEA-CTR (ma hoa) + XTEA-CBC-MAC (xac thuc): sua 1 byte hay tu ghi dia chi khac vao tep -> bi tu choi.
+   Khoa KHONG nam trong ma nguon: 64 byte duoi day chi la vung danh dau; cong cu ky app (rieng, ngoai repo)
+   thay vung nay bang khoa that truoc khi phat hanh. Ban chua nap khoa (ban thu CI) bo qua server.dat.
+   Dang tep: 'A' 'V' 2 | nonce 8 | L 1 | ban ma L | the 8.  Khoa: K[i] = A[i] ^ rotl(B[i], 7). */
+__attribute__((used)) static volatile const uint8_t srv_kb[64] = {
+    'A', 'V', 'S', 'R', 'V', 'K', 'E', 'Y',
+    0x74, 0x12, 0xEA, 0x31, 0x80, 0x48, 0xED, 0xFE, 0x66, 0xBA, 0xE9, 0x07, 0x8C, 0x0B,
+    0x35, 0x3C, 0x7D, 0xE5, 0x5E, 0xCB, 0x64, 0xFB, 0x1F, 0x89, 0x68, 0x2E, 0x8D, 0xDB,
+    0xFE, 0x67, 0xE0, 0x5F, 0x49, 0xFA, 0xD1, 0xA8, 0x9D, 0x37, 0x12, 0x39, 0x28, 0xC7,
+    0xDC, 0x76, 0xEE, 0x7C, 0x70, 0xB6, 0xBA, 0x54, 0xA5, 0xF5, 0xFC, 0x58, 0x09, 0x7F
+};
+
+static uint32_t se_be32(const uint8_t *p) {
+    return ((uint32_t)p[0] << 24) | ((uint32_t)p[1] << 16) | ((uint32_t)p[2] << 8) | p[3];
+}
+
+static void se_xtea(uint32_t *v0p, uint32_t *v1p, const uint32_t k[4]) {
+    uint32_t v0 = *v0p, v1 = *v1p, s = 0;
+    for (int i = 0; i < 32; i++) {
+        v0 += (((v1 << 4) ^ (v1 >> 5)) + v1) ^ (s + k[s & 3]);
+        s += 0x9E3779B9u;
+        v1 += (((v0 << 4) ^ (v0 >> 5)) + v0) ^ (s + k[(s >> 11) & 3]);
+    }
+    *v0p = v0;
+    *v1p = v1;
+}
+
+int j2n_set_server_enc(const unsigned char *d, int n) {
+    uint8_t kb[64];
+    for (int i = 0; i < 64; i++) kb[i] = srv_kb[i];
+    if (memcmp(kb, "AVSRVKEY", 8) == 0) return 0;          /* ban chua nap khoa */
+    uint32_t K[8];
+    for (int i = 0; i < 8; i++) {
+        uint32_t b = se_be32(kb + 32 + 4 * i);
+        K[i] = se_be32(kb + 4 * i) ^ ((b << 7) | (b >> 25));
+    }
+    memset(kb, 0, sizeof kb);
+    int ok = 0;
+    if (d && n >= 21 && d[0] == 'A' && d[1] == 'V' && d[2] == 2) {
+        int L = d[11];
+        if (L > 0 && L <= 200 && n == 12 + L + 8) {
+            /* the xac thuc: CBC-MAC tren (dau tep + ban ma), dem 0 cho du khoi 8 byte, khoi cuoi chua do dai */
+            uint32_t s0 = 0, s1 = 0;
+            int m = 12 + L;
+            for (int i = 0; i < m; i += 8) {
+                uint8_t blk[8] = {0};
+                for (int j = 0; j < 8 && i + j < m; j++) blk[j] = d[i + j];
+                s0 ^= se_be32(blk); s1 ^= se_be32(blk + 4);
+                se_xtea(&s0, &s1, K + 4);
+            }
+            s0 ^= (uint32_t)m; s1 ^= 0x5A5A5A5Au;
+            se_xtea(&s0, &s1, K + 4);
+            uint8_t tag[8] = {(uint8_t)(s0 >> 24), (uint8_t)(s0 >> 16), (uint8_t)(s0 >> 8), (uint8_t)s0,
+                              (uint8_t)(s1 >> 24), (uint8_t)(s1 >> 16), (uint8_t)(s1 >> 8), (uint8_t)s1};
+            uint8_t diff = 0;
+            for (int j = 0; j < 8; j++) diff |= tag[j] ^ d[m + j];
+            if (diff == 0) {
+                char addr[208];
+                uint32_t n0 = se_be32(d + 3), n1 = se_be32(d + 7);
+                for (int i = 0; i < L; i += 8) {
+                    uint32_t a = n0 ^ (uint32_t)(i / 8), b = n1;
+                    se_xtea(&a, &b, K);
+                    uint8_t ks[8] = {(uint8_t)(a >> 24), (uint8_t)(a >> 16), (uint8_t)(a >> 8), (uint8_t)a,
+                                     (uint8_t)(b >> 24), (uint8_t)(b >> 16), (uint8_t)(b >> 8), (uint8_t)b};
+                    for (int j = 0; j < 8 && i + j < L; j++) addr[i + j] = (char)(d[12 + i + j] ^ ks[j]);
+                }
+                addr[L] = 0;
+                j2n_set_server(addr);
+                memset(addr, 0, sizeof addr);
+                ok = 1;
+            }
+        }
+    }
+    memset(K, 0, sizeof K);
+    return ok;
+}
+
 int32_t N_j2n_Net_connect(jctx *t, jobj host, int32_t port) {
     (void)t;
 #ifdef _WIN32
@@ -450,7 +528,7 @@ int32_t N_j2n_Net_connect(jctx *t, jobj host, int32_t port) {
         pthread_mutex_unlock(&srv_mu);
         if (rh[0]) {
             char lb[400];
-            snprintf(lb, sizeof lb, "[mang] %s:%d -> %s:%d", h, (int)port, rh, rp > 0 ? rp : (int)port);
+            snprintf(lb, sizeof lb, "[mang] %s:%d -> may chu", h, (int)port);   /* khong ghi dia chi may chu ra log */
             plat_log(lb);
             h = rh;
             if (rp > 0) port = rp;
