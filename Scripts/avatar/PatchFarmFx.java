@@ -58,6 +58,7 @@ public class PatchFarmFx {
                 case "ir.class": data = va(data, PatchFarmFx::oDat, can, name); break;
                 case "go.class": data = va(data, PatchFarmFx::luatDat, can, name); break;
                 case "kz.class": data = va(data, PatchFarmFx::lenh118, can, name); break;
+                case "b.class": data = va(data, PatchFarmFx::banPhim, can, name); break;
                 default: break;
             }
             zo.putNextEntry(new ZipEntry(name));
@@ -76,7 +77,7 @@ public class PatchFarmFx {
         boolean ok = can.getOrDefault("keytap", 0) == 1 && can.getOrDefault("rong_sau", 0) == 1 && can.getOrDefault("rong_truoc", 0) >= 1
                 && can.getOrDefault("vecay", 0) == 1
                 && can.getOrDefault("odat", 0) == 1 && can.getOrDefault("dau", 0) == 2 && can.getOrDefault("logic", 0) == 3
-                && can.getOrDefault("l118", 0) == 1;
+                && can.getOrDefault("l118", 0) == 1 && can.getOrDefault("banphim", 0) >= 1;
         if (!ok) {
             System.out.println("PatchFarmFx: SO CHO SUA KHONG KHOP -> dung");
             new File(a[1]).delete();
@@ -131,6 +132,31 @@ public class PatchFarmFx {
                         dem(can, "keytap");
                         return;
                     }
+                }
+            }
+        }
+    }
+
+    // 6) b (ban phim ao): mo cac truong (ban J2ME de private) va goi KeyTap.nhan(this, g) truoc moi return cua a(Graphics)V
+    //    -> ghi "F1" / "F2" / "OK" vao 3 o truoc day de trong
+    static void banPhim(ClassNode cn, Map<String, Integer> can) {
+        for (FieldNode f : cn.fields) {
+            if ("a b c d e f g l u v".contains(f.name) && f.name.length() == 1 && (f.access & Opcodes.ACC_STATIC) == 0) {
+                f.access = (f.access & ~(Opcodes.ACC_PRIVATE | Opcodes.ACC_PROTECTED)) | Opcodes.ACC_PUBLIC;
+            }
+        }
+        for (MethodNode mn : cn.methods) {
+            if (!mn.name.equals("a") || !mn.desc.equals("(" + G + ")V")) {
+                continue;
+            }
+            for (AbstractInsnNode n : mn.instructions.toArray()) {
+                if (n.getOpcode() == Opcodes.RETURN) {
+                    InsnList l = new InsnList();
+                    l.add(new VarInsnNode(Opcodes.ALOAD, 0));
+                    l.add(new VarInsnNode(Opcodes.ALOAD, 1));
+                    l.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "KeyTap", "nhan", "(Lb;" + G + ")V", false));
+                    mn.instructions.insertBefore(n, l);
+                    dem(can, "banphim");
                 }
             }
         }
