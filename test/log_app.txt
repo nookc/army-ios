@@ -1,0 +1,22 @@
+--------- beginning of main
+--------- beginning of system
+--------- beginning of kernel
+11-19 15:12:52.002  2039  2039 I Army250 : [app] activity tao (lan 1, game chua chay)
+11-19 15:12:52.010  2039  2039 I Army250 : [app] khoi dong Army2.5.0 (Android), man 320x496, jar 21169779 byte
+11-19 15:12:52.012  2039  2090 I Army250 : [app] luong game bat dau
+11-19 15:12:52.013  2039  2090 I Army250 : [Boot] khoi dong coreLG.TerrainMidlet
+11-19 15:12:52.113  2039  2090 I Army250 : [am thanh] audio/x-wav 7180 byte: ok
+11-19 15:12:52.195  2039  2090 I Army250 : [am thanh] audio/x-wav 1834 byte: ok
+11-19 15:12:52.198  2039  2090 I Army250 : [am thanh] audio/x-wav 2934 byte: ok
+11-19 15:12:52.369  2039  2039 I Army250 : [bocuc] canvas 0 66 1080 1740 pad 0 1740 1080 2280 game 320 496
+11-19 15:12:53.728  2039  2039 I Army250 : [app] activity huy
+11-19 15:12:53.730  2039  2039 I Army250 : [app] activity tao (lan 2, game dang chay)
+11-19 15:12:53.819  2039  2039 I Army250 : [bocuc] canvas 5 83 1074 1740 pad 0 1740 1080 2280 game 320 496
+11-19 15:12:55.742  2039  2099 I Army250 : [Boot] giai nen san anh lon: 520 ms
+11-19 15:13:06.167  2039  2098 I Army250 : [am thanh] audio/x-wav 902214 byte: ok
+11-19 15:13:34.688  2039  2098 I Army250 : [app] hop nhap chu (kieu 0, toi da 500)
+11-19 15:13:34.718  2039  2039 I Army250 : [app] hop nhap chu kieu 0
+11-19 15:13:48.788  2039  2098 I Army250 : [app] hop nhap chu (kieu 65536, toi da 500)
+11-19 15:13:48.868  2039  2039 I Army250 : [app] hop nhap chu kieu 65536
+11-19 15:14:12.549  2039  2098 I Army250 : [app] hop nhap chu (kieu 0, toi da 500)
+11-19 15:14:12.632  2039  2039 I Army250 : [app] hop nhap chu kieu 0
