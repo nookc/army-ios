@@ -1,0 +1,53 @@
+warning: refs/tags/v8.2.8 d54010c33189bfac434d85d315ad69783be7ea9b is not a commit!
+j2c: 598 lop, 11 tep, 0 loi dich, 0 tham chieu thieu
+classes 598
+methods 4185
+literals 1556
+selectors 141
+icache 203
+loi dich 0
+tham chieu thieu:
+== bien dich (iphoneos)
+== lien ket
+== Info.plist: Xcode 26.3 (17C529) -> DTXcode 2630, SDK iphoneos26.2 (23C57), macOS 24H232
+/Users/runner/work/army-ios/army-ios/native/platform/ios/PrivacyInfo.xcprivacy: OK
+/* com.apple.actool.compilation-results */
+/Users/runner/work/army-ios/army-ios/native/build/ios/dev/Army250.app/AppIcon60x60@2x.png
+/Users/runner/work/army-ios/army-ios/native/build/ios/dev/Army250.app/Assets.car
+/Users/runner/work/army-ios/army-ios/native/build/ios/dev/icon-info.plist
+
+co Assets.car
+total 48544
+drwxr-xr-x  10 runner  staff       320 Nov 19 15:11 .
+drwxr-xr-x   8 runner  staff       256 Nov 19 15:11 ..
+-rw-r--r--   1 runner  staff      1546 Nov 19 15:11 AppIcon60x60@2x.png
+-rw-r--r--   1 runner  staff      1819 Nov 19 15:11 AppIcon60x60@3x.png
+-rwxr-xr-x   1 runner  staff   3566640 Nov 19 15:11 Army250
+-rw-r--r--   1 runner  staff  21169779 Nov 19 15:11 Army250.jar
+-rw-r--r--   1 runner  staff     90824 Nov 19 15:11 Assets.car
+-rw-r--r--   1 runner  staff      1299 Nov 19 15:11 Info.plist
+-rw-r--r--   1 runner  staff         8 Nov 19 15:11 PkgInfo
+-rw-r--r--   1 runner  staff       549 Nov 19 15:11 PrivacyInfo.xcprivacy
+-rw-r--r--  1 runner  staff  21880748 Nov 19 15:11 /Users/runner/work/army-ios/army-ios/native/build/ios/Army250-Native.ipa
+== bien dich (iphonesimulator)
+== lien ket
+== Info.plist: Xcode 26.3 (17C529) -> DTXcode 2630, SDK iphonesimulator26.2 (23C57), macOS 24H232
+/Users/runner/work/army-ios/army-ios/native/platform/ios/PrivacyInfo.xcprivacy: OK
+/* com.apple.actool.compilation-results */
+/Users/runner/work/army-ios/army-ios/native/build/ios/sim/Army250.app/AppIcon60x60@2x.png
+/Users/runner/work/army-ios/army-ios/native/build/ios/sim/Army250.app/Assets.car
+/Users/runner/work/army-ios/army-ios/native/build/ios/sim/icon-info.plist
+
+co Assets.car
+total 48600
+drwxr-xr-x  10 runner  staff       320 Nov 19 15:12 .
+drwxr-xr-x   8 runner  staff       256 Nov 19 15:12 ..
+-rw-r--r--   1 runner  staff      1546 Nov 19 15:12 AppIcon60x60@2x.png
+-rw-r--r--   1 runner  staff      1819 Nov 19 15:12 AppIcon60x60@3x.png
+-rwxr-xr-x   1 runner  staff   3595192 Nov 19 15:12 Army250
+-rw-r--r--   1 runner  staff  21169779 Nov 19 15:12 Army250.jar
+-rw-r--r--   1 runner  staff     90824 Nov 19 15:12 Assets.car
+-rw-r--r--   1 runner  staff      1326 Nov 19 15:12 Info.plist
+-rw-r--r--   1 runner  staff         8 Nov 19 15:12 PkgInfo
+-rw-r--r--   1 runner  staff       549 Nov 19 15:12 PrivacyInfo.xcprivacy
+/Users/runner/work/army-ios/army-ios/native/build/ios/sim/Army250.app: replacing existing signature

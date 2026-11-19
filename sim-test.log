@@ -1,0 +1,228 @@
+chon: iPhone 17
+simulator BC7CEBFB-6B90-4D7E-B85E-BB0102C99F06
+Monitoring boot status for iPhone 17 (BC7CEBFB-6B90-4D7E-B85E-BB0102C99F06).
+[2026-11-19 15:13:21 +0000] Status=2, isTerminal=NO, Elapsed=00:48.
+	Waiting on Data Migration
+		Reason:Running plugin com.apple.-0LaunchServicesMigrator (00LaunchServicesMigrator.migrator, user-agnostic)
+		Migration Elapsed:00:40 seconds
+
+[2026-11-19 15:13:22 +0000] Status=2, isTerminal=NO, Elapsed=00:49.
+	Waiting on Data Migration
+		Reason:Running plugin com.apple.-0LaunchServicesMigrator (00LaunchServicesMigrator.migrator, user-agnostic)
+		Migration Elapsed:00:41 seconds
+
+[2026-11-19 15:13:23 +0000] Status=2, isTerminal=NO, Elapsed=00:50.
+	Waiting on Data Migration
+		Reason:Running plugin com.apple.-0LaunchServicesMigrator (00LaunchServicesMigrator.migrator, user-agnostic)
+		Migration Elapsed:00:42 seconds
+
+[2026-11-19 15:13:24 +0000] Status=2, isTerminal=NO, Elapsed=00:51.
+	Waiting on Data Migration
+		Reason:Running plugin com.apple.-0LaunchServicesMigrator (00LaunchServicesMigrator.migrator, user-agnostic)
+		Migration Elapsed:00:43 seconds
+
+[2026-11-19 15:13:25 +0000] Status=2, isTerminal=NO, Elapsed=00:52.
+	Waiting on Data Migration
+		Reason:Running plugin com.apple.-0LaunchServicesMigrator (00LaunchServicesMigrator.migrator, user-agnostic)
+		Migration Elapsed:00:44 seconds
+
+[2026-11-19 15:13:26 +0000] Status=2, isTerminal=NO, Elapsed=00:53.
+	Waiting on Data Migration
+		Reason:Running plugin com.apple.-0LaunchServicesMigrator (00LaunchServicesMigrator.migrator, user-agnostic)
+		Migration Elapsed:00:45 seconds
+
+[2026-11-19 15:13:27 +0000] Status=2, isTerminal=NO, Elapsed=00:54.
+	Waiting on Data Migration
+		Reason:Running plugin com.apple.-0LaunchServicesMigrator (00LaunchServicesMigrator.migrator, user-agnostic)
+		Migration Elapsed:00:46 seconds
+
+[2026-11-19 15:13:28 +0000] Status=2, isTerminal=NO, Elapsed=00:55.
+	Waiting on Data Migration
+		Reason:Running plugin com.apple.-0LaunchServicesMigrator (00LaunchServicesMigrator.migrator, user-agnostic)
+		Migration Elapsed:00:47 seconds
+
+[2026-11-19 15:13:29 +0000] Status=2, isTerminal=NO, Elapsed=00:56.
+	Waiting on Data Migration
+		Reason:Running plugin com.apple.-0LaunchServicesMigrator (00LaunchServicesMigrator.migrator, user-agnostic)
+		Migration Elapsed:00:48 seconds
+
+[2026-11-19 15:13:30 +0000] Status=2, isTerminal=NO, Elapsed=00:57.
+	Waiting on Data Migration
+		Reason:Running plugin com.apple.-0LaunchServicesMigrator (00LaunchServicesMigrator.migrator, user-agnostic)
+		Migration Elapsed:00:49 seconds
+
+[2026-11-19 15:13:31 +0000] Status=2, isTerminal=NO, Elapsed=00:58.
+	Waiting on Data Migration
+		Reason:Running plugin com.apple.-0LaunchServicesMigrator (00LaunchServicesMigrator.migrator, user-agnostic)
+		Migration Elapsed:00:50 seconds
+
+[2026-11-19 15:13:32 +0000] Status=2, isTerminal=NO, Elapsed=00:59.
+	Waiting on Data Migration
+		Reason:Running plugin com.apple.-0LaunchServicesMigrator (00LaunchServicesMigrator.migrator, user-agnostic)
+		Migration Elapsed:00:51 seconds
+
+[2026-11-19 15:13:33 +0000] Status=2, isTerminal=NO, Elapsed=01:00.
+	Waiting on Data Migration
+		Reason:Running plugin com.apple.-0LaunchServicesMigrator (00LaunchServicesMigrator.migrator, user-agnostic)
+		Migration Elapsed:00:52 seconds
+
+[2026-11-19 15:13:34 +0000] Status=2, isTerminal=NO, Elapsed=01:01.
+	Waiting on Data Migration
+		Reason:Running plugin com.apple.-0LaunchServicesMigrator (00LaunchServicesMigrator.migrator, user-agnostic)
+		Migration Elapsed:00:53 seconds
+
+[2026-11-19 15:13:35 +0000] Status=2, isTerminal=NO, Elapsed=01:02.
+	Waiting on Data Migration
+		Reason:Running plugin com.apple.-0LaunchServicesMigrator (00LaunchServicesMigrator.migrator, user-agnostic)
+		Migration Elapsed:00:54 seconds
+
+[2026-11-19 15:13:36 +0000] Status=2, isTerminal=NO, Elapsed=01:03.
+	Waiting on Data Migration
+		Reason:Running plugin com.apple.-0LaunchServicesMigrator (00LaunchServicesMigrator.migrator, user-agnostic)
+		Migration Elapsed:00:55 seconds
+
+[2026-11-19 15:13:37 +0000] Status=2, isTerminal=NO, Elapsed=01:04.
+	Waiting on Data Migration
+		Reason:Running plugin com.apple.-0LaunchServicesMigrator (00LaunchServicesMigrator.migrator, user-agnostic)
+		Migration Elapsed:00:56 seconds
+
+[2026-11-19 15:13:38 +0000] Status=2, isTerminal=NO, Elapsed=01:05.
+	Waiting on Data Migration
+		Reason:Running plugin com.apple.-0LaunchServicesMigrator (00LaunchServicesMigrator.migrator, user-agnostic)
+		Migration Elapsed:00:57 seconds
+
+[2026-11-19 15:13:39 +0000] Status=2, isTerminal=NO, Elapsed=01:06.
+	Waiting on Data Migration
+		Reason:Running plugin com.apple.-0LaunchServicesMigrator (00LaunchServicesMigrator.migrator, user-agnostic)
+		Migration Elapsed:00:58 seconds
+
+[2026-11-19 15:13:40 +0000] Status=2, isTerminal=NO, Elapsed=01:07.
+	Waiting on Data Migration
+		Reason:Running plugin com.apple.-0LaunchServicesMigrator (00LaunchServicesMigrator.migrator, user-agnostic)
+		Migration Elapsed:00:59 seconds
+
+[2026-11-19 15:13:41 +0000] Status=2, isTerminal=NO, Elapsed=01:08.
+	Waiting on Data Migration
+		Reason:Running plugin com.apple.-0LaunchServicesMigrator (00LaunchServicesMigrator.migrator, user-agnostic)
+		Migration Elapsed:01:00 seconds
+
+[2026-11-19 15:13:42 +0000] Status=2, isTerminal=NO, Elapsed=01:09.
+	Waiting on Data Migration
+		Reason:Running plugin com.apple.-0LaunchServicesMigrator (00LaunchServicesMigrator.migrator, user-agnostic)
+		Migration Elapsed:01:01 seconds
+
+[2026-11-19 15:13:43 +0000] Status=2, isTerminal=NO, Elapsed=01:10.
+	Waiting on Data Migration
+		Reason:Running plugin com.apple.-0LaunchServicesMigrator (00LaunchServicesMigrator.migrator, user-agnostic)
+		Migration Elapsed:01:02 seconds
+
+[2026-11-19 15:13:48 +0000] Status=2, isTerminal=NO, Elapsed=01:15.
+	Waiting on Data Migration
+		Reason:Running plugin com.apple.managedconfiguration.migrator (MCProfile.migrator, user-agnostic)
+		Migration Elapsed:01:03 seconds
+
+[2026-11-19 15:13:50 +0000] Status=2, isTerminal=NO, Elapsed=01:16.
+	Waiting on Data Migration
+		Reason:Running plugin com.apple.managedconfiguration.migrator (MCProfile.migrator, user-agnostic)
+		Migration Elapsed:01:06 seconds
+
+[2026-11-19 15:13:51 +0000] Status=2, isTerminal=NO, Elapsed=01:17.
+	Waiting on Data Migration
+		Reason:Running plugin com.apple.locationd.migrator (CoreLocationMigrator.migrator)
+		Migration Elapsed:01:08 seconds
+
+[2026-11-19 15:13:54 +0000] Status=2, isTerminal=NO, Elapsed=01:21.
+	Waiting on Data Migration
+		Reason:Running plugin com.apple.VoiceShortcuts.ShortcutsMigrator (Shortcuts.migrator)
+		Migration Elapsed:01:09 seconds
+
+[2026-11-19 15:13:56 +0000] Status=4, isTerminal=NO, Elapsed=01:22.
+	Waiting on System App
+
+[2026-11-19 15:13:57 +0000] Status=4, isTerminal=NO, Elapsed=01:24.
+	Waiting on System App
+
+[2026-11-19 15:13:58 +0000] Status=4, isTerminal=NO, Elapsed=01:24.
+	Waiting on System App
+
+[2026-11-19 15:14:00 +0000] Status=4, isTerminal=NO, Elapsed=01:26.
+	Waiting on System App
+
+[2026-11-19 15:14:01 +0000] Status=4, isTerminal=NO, Elapsed=01:27.
+	Waiting on System App
+
+[2026-11-19 15:14:02 +0000] Status=4, isTerminal=NO, Elapsed=01:28.
+	Waiting on System App
+
+[2026-11-19 15:14:02 +0000] Status=4, isTerminal=NO, Elapsed=01:28.
+	Waiting on System App
+
+[2026-11-19 15:14:02 +0000] Status=4, isTerminal=NO, Elapsed=01:29.
+	Waiting on System App
+
+[2026-11-19 15:14:04 +0000] Status=4, isTerminal=NO, Elapsed=01:30.
+	Waiting on System App
+
+[2026-11-19 15:14:08 +0000] Status=4, isTerminal=NO, Elapsed=01:34.
+	Waiting on System App
+
+[2026-11-19 15:14:15 +0000] Status=4294967295, isTerminal=YES, Elapsed=01:42.
+	Finished
+
+Detected file type 'PNG' from extension
+Wrote screenshot to: /Users/runner/work/army-ios/army-ios/native/build/ios/test/man_hinh_simulator.png
+total 3544
+drwxr-xr-x  16 runner  staff     512 Nov 19 15:17 .
+drwxr-xr-x   7 runner  staff     224 Nov 19 15:12 ..
+-rw-r--r--@  1 runner  staff      20 Nov 19 15:17 autotest.txt
+-rw-r--r--   1 runner  staff    2429 Nov 19 15:17 console.log
+-rw-r--r--   1 runner  staff       0 Nov 19 15:17 crash_app.txt
+-rw-r--r--   1 runner  staff     898 Nov 19 15:17 log_app.txt
+-rw-r--r--@  1 runner  staff  500301 Nov 19 15:17 man_hinh_simulator.png
+-rw-r--r--   1 runner  staff    4732 Nov 19 15:17 t1_cauhinh.png
+-rw-r--r--   1 runner  staff    5503 Nov 19 15:17 t2_amthanh.png
+-rw-r--r--   1 runner  staff   14443 Nov 19 15:17 t3_gioithieu.png
+-rw-r--r--   1 runner  staff   20100 Nov 19 15:17 t4_dangnhap.png
+-rw-r--r--   1 runner  staff  316700 Nov 19 15:17 t4b_toan_man_hinh.png
+-rw-r--r--   1 runner  staff  453459 Nov 19 15:17 t5_hop_nhap_ten.png
+-rw-r--r--   1 runner  staff   18506 Nov 19 15:17 t6_da_nhap_ten.png
+-rw-r--r--   1 runner  staff  445923 Nov 19 15:17 t7_hop_nhap_mat_khau.png
+-rw-r--r--   1 runner  staff      13 Nov 19 15:17 trang_thai_app.txt
+app con chay
+fps 30.1
+ram 106 MB
+19/11 15:16:14 [app] khoi dong 2.5.0 (84), man 320x498, iOS 26.2
+19/11 15:16:14 [gc] khoi dong: 471 thu vien da nap, GC xet 1020 vung du lieu (giu 3 cua app, bo 1017 cua he thong)
+19/11 15:16:46 [gc] truoc khi mo ban phim: 510 thu vien da nap, GC xet 1105 vung du lieu (giu 3 cua app, bo 1102 cua he thong)
+19/11 15:16:46 [app] hop nhap chu (kieu 0, toi da 500)
+19/11 15:16:50 [gc] sau khi mo ban phim: 733 thu vien da nap, GC xet 1638 vung du lieu (giu 3 cua app, bo 1635 cua he thong)
+19/11 15:16:57 [app] hop nhap chu (kieu 65536, toi da 500)
+19/11 15:17:01 [gc] sau khi mo ban phim: 734 thu vien da nap, GC xet 1641 vung du lieu (giu 3 cua app, bo 1638 cua he thong)
+19/11 15:17:03 [gc] sau 2 hop nhap chu: 734 thu vien da nap, GC xet 1641 vung du lieu (giu 3 cua app, bo 1638 cua he thong)
+2026-11-19 15:16:14.365 Army250[7681:26598] [app] khoi dong 2.5.0 (84), man 320x498, iOS 26.2
+2026-11-19 15:16:14.403 Army250[7681:26598] [gc] khoi dong: 471 thu vien da nap, GC xet 1020 vung du lieu (giu 3 cua app, bo 1017 cua he thong)
+2026-11-19 15:16:14.405 Army250[7681:26663] [Boot] khoi dong coreLG.TerrainMidlet
+2026-11-19 15:16:14.489 Army250[7681:26663] [am thanh] audio/x-wav 7180 byte: ok
+2026-11-19 15:16:14.787 Army250[7681:26663] [am thanh] audio/x-wav 1834 byte: ok
+2026-11-19 15:16:14.799 Army250[7681:26663] [am thanh] audio/x-wav 2934 byte: ok
+2026-11-19 15:16:17.864 Army250[7681:26701] [Boot] giai nen san anh lon: 52 ms
+2026-11-19 15:16:21.425 Army250[7681:26624] [autotest] t1_cauhinh khung 199
+2026-11-19 15:16:25.366 Army250[7681:26624] [autotest] t2_amthanh khung 318
+2026-11-19 15:16:25.688 Army250[7681:26700] [am thanh] audio/x-wav 902214 byte: ok
+2026-11-19 15:16:30.799 Army250[7681:26624] [autotest] t3_gioithieu khung 481
+2026-11-19 15:16:36.229 Army250[7681:26624] [autotest] t4_dangnhap khung 642
+2026-11-19 15:16:36.490 Army250[7681:26598] [autotest] t4b_toan_man_hinh (cua so)
+2026-11-19 15:16:46.496 Army250[7681:26624] [autotest] toc do fps 30.1
+ram 106 MB
+2026-11-19 15:16:46.496 Army250[7681:26624] [gc] truoc khi mo ban phim: 510 thu vien da nap, GC xet 1105 vung du lieu (giu 3 cua app, bo 1102 cua he thong)
+2026-11-19 15:16:46.855 Army250[7681:26598] [app] hop nhap chu (kieu 0, toi da 500)
+2026-11-19 15:16:49.923 Army250[7681:26598] [autotest] t5_hop_nhap_ten (cua so)
+2026-11-19 15:16:50.048 Army250[7681:26598] [gc] sau khi mo ban phim: 733 thu vien da nap, GC xet 1638 vung du lieu (giu 3 cua app, bo 1635 cua he thong)
+2026-11-19 15:16:53.547 Army250[7681:26624] [autotest] tra loi hop nhap chu 'tbot6': ok
+2026-11-19 15:16:56.051 Army250[7681:26624] [autotest] t6_da_nhap_ten khung 1027
+2026-11-19 15:16:57.794 Army250[7681:26598] [app] hop nhap chu (kieu 65536, toi da 500)
+2026-11-19 15:17:01.044 Army250[7681:26598] [autotest] t7_hop_nhap_mat_khau (cua so)
+2026-11-19 15:17:01.060 Army250[7681:26598] [gc] sau khi mo ban phim: 734 thu vien da nap, GC xet 1641 vung du lieu (giu 3 cua app, bo 1638 cua he thong)
+2026-11-19 15:17:03.052 Army250[7681:26624] [gc] sau 2 hop nhap chu: 734 thu vien da nap, GC xet 1641 vung du lieu (giu 3 cua app, bo 1638 cua he thong)
+2026-11-19 15:17:03.053 Army250[7681:26624] [autotest] xong
+vn.army250.native: 7681

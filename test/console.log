@@ -1,0 +1,27 @@
+2026-11-19 15:16:14.365 Army250[7681:26598] [app] khoi dong 2.5.0 (84), man 320x498, iOS 26.2
+2026-11-19 15:16:14.403 Army250[7681:26598] [gc] khoi dong: 471 thu vien da nap, GC xet 1020 vung du lieu (giu 3 cua app, bo 1017 cua he thong)
+2026-11-19 15:16:14.405 Army250[7681:26663] [Boot] khoi dong coreLG.TerrainMidlet
+2026-11-19 15:16:14.489 Army250[7681:26663] [am thanh] audio/x-wav 7180 byte: ok
+2026-11-19 15:16:14.787 Army250[7681:26663] [am thanh] audio/x-wav 1834 byte: ok
+2026-11-19 15:16:14.799 Army250[7681:26663] [am thanh] audio/x-wav 2934 byte: ok
+2026-11-19 15:16:17.864 Army250[7681:26701] [Boot] giai nen san anh lon: 52 ms
+2026-11-19 15:16:21.425 Army250[7681:26624] [autotest] t1_cauhinh khung 199
+2026-11-19 15:16:25.366 Army250[7681:26624] [autotest] t2_amthanh khung 318
+2026-11-19 15:16:25.688 Army250[7681:26700] [am thanh] audio/x-wav 902214 byte: ok
+2026-11-19 15:16:30.799 Army250[7681:26624] [autotest] t3_gioithieu khung 481
+2026-11-19 15:16:36.229 Army250[7681:26624] [autotest] t4_dangnhap khung 642
+2026-11-19 15:16:36.490 Army250[7681:26598] [autotest] t4b_toan_man_hinh (cua so)
+2026-11-19 15:16:46.496 Army250[7681:26624] [autotest] toc do fps 30.1
+ram 106 MB
+2026-11-19 15:16:46.496 Army250[7681:26624] [gc] truoc khi mo ban phim: 510 thu vien da nap, GC xet 1105 vung du lieu (giu 3 cua app, bo 1102 cua he thong)
+2026-11-19 15:16:46.855 Army250[7681:26598] [app] hop nhap chu (kieu 0, toi da 500)
+2026-11-19 15:16:49.923 Army250[7681:26598] [autotest] t5_hop_nhap_ten (cua so)
+2026-11-19 15:16:50.048 Army250[7681:26598] [gc] sau khi mo ban phim: 733 thu vien da nap, GC xet 1638 vung du lieu (giu 3 cua app, bo 1635 cua he thong)
+2026-11-19 15:16:53.547 Army250[7681:26624] [autotest] tra loi hop nhap chu 'tbot6': ok
+2026-11-19 15:16:56.051 Army250[7681:26624] [autotest] t6_da_nhap_ten khung 1027
+2026-11-19 15:16:57.794 Army250[7681:26598] [app] hop nhap chu (kieu 65536, toi da 500)
+2026-11-19 15:17:01.044 Army250[7681:26598] [autotest] t7_hop_nhap_mat_khau (cua so)
+2026-11-19 15:17:01.060 Army250[7681:26598] [gc] sau khi mo ban phim: 734 thu vien da nap, GC xet 1641 vung du lieu (giu 3 cua app, bo 1638 cua he thong)
+2026-11-19 15:17:03.052 Army250[7681:26624] [gc] sau 2 hop nhap chu: 734 thu vien da nap, GC xet 1641 vung du lieu (giu 3 cua app, bo 1638 cua he thong)
+2026-11-19 15:17:03.053 Army250[7681:26624] [autotest] xong
+vn.army250.native: 7681
