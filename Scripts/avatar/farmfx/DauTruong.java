@@ -2037,7 +2037,7 @@ public final class DauTruong {
         if (dau > 0) {
             hn bb = ir.g(dBoss[i]);
             sx = bb != null ? bb.aw * js.ay : x;
-            sy = dau - 22;
+            sy = dau - 31;                                 // tren chu ten boss (khong de len bang ten)
         }
         if (dSo[i] >= 0 && dCuaToi[i] && !dCrit[i]) {
             if (tongToi == 0) {
