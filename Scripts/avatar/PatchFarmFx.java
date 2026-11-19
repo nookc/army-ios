@@ -31,7 +31,7 @@ public class PatchFarmFx {
                 moi.put(f.getName(), java.nio.file.Files.readAllBytes(f.toPath()));
             }
         }
-        for (String c : new String[]{"KeyTap.class", "LandFx.class", "CayRong.class"}) {
+        for (String c : new String[]{"KeyTap.class", "LandFx.class", "CayRong.class", "TocDo.class"}) {
             if (!moi.containsKey(c)) {
                 throw new IllegalStateException("thieu " + c);
             }
@@ -53,7 +53,8 @@ public class PatchFarmFx {
                 continue;                      // ban cu cua lop moi (chay lai patcher tren jar da va)
             }
             switch (name) {
-                case "main/a.class": data = va(data, PatchFarmFx::keyTap, can, name); break;
+                case "main/a.class": data = va(va(data, PatchFarmFx::keyTap, can, name), PatchFarmFx::tocDoVongLap, can, name); break;
+                case "dm.class": data = va(data, PatchFarmFx::tocDoCaiDat, can, name); break;
                 case "kc.class": data = va(data, PatchFarmFx::cayRong, can, name); break;
                 case "ir.class": data = va(data, PatchFarmFx::oDat, can, name); break;
                 case "go.class": data = va(data, PatchFarmFx::luatDat, can, name); break;
@@ -77,7 +78,9 @@ public class PatchFarmFx {
         boolean ok = can.getOrDefault("keytap", 0) == 1 && can.getOrDefault("rong_sau", 0) == 1 && can.getOrDefault("rong_truoc", 0) >= 1
                 && can.getOrDefault("vecay", 0) == 1
                 && can.getOrDefault("odat", 0) == 1 && can.getOrDefault("dau", 0) == 2 && can.getOrDefault("logic", 0) == 3
-                && can.getOrDefault("l118", 0) == 1 && can.getOrDefault("banphim", 0) >= 1;
+                && can.getOrDefault("l118", 0) == 1 && can.getOrDefault("banphim", 0) >= 1
+                && can.getOrDefault("tocdo_khung", 0) == 2 && can.getOrDefault("tocdo_ve", 0) == 1
+                && can.getOrDefault("tocdo_caidat", 0) == 1 && can.getOrDefault("tocdo_doi", 0) == 1;
         if (!ok) {
             System.out.println("PatchFarmFx: SO CHO SUA KHONG KHOP -> dung");
             new File(a[1]).delete();
@@ -133,6 +136,54 @@ public class PatchFarmFx {
                         return;
                     }
                 }
+            }
+        }
+    }
+
+    // 7) toc do game: main/a.run() - hang so 50 (ms / khung) -> TocDo.khung(), Canvas.repaint() -> TocDo.ve(canvas)
+    static void tocDoVongLap(ClassNode cn, Map<String, Integer> can) {
+        for (MethodNode mn : cn.methods) {
+            if (!mn.name.equals("run") || !mn.desc.equals("()V")) {
+                continue;
+            }
+            for (AbstractInsnNode n : mn.instructions.toArray()) {
+                if (n instanceof LdcInsnNode && Long.valueOf(50L).equals(((LdcInsnNode) n).cst)) {
+                    mn.instructions.set(n, new MethodInsnNode(Opcodes.INVOKESTATIC, "TocDo", "khung", "()J", false));
+                    dem(can, "tocdo_khung");
+                } else if (n instanceof MethodInsnNode && n.getOpcode() == Opcodes.INVOKEVIRTUAL
+                        && ((MethodInsnNode) n).name.equals("repaint") && ((MethodInsnNode) n).desc.equals("()V")) {
+                    mn.instructions.set(n, new MethodInsnNode(Opcodes.INVOKESTATIC, "TocDo", "ve", "(Ljavax/microedition/lcdui/Canvas;)V", false));
+                    dem(can, "tocdo_ve");
+                }
+            }
+        }
+    }
+
+    //    dm (man Cai dat): mo truong l / g / b; dau e(): TocDo.caiDat(this); dau e(int): if (TocDo.doi(this, n)) return;
+    static void tocDoCaiDat(ClassNode cn, Map<String, Integer> can) {
+        for (FieldNode f : cn.fields) {
+            if ((f.name.equals("l") || f.name.equals("g") || f.name.equals("b")) && (f.access & Opcodes.ACC_STATIC) == 0) {
+                f.access = (f.access & ~(Opcodes.ACC_PRIVATE | Opcodes.ACC_PROTECTED)) | Opcodes.ACC_PUBLIC;
+            }
+        }
+        for (MethodNode mn : cn.methods) {
+            if (mn.name.equals("e") && mn.desc.equals("()V") && (mn.access & Opcodes.ACC_STATIC) == 0) {
+                InsnList l = new InsnList();
+                l.add(new VarInsnNode(Opcodes.ALOAD, 0));
+                l.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "TocDo", "caiDat", "(Ldm;)V", false));
+                mn.instructions.insert(l);
+                dem(can, "tocdo_caidat");
+            } else if (mn.name.equals("e") && mn.desc.equals("(I)V") && (mn.access & Opcodes.ACC_STATIC) == 0) {
+                InsnList l = new InsnList();
+                LabelNode tiep = new LabelNode();
+                l.add(new VarInsnNode(Opcodes.ALOAD, 0));
+                l.add(new VarInsnNode(Opcodes.ILOAD, 1));
+                l.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "TocDo", "doi", "(Ldm;I)Z", false));
+                l.add(new JumpInsnNode(Opcodes.IFEQ, tiep));
+                l.add(new InsnNode(Opcodes.RETURN));
+                l.add(tiep);
+                mn.instructions.insert(l);
+                dem(can, "tocdo_doi");
             }
         }
     }
