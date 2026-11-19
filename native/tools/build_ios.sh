@@ -100,10 +100,18 @@ CC1
   # bieu tuong: Assets.car bang actool nhu Xcode (Info.plist co CFBundleIconName=AppIcon); loi thi van con PNG o tren
   local XA="$OUT/Assets.xcassets"
   rm -rf "$XA" && mkdir -p "$XA/AppIcon.appiconset"
+  # v8h-75i: du bo co anh (sinh tu goc 32x32 bang nearest - tools/tao_icon.py) -> actool dung nguyen anh, khong tu thu nho 1024 bang loc
+  # min (truoc: bieu tuong tren man hinh chinh / trang cai dat bi nhoe, loang mau)
+  local IMGS="" sep="" f
+  for f in 20x20@2x 20x20@3x 29x29@2x 29x29@3x 40x40@2x 40x40@3x 60x60@2x 60x60@3x; do
+    cp "$N/platform/ios/res/AppIcon$f.png" "$XA/AppIcon.appiconset/AppIcon$f.png"
+    IMGS="$IMGS$sep{\"filename\":\"AppIcon$f.png\",\"idiom\":\"iphone\",\"size\":\"${f%@*}\",\"scale\":\"${f#*@}\"}"
+    sep=","
+  done
   cp "$N/platform/ios/res/AppIcon-1024.png" "$XA/AppIcon.appiconset/icon1024.png"
+  IMGS="$IMGS,{\"filename\":\"icon1024.png\",\"idiom\":\"ios-marketing\",\"size\":\"1024x1024\",\"scale\":\"1x\"}"
   echo '{"info":{"version":1,"author":"xcode"}}' > "$XA/Contents.json"
-  echo '{"images":[{"filename":"icon1024.png","idiom":"universal","platform":"ios","size":"1024x1024"}],"info":{"version":1,"author":"xcode"}}' \
-    > "$XA/AppIcon.appiconset/Contents.json"
+  echo "{\"images\":[$IMGS],\"info\":{\"version\":1,\"author\":\"xcode\"}}" > "$XA/AppIcon.appiconset/Contents.json"
   xcrun actool --compile "$APP" --platform "$SDK" --minimum-deployment-target 15.0 --target-device iphone \
     --app-icon AppIcon --output-partial-info-plist "$OUT/icon-info.plist" --output-format human-readable-text "$XA" \
     | tail -5 || echo "actool loi: chi dung PNG"
@@ -116,7 +124,10 @@ if [ "$MODE" = device ] || [ "$MODE" = ca-hai ]; then
   build_one iphoneos "$B/ios/dev"
   rm -rf "$B/ios/ipa" && mkdir -p "$B/ios/ipa/Payload"
   cp -R "$B/ios/dev/Army250.app" "$B/ios/ipa/Payload/"
-  (cd "$B/ios/ipa" && zip -qry ../Army250-Native.ipa Payload)
+  # v8h-75i: anh lon o goc .ipa (trang cai dat / ky lay bieu tuong o day thay vi phong to anh 180 -> nhoe)
+  cp "$N/platform/ios/res/iTunesArtwork.png" "$B/ios/ipa/iTunesArtwork"
+  cp "$N/platform/ios/res/iTunesArtwork@2x.png" "$B/ios/ipa/iTunesArtwork@2x"
+  (cd "$B/ios/ipa" && zip -qry ../Army250-Native.ipa Payload iTunesArtwork iTunesArtwork@2x)
   ls -la "$B/ios/Army250-Native.ipa"
 fi
 if [ "$MODE" = sim ] || [ "$MODE" = ca-hai ]; then
