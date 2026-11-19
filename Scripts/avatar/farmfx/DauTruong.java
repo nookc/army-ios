@@ -139,6 +139,31 @@ public final class DauTruong {
         return ir.a == MAP && main.GameMidlet.i != null;
     }
 
+    // ban phim ao cua game (lop b) chiem nua duoi man 240x320 -> tat tam khi vao dau truong (chi man doc nho),
+    // ra khoi dau truong thi bat lai nhu nut tay cam (khong doi cai dat da luu cua nguoi choi)
+    static boolean anPhim;
+
+    static void anBanPhim() {
+        if (main.a.z == null || main.a.z.a || main.a.G || main.a.n >= 300 || main.a.a == null) {
+            return;                     // khong co ban phim ao / dang go chu / man ngang / man du cao
+        }
+        dm.d = false;
+        main.a.a.b();
+        anPhim = true;
+    }
+
+    static void hienBanPhim() {
+        if (!anPhim) {
+            return;
+        }
+        anPhim = false;
+        if (dm.d || main.a.a == null) {
+            return;                     // nguoi choi da tu bat lai trong dau truong
+        }
+        dm.d = true;
+        main.a.a.b();                   // ban phim ao moi: o mui ten (nhu luc nguoi choi bam nut tay cam)
+    }
+
     static boolean sanMoi() {
         return ir.e == 44 && js.ay == 1;
     }
@@ -467,18 +492,28 @@ public final class DauTruong {
     }
 
     // ================================================================ logic moi khung (ae.k)
+    static long lanCuoi;            // lan capNhat gan nhat (o ban do thanh pho capNhat khong chay)
+
     public static void capNhat() {
+        NhapChat.kiem();                // ban JAR: bong chat / nut abc -> o nhap chu cua dien thoai
+        long t = now();
         if (!bat()) {
             if (trong) {
                 trong = false;
                 xoaHieuUng();
             }
+            hienBanPhim();
+            lanCuoi = t;
             return;
         }
-        long t = now();
+        if (trong && t - lanCuoi > 1500) {
+            trong = false;              // vao lai tu ban do thanh pho (hoac sau khi tam dung app): lam lai buoc vao san
+        }
+        lanCuoi = t;
         if (!trong) {
             trong = true;
             vaoLuc = t;
+            anBanPhim();
             nap();
             xoaHieuUng();
             coTT = false;
