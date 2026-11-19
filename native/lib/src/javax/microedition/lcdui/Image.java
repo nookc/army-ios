@@ -9,6 +9,10 @@ public class Image {
     int[] argb;
     boolean mutable;
     int akind;       /* 0 dac, 1 chi trong suot hoan toan, 2 ban trong suot (C chon cach ve nhanh) */
+    /* Avatar: anh net cao - w, h, argb la diem anh that, kich thuoc logic = w / hd (anh dt3/ ve tren man net cao) */
+    int hd = 1;
+    /** Graphics.setStrokeStyle(0x4846) dat: anh createRGBImage ke tiep co he so nay (dung 1 lan) */
+    static int hdLan;
 
     Image(int w, int h, int[] argb, boolean mutable) {
         this.w = w;
@@ -36,6 +40,7 @@ public class Image {
         System.arraycopy(src.argb, 0, p, 0, p.length);
         Image i = new Image(src.w, src.h, p, false);
         i.akind = src.akind;
+        i.hd = src.hd;
         return i;
     }
 
@@ -47,6 +52,21 @@ public class Image {
         Image c = cacheGet(r);
         if (c != null) {
             return c;
+        }
+        if (r.startsWith("dt/") && r.endsWith(".png")) {
+            // dau truong: co ban net cao x3 trong dt3/ thi dung (kich thuoc logic giu nguyen nhu anh dt/)
+            String r3 = "dt3/" + r.substring(3);
+            Image c3 = cacheGet(r3);
+            if (c3 != null) {
+                return c3;
+            }
+            byte[] b3 = j2n.Res.read(r3);
+            if (b3 != null) {
+                Image i3 = decode(b3, 0, b3.length);
+                i3.hd = j2n.Ui.HD_MAN;
+                cachePut(r3, i3);
+                return i3;
+            }
         }
         byte[] b = j2n.Res.read(r);
         if (b == null) {
@@ -197,6 +217,12 @@ public class Image {
         }
         Image im = new Image(w, h, p, false);
         im.akind = k;
+        if (hdLan > 1) {
+            if (w % hdLan == 0 && h % hdLan == 0) {
+                im.hd = hdLan;
+            }
+            hdLan = 0;
+        }
         return im;
     }
 
@@ -210,11 +236,11 @@ public class Image {
     }
 
     public int getWidth() {
-        return w;
+        return hd > 1 ? w / hd : w;
     }
 
     public int getHeight() {
-        return h;
+        return hd > 1 ? h / hd : h;
     }
 
     public boolean isMutable() {
@@ -222,11 +248,22 @@ public class Image {
     }
 
     public void getRGB(int[] out, int off, int scan, int x, int y, int ww, int hh) {
-        if (x < 0 || y < 0 || ww < 0 || hh < 0 || x + ww > w || y + hh > h) {
+        if (x < 0 || y < 0 || ww < 0 || hh < 0 || x + ww > getWidth() || y + hh > getHeight()) {
             throw new IllegalArgumentException();
         }
         if (Math.abs(scan) < ww) {
             throw new IllegalArgumentException();
+        }
+        if (hd > 1) {
+            // anh net cao: lay mau theo luoi logic
+            for (int j = 0; j < hh; j++) {
+                int s = (y + j) * hd * w + x * hd;
+                int d = off + j * scan;
+                for (int i = 0; i < ww; i++) {
+                    out[d + i] = argb[s + i * hd];
+                }
+            }
+            return;
         }
         for (int j = 0; j < hh; j++) {
             int s = (y + j) * w + x;

@@ -120,6 +120,13 @@ public class Display {
 
     public static void resetGraphics(Graphics g, int w, int h) {
         g.reset(w, h);
+        g.k = 1;
+    }
+
+    /** Avatar: Graphics ve len anh lon (w*k x h*k diem anh that) nhung game dung toa do logic w x h */
+    public static void resetGraphicsK(Graphics g, int w, int h, int k) {
+        g.reset(w, h);
+        g.k = k < 1 ? 1 : k;
     }
 
     /* Avatar: Canvas ve phong to (ban ban ca) */

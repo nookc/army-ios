@@ -33,11 +33,16 @@ void gfx_init(int w, int h) {
 
 typedef struct tgt {
     uint32_t *px;
-    int w, h;
-    int x0, y0, x1, y1;  /* vung cat [x0,x1) x [y0,y1) trong toa do dich */
+    int w, h;            /* kich thuoc diem anh that cua dich (hang = w) */
+    int k;               /* Avatar: diem anh that cho 1 diem logic (man net cao x3), con lai 1 */
+    int x0, y0, x1, y1;  /* vung cat [x0,x1) x [y0,y1) trong toa do LOGIC cua dich */
     int tx, ty;
     uint32_t color;      /* 0xFFRRGGBB */
+    int hdp;             /* Avatar: ve hinh o diem anh that (man net cao, lop phu dau truong bat) */
 } tgt;
+
+/* Avatar: khung nay co ve anh net cao (anh dt3/, hd > 1) -> j2n.Ui ve khung sau o man net cao */
+volatile int gfx_hd_seen;
 
 static int target(jctx *t, jobj g, tgt *o) {
     struct O_javax_microedition_lcdui_Graphics *gr = G(g);
@@ -56,18 +61,23 @@ static int target(jctx *t, jobj g, tgt *o) {
         o->w = gfx_w;
         o->h = gfx_h;
     }
+    int k = gr->f_k_I;
+    if (k < 1 || k > 8) k = 1;
+    o->k = k;
+    int lw = o->w / k, lh = o->h / k;   /* kich thuoc logic */
     int x0 = gr->f_cx_I, y0 = gr->f_cy_I;
     int x1 = x0 + gr->f_cw_I, y1 = y0 + gr->f_ch_I;
     if (x0 < 0) x0 = 0;
     if (y0 < 0) y0 = 0;
-    if (x1 > o->w) x1 = o->w;
-    if (y1 > o->h) y1 = o->h;
+    if (x1 > lw) x1 = lw;
+    if (y1 > lh) y1 = lh;
     o->x0 = x0;
     o->y0 = y0;
     o->x1 = x1;
     o->y1 = y1;
     o->tx = gr->f_tx_I;
     o->ty = gr->f_ty_I;
+    o->hdp = gr->f_hdp_Z && k > 1;
     o->color = 0xFF000000u | ((uint32_t)gr->f_color_I & 0xFFFFFFu);
     return x1 > x0 && y1 > y0;
 }
@@ -84,8 +94,57 @@ static inline uint32_t blend(uint32_t s, uint32_t d) {
     return 0xFF000000u | rb | gg;
 }
 
+static inline void pset(tgt *o, int x, int y) {
+    if (o->k == 1) {
+        o->px[(size_t)y * o->w + x] = o->color;
+        return;
+    }
+    int k = o->k;
+    uint32_t c = o->color;
+    uint32_t *p = o->px + (size_t)y * k * o->w + (size_t)x * k;
+    for (int r = 0; r < k; r++, p += o->w)
+        for (int i = 0; i < k; i++) p[i] = c;
+}
+
+/* ghi gia tri v (da xu ly alpha theo kind) vao diem logic (x, y) */
+static inline void pput(tgt *o, int x, int y, uint32_t v, int kind) {
+    if (o->k == 1) {
+        uint32_t *d = o->px + (size_t)y * o->w + x;
+        if (kind == 0) *d = v | 0xFF000000u;
+        else if (kind == 1) {
+            if (v >> 24) *d = v | 0xFF000000u;
+        } else *d = blend(v, *d);
+        return;
+    }
+    if (kind != 0 && (v >> 24) == 0) return;
+    int k = o->k;
+    uint32_t *p = o->px + (size_t)y * k * o->w + (size_t)x * k;
+    if (kind == 2 && (v >> 24) != 255) {
+        for (int r = 0; r < k; r++, p += o->w)
+            for (int i = 0; i < k; i++) p[i] = blend(v, p[i]);
+        return;
+    }
+    v |= 0xFF000000u;
+    for (int r = 0; r < k; r++, p += o->w)
+        for (int i = 0; i < k; i++) p[i] = v;
+}
+
 static inline void plot(tgt *o, int x, int y) {
-    if (x >= o->x0 && x < o->x1 && y >= o->y0 && y < o->y1) o->px[y * o->w + x] = o->color;
+    if (x >= o->x0 && x < o->x1 && y >= o->y0 && y < o->y1) pset(o, x, y);
+}
+
+/* Avatar: chuyen dich sang toa do diem anh that (hinh ve min tren man net cao); tra ve he so cu */
+static int phys(tgt *o) {
+    int k = o->k;
+    o->k = 1;
+    o->x0 *= k;
+    o->y0 *= k;
+    o->x1 *= k;
+    o->y1 *= k;
+    o->tx *= k;
+    o->ty *= k;
+    o->hdp = 0;
+    return k;
 }
 
 /* neo: 0 -> TOP|LEFT; phai co dung 1 bit ngang + 1 bit doc (anh: TOP/BOTTOM/VCENTER, chu: TOP/BOTTOM/BASELINE) */
@@ -137,13 +196,24 @@ static void line_abs(tgt *o, int x1, int y1, int x2, int y2) {
         }
         int64_t cx = xmaj ? sx0 + stx * (int64_t)s : sx0 + stx * (int64_t)m;
         int64_t cy = xmaj ? sy0 + sty * (int64_t)m : sy0 + sty * (int64_t)s;
-        if (cx >= cl && cx <= cr && cy >= ct && cy <= cb) o->px[cy * o->w + cx] = o->color;
+        if (cx >= cl && cx <= cr && cy >= ct && cy <= cb) pset(o, (int)cx, (int)cy);
     }
 }
 
 void N_javax_microedition_lcdui_Graphics_drawLine(jctx *t, jobj self, int32_t x1, int32_t y1, int32_t x2, int32_t y2) {
     tgt o;
     if (!target(t, self, &o)) return;
+    if (o.hdp) {
+        int lx1 = x1 + o.tx, ly1 = y1 + o.ty, lx2 = x2 + o.tx, ly2 = y2 + o.ty;
+        int k = phys(&o), c = k / 2;
+        int X1 = lx1 * k + c, Y1 = ly1 * k + c, X2 = lx2 * k + c, Y2 = ly2 * k + c;
+        int xmaj = abs(X2 - X1) >= abs(Y2 - Y1);
+        for (int d = -(k - 1) / 2; d <= k / 2; d++) {
+            if (xmaj) line_abs(&o, X1, Y1 + d, X2, Y2 + d);
+            else line_abs(&o, X1 + d, Y1, X2 + d, Y2);
+        }
+        return;
+    }
     line_abs(&o, x1 + o.tx, y1 + o.ty, x2 + o.tx, y2 + o.ty);
 }
 
@@ -155,8 +225,13 @@ static void fill_abs(tgt *o, int x, int y, int w, int h) {
     if (y1 > o->y1) y1 = o->y1;
     if (x1 <= x0 || y1 <= y0) return;
     uint32_t c = o->color;
+    int k = o->k;
+    x0 *= k;
+    x1 *= k;
+    y0 *= k;
+    y1 *= k;
     for (int yy = y0; yy < y1; yy++) {
-        uint32_t *p = o->px + yy * o->w + x0;
+        uint32_t *p = o->px + (size_t)yy * o->w + x0;
         for (int n = x1 - x0; n > 0; n--) *p++ = c;
     }
 }
@@ -198,6 +273,17 @@ static void round_rect(jctx *t, jobj self, int x, int y, int w, int h, int aw, i
     if (w <= 0 || h <= 0) return;
     tgt o;
     if (!target(t, self, &o)) return;
+    int th = 1;   /* do day vien (diem anh dich) */
+    if (o.hdp) {
+        int k = phys(&o);
+        x *= k;
+        y *= k;
+        w *= k;
+        h *= k;
+        aw *= k;
+        ah *= k;
+        th = k;
+    }
     int rx = half_mag(aw, w / 2), ry = half_mag(ah, h / 2);
     int ax = x + o.tx, ay = y + o.ty;
     int x0 = ax > o.x0 ? ax : o.x0, y0 = ay > o.y0 ? ay : o.y0;
@@ -208,10 +294,10 @@ static void round_rect(jctx *t, jobj self, int x, int y, int w, int h, int aw, i
             int lx = xx - ax;
             if (!rounded_contains(lx, ly, w, h, rx, ry)) continue;
             if (!fill) {
-                int rx1 = rx - 1 > 0 ? rx - 1 : 0, ry1 = ry - 1 > 0 ? ry - 1 : 0;
-                if (w > 2 && h > 2 && rounded_contains(lx - 1, ly - 1, w - 2, h - 2, rx1, ry1)) continue;
+                int rx1 = rx - th > 0 ? rx - th : 0, ry1 = ry - th > 0 ? ry - th : 0;
+                if (w > 2 * th && h > 2 * th && rounded_contains(lx - th, ly - th, w - 2 * th, h - 2 * th, rx1, ry1)) continue;
             }
-            o.px[yy * o.w + xx] = o.color;
+            pset(&o, xx, yy);
         }
     }
 }
@@ -233,10 +319,28 @@ static int rnd(double v) {
     return (int)llround(v);
 }
 
+static void arc_draw(tgt *o0, int x, int y, int w, int h, int start, int arcang, int fill);
+
 static void arc(jctx *t, jobj self, int x, int y, int w, int h, int start, int arcang, int fill) {
     if (w <= 0 || h <= 0 || arcang == 0) return;
     tgt o;
     if (!target(t, self, &o)) return;
+    if (o.hdp) {
+        int k = phys(&o);
+        if (fill) {
+            arc_draw(&o, x * k, y * k, w * k, h * k, start, arcang, 1);
+        } else {
+            for (int i = 0; i < k && w * k - 2 * i > 0 && h * k - 2 * i > 0; i++)
+                arc_draw(&o, x * k + i, y * k + i, w * k - 2 * i, h * k - 2 * i, start, arcang, 0);
+        }
+        return;
+    }
+    arc_draw(&o, x, y, w, h, start, arcang, fill);
+}
+
+static void arc_draw(tgt *o0, int x, int y, int w, int h, int start, int arcang, int fill) {
+    if (w <= 0 || h <= 0) return;
+    tgt o = *o0;
     int ax = x + o.tx, ay = y + o.ty;
     double cx = ax + (w - 1) / 2.0, cy = ay + (h - 1) / 2.0;
     double rx = (w - 1) / 2.0, ry = (h - 1) / 2.0;
@@ -253,8 +357,7 @@ static void arc(jctx *t, jobj self, int x, int y, int w, int h, int start, int a
             int64_t xa = (int64_t)ceil(cx - half - 1e-9), xb = (int64_t)floor(cx + half + 1e-9);
             if (xa < o.x0) xa = o.x0;
             if (xb > (int64_t)o.x1 - 1) xb = (int64_t)o.x1 - 1;
-            uint32_t *row = o.px + (size_t)yy * o.w;
-            for (int64_t xx = xa; xx <= xb; xx++) row[xx] = o.color;
+            if (xb >= xa) fill_abs(&o, (int)xa, (int)yy, (int)(xb - xa + 1), 1);
         }
         return;
     }
@@ -274,7 +377,6 @@ static void arc(jctx *t, jobj self, int x, int y, int w, int h, int start, int a
         const double RAD = 180.0 / 3.14159265358979323846;
         for (int64_t yy = ry0; yy < ry1; yy++) {
             double ty = ((double)yy - cy) / (ry + 0.5);
-            uint32_t *row = o.px + (size_t)yy * o.w;
             for (int64_t xx = rx0; xx < rx1; xx++) {
                 double tx = ((double)xx - cx) / (rx + 0.5);
                 if (tx * tx + ty * ty > 1.0) continue;
@@ -282,7 +384,7 @@ static void arc(jctx *t, jobj self, int x, int y, int w, int h, int start, int a
                 if (ang < 0) ang += 360.0;
                 double d = ang - a0;
                 if (d < 0) d += 360.0;
-                if (d <= sweep) row[xx] = o.color;
+                if (d <= sweep) pset(&o, (int)xx, (int)yy);
             }
         }
         return;
@@ -290,7 +392,7 @@ static void arc(jctx *t, jobj self, int x, int y, int w, int h, int start, int a
     int ns = start % 360;
     int ca = arcang < -360 ? -360 : arcang > 360 ? 360 : arcang;
     double desired = ceil(fabs((double)ca) * (double)(w > h ? w : h) / 90.0);
-    double budget = 8.0 * (o.w + o.h);
+    double budget = 8.0 * (o.w / o.k + o.h / o.k);
     if (budget < 64) budget = 64;
     if (budget > 1000000) budget = 1000000;
     int steps = (int)(desired < 1 ? 1 : desired > budget ? budget : desired);
@@ -355,12 +457,15 @@ void N_javax_microedition_lcdui_Graphics_fillTriangle(jctx *t, jobj self, int32_
         for (int xx = minx; xx <= maxx; xx++) {
             double e1 = edge(x1, y1, x2, y2, xx, yy), e2 = edge(x2, y2, x3, y3, xx, yy), e3 = edge(x3, y3, x1, y1, xx, yy);
             if ((e1 > 0 || (e1 == 0 && t1)) && (e2 > 0 || (e2 == 0 && t2)) && (e3 > 0 || (e3 == 0 && t3)))
-                o.px[yy * o.w + xx] = o.color;
+                pset(&o, xx, yy);
         }
     }
 }
 
 /* ------------------------------------------------------------ anh */
+static void draw_img(tgt *o, const uint32_t *src, int sstride, int s, int xs, int ys, int w, int h, int tr, int px, int py,
+                     int kind);
+
 static void blit(tgt *o, const uint32_t *src, int sstride, int sx, int sy, int dx, int dy, int w, int h, int kind) {
     /* cat theo vung cat */
     if (dx < o->x0) { sx += o->x0 - dx; w -= o->x0 - dx; dx = o->x0; }
@@ -389,8 +494,10 @@ void N_javax_microedition_lcdui_Graphics_drawImage0(jctx *t, jobj self, jobj img
     tgt o;
     int ok = target(t, self, &o);
     if (t->exc) return;
+    int sc = im->f_hd_I > 1 ? im->f_hd_I : 1;
+    int lw = im->f_w_I / sc, lh = im->f_h_I / sc;
     int px, py;
-    if (!anchor_pos(t, anchor, 0, x + o.tx, y + o.ty, im->f_w_I, im->f_h_I, 0, &px, &py)) return;
+    if (!anchor_pos(t, anchor, 0, x + o.tx, y + o.ty, lw, lh, 0, &px, &py)) return;
     if (!ok || !im->f_argb__5b) return;
     const uint32_t *src = AD(im->f_argb__5b, uint32_t);
     if (src == o.px) {
@@ -398,11 +505,11 @@ void N_javax_microedition_lcdui_Graphics_drawImage0(jctx *t, jobj self, jobj img
         size_t n = (size_t)im->f_w_I * im->f_h_I;
         uint32_t *tmp = (uint32_t *)malloc(n * 4);
         memcpy(tmp, src, n * 4);
-        blit(&o, tmp, im->f_w_I, 0, 0, px, py, im->f_w_I, im->f_h_I, 2);
+        draw_img(&o, tmp, im->f_w_I, sc, 0, 0, lw, lh, 0, px, py, 2);
         free(tmp);
         return;
     }
-    blit(&o, src, im->f_w_I, 0, 0, px, py, im->f_w_I, im->f_h_I, im->f_akind_I);
+    draw_img(&o, src, im->f_w_I, sc, 0, 0, lw, lh, 0, px, py, im->f_akind_I);
 }
 
 /* bien doi: (lx, ly) dich -> (sx, sy) nguon = base + col*lx + row*ly (giong transform_steps cua bo chay cu) */
@@ -449,6 +556,66 @@ static void region_draw(tgt *o, const uint32_t *src, int sstride, int xs, int ys
     }
 }
 
+/* Avatar: ve vung anh len dich voi he so rieng. xs, ys, w, h: toa do LOGIC trong anh; s = diem anh that / diem logic
+ * cua anh (anh dt3/: 3); px, py: toa do logic tren dich (he so o->k). k = s = 1 -> dung y nhu cu. */
+static void draw_img(tgt *o, const uint32_t *src, int sstride, int s, int xs, int ys, int w, int h, int tr, int px, int py,
+                     int kind) {
+    if (s < 1) s = 1;
+    if (s > 1) gfx_hd_seen = 1;
+    int k = o->k;
+    if (s == k) {
+        tgt p = *o;
+        p.k = 1;
+        p.x0 = o->x0 * k;
+        p.y0 = o->y0 * k;
+        p.x1 = o->x1 * k;
+        p.y1 = o->y1 * k;
+        region_draw(&p, src, sstride, xs * s, ys * s, w * s, h * s, tr, px * k, py * k, kind);
+        return;
+    }
+    int ow = (tr >= 4) ? h : w, oh = (tr >= 4) ? w : h;
+    int bx, by, cx, cy, rx, ry;
+    if (s == 1) {
+        /* anh thuong len man net cao: moi diem anh thanh o k x k (giong het phong to theo diem anh) */
+        int vx0 = px > o->x0 ? px : o->x0, vy0 = py > o->y0 ? py : o->y0;
+        int vx1 = px + ow < o->x1 ? px + ow : o->x1, vy1 = py + oh < o->y1 ? py + oh : o->y1;
+        if (vx1 <= vx0 || vy1 <= vy0) return;
+        tsteps(w, h, tr, &bx, &by, &cx, &cy, &rx, &ry);
+        const uint32_t *base = src + (size_t)ys * sstride + xs;
+        for (int yy = vy0; yy < vy1; yy++) {
+            int ly = yy - py;
+            for (int xx = vx0; xx < vx1; xx++) {
+                int lx = xx - px;
+                int sx = bx + cx * lx + rx * ly, sy = by + cy * lx + ry * ly;
+                pput(o, xx, yy, base[(size_t)sy * sstride + sx], kind);
+            }
+        }
+        return;
+    }
+    /* chung (anh net cao len dich he so khac): lay mau gan nhat theo diem anh that cua dich */
+    int64_t X0 = (int64_t)px * k, Y0 = (int64_t)py * k;
+    int64_t vx0 = X0 > (int64_t)o->x0 * k ? X0 : (int64_t)o->x0 * k;
+    int64_t vy0 = Y0 > (int64_t)o->y0 * k ? Y0 : (int64_t)o->y0 * k;
+    int64_t vx1 = X0 + (int64_t)ow * k < (int64_t)o->x1 * k ? X0 + (int64_t)ow * k : (int64_t)o->x1 * k;
+    int64_t vy1 = Y0 + (int64_t)oh * k < (int64_t)o->y1 * k ? Y0 + (int64_t)oh * k : (int64_t)o->y1 * k;
+    if (vx1 <= vx0 || vy1 <= vy0) return;
+    tsteps(w * s, h * s, tr, &bx, &by, &cx, &cy, &rx, &ry);
+    const uint32_t *base = src + (size_t)ys * s * sstride + (size_t)xs * s;
+    for (int64_t Y = vy0; Y < vy1; Y++) {
+        int ly = (int)((Y - Y0) * s / k);
+        uint32_t *d = o->px + (size_t)Y * o->w;
+        for (int64_t X = vx0; X < vx1; X++) {
+            int lx = (int)((X - X0) * s / k);
+            int sx = bx + cx * lx + rx * ly, sy = by + cy * lx + ry * ly;
+            uint32_t v = base[(size_t)sy * sstride + sx];
+            if (kind == 0) d[X] = v | 0xFF000000u;
+            else if (kind == 1) {
+                if (v >> 24) d[X] = v | 0xFF000000u;
+            } else d[X] = blend(v, d[X]);
+        }
+    }
+}
+
 void N_javax_microedition_lcdui_Graphics_drawRegion0(jctx *t, jobj self, jobj img, int32_t xs, int32_t ys, int32_t w,
                                                      int32_t h, int32_t tr, int32_t xd, int32_t yd, int32_t anchor) {
     struct O_javax_microedition_lcdui_Image *im = IMG(img);
@@ -460,15 +627,16 @@ void N_javax_microedition_lcdui_Graphics_drawRegion0(jctx *t, jobj self, jobj im
     if (!anchor_pos(t, anchor, 0, xd + o.tx, yd + o.ty, w, h, 0, &px, &py)) return;
     if (!ok || !im->f_argb__5b) return;
     const uint32_t *src = AD(im->f_argb__5b, uint32_t);
+    int sc = im->f_hd_I > 1 ? im->f_hd_I : 1;
     if (src == o.px) {
         size_t n = (size_t)im->f_w_I * im->f_h_I;
         uint32_t *tmp = (uint32_t *)malloc(n * 4);
         memcpy(tmp, src, n * 4);
-        region_draw(&o, tmp, im->f_w_I, xs, ys, w, h, tr, px, py, 2);
+        draw_img(&o, tmp, im->f_w_I, sc, xs, ys, w, h, tr, px, py, 2);
         free(tmp);
         return;
     }
-    region_draw(&o, src, im->f_w_I, xs, ys, w, h, tr, px, py, im->f_akind_I);
+    draw_img(&o, src, im->f_w_I, sc, xs, ys, w, h, tr, px, py, im->f_akind_I);
 }
 
 void N_javax_microedition_lcdui_Graphics_drawRGB(jctx *t, jobj self, jobj rgb, int32_t off, int32_t scan, int32_t x,
@@ -493,11 +661,19 @@ void N_javax_microedition_lcdui_Graphics_drawRGB(jctx *t, jobj self, jobj rgb, i
         int yy = dy + r;
         if (yy < o.y0 || yy >= o.y1) continue;
         const uint32_t *s = src + off + (int64_t)scan * r;
-        uint32_t *d = o.px + (size_t)yy * o.w;
+        if (o.k == 1) {
+            uint32_t *d = o.px + (size_t)yy * o.w;
+            for (int i = 0; i < w; i++) {
+                int xx = dx + i;
+                if (xx < o.x0 || xx >= o.x1) continue;
+                d[xx] = alpha ? blend(s[i], d[xx]) : (s[i] | 0xFF000000u);
+            }
+            continue;
+        }
         for (int i = 0; i < w; i++) {
             int xx = dx + i;
             if (xx < o.x0 || xx >= o.x1) continue;
-            d[xx] = alpha ? blend(s[i], d[xx]) : (s[i] | 0xFF000000u);
+            pput(&o, xx, yy, s[i], alpha ? 2 : 0);
         }
     }
 }
@@ -509,17 +685,25 @@ void N_javax_microedition_lcdui_Graphics_copyArea(jctx *t, jobj self, int32_t xs
     if (t->exc) return;
     if (G(self)->f_img_L == 0 && 0) return;
     int ax = xs + o.tx, ay = ys + o.ty;
-    if (ax < 0 || ay < 0 || w < 0 || h < 0 || ax + w > o.w || ay + h > o.h) {
+    if (ax < 0 || ay < 0 || w < 0 || h < 0 || ax + w > o.w / o.k || ay + h > o.h / o.k) {
         rt_err(t, "java/lang/IllegalArgumentException", "copyArea");
         return;
     }
     int px, py;
     if (!anchor_pos(t, anchor, 0, xd + o.tx, yd + o.ty, w, h, 0, &px, &py)) return;
     if (!ok || w == 0 || h == 0) return;
-    size_t n = (size_t)w * h;
+    int k = o.k;
+    tgt p = o;
+    p.k = 1;
+    p.x0 = o.x0 * k;
+    p.y0 = o.y0 * k;
+    p.x1 = o.x1 * k;
+    p.y1 = o.y1 * k;
+    int W = w * k, H = h * k;
+    size_t n = (size_t)W * H;
     uint32_t *tmp = (uint32_t *)malloc(n * 4);
-    for (int r = 0; r < h; r++) memcpy(tmp + (size_t)r * w, o.px + (size_t)(ay + r) * o.w + ax, (size_t)w * 4);
-    blit(&o, tmp, w, 0, 0, px, py, w, h, 0);
+    for (int r = 0; r < H; r++) memcpy(tmp + (size_t)r * W, o.px + (size_t)(ay * k + r) * o.w + (size_t)ax * k, (size_t)W * 4);
+    blit(&p, tmp, W, 0, 0, px * k, py * k, W, H, 0);
     free(tmp);
 }
 
@@ -576,8 +760,7 @@ void N_javax_microedition_lcdui_Graphics_drawText(jctx *t, jobj self, jobj str, 
                 if (xx < o.x0 || xx >= o.x1) continue;
                 uint8_t a = bits[r * gw + c];
                 if (!a) continue;
-                uint32_t *d = o.px + (size_t)yy * o.w + xx;
-                *d = blend(((uint32_t)a << 24) | col, *d);
+                pput(&o, xx, yy, ((uint32_t)a << 24) | col, 2);
             }
         }
         cx += FONT_ADV[gi];
@@ -636,15 +819,22 @@ jobj N_javax_microedition_lcdui_Image_createImage_6f34(jctx *t, jobj src, int32_
         return 0;
     }
     struct O_javax_microedition_lcdui_Image *im = IMG(src);
-    if (x < 0 || y < 0 || w <= 0 || h <= 0 || x + w > im->f_w_I || y + h > im->f_h_I || tr < 0 || tr > 7) {
+    int sc = im->f_hd_I > 1 ? im->f_hd_I : 1;
+    if (x < 0 || y < 0 || w <= 0 || h <= 0 || x + w > im->f_w_I / sc || y + h > im->f_h_I / sc || tr < 0 || tr > 7) {
         rt_err(t, "java/lang/IllegalArgumentException", "createImage");
         return 0;
     }
+    /* anh net cao: lam viec tren diem anh that roi danh dau anh moi cung he so */
+    x *= sc;
+    y *= sc;
+    w *= sc;
+    h *= sc;
     int ow = tr >= 4 ? h : w, oh = tr >= 4 ? w : h;
     jobj arr = rt_newarr(t, &rt_arr_I, ow * oh);
     if (!arr) return 0;
     tgt o;
     o.px = AD(arr, uint32_t);
+    o.k = 1;
     o.w = ow;
     o.h = oh;
     o.x0 = 0;
@@ -663,5 +853,7 @@ jobj N_javax_microedition_lcdui_Image_createImage_6f34(jctx *t, jobj src, int32_
             o.px[ly * ow + lx] = s[(size_t)(y + sy) * im->f_w_I + x + sx];
         }
     }
-    return make_image(t, ow, oh, arr, im->f_akind_I);
+    jobj r = make_image(t, ow, oh, arr, im->f_akind_I);
+    if (r && sc > 1) IMG(r)->f_hd_I = sc;
+    return r;
 }

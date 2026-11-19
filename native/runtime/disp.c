@@ -167,6 +167,16 @@ int32_t N_j2n_Disp_hdScale(jctx *t) {
 
 jobj N_j2n_Disp_hdNames(jctx *t) { return hd_names[0] ? rt_str_utf8(t, hd_names) : 0; }
 
+/* Avatar: co "khung vua ve co anh net cao" (gfx.c) -> j2n.Ui ve khung sau o man net cao */
+extern volatile int gfx_hd_seen;
+
+int32_t N_j2n_Disp_hdSeen(jctx *t) {
+    (void)t;
+    int v = gfx_hd_seen;
+    gfx_hd_seen = 0;
+    return v != 0;
+}
+
 void N_j2n_Disp_presentImage(jctx *t, jobj argb, int32_t w, int32_t h) {
     if (!argb) {
         rt_npe(t);

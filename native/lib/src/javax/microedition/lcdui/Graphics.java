@@ -19,6 +19,11 @@ public class Graphics {
     int tw, th;              /* kich thuoc dich */
     Image img;               /* null = man hinh */
     Font font;
+    /* Avatar: so diem anh that cho 1 diem logic (man ve net cao x3 o dau truong; con lai 1). Game van ve theo toa do logic */
+    int k = 1;
+    /* Avatar: ve hinh (cung, chu nhat bo goc, duong thang) o diem anh that tren man net cao -> min, khong rang cua.
+     * Lop phu dau truong bat bang setStrokeStyle(0x4844) / tat 0x4845 (may J2ME that nem loi -> lop phu bo qua). */
+    boolean hdp;
 
     Graphics(Image target) {
         img = target;
@@ -40,6 +45,7 @@ public class Graphics {
         ch = h;
         color = 0;
         stroke = SOLID;
+        hdp = false;
         font = Font.getDefaultFont();
     }
 
@@ -99,6 +105,15 @@ public class Graphics {
     }
 
     public void setStrokeStyle(int s) {
+        if (s == 0x4844 || s == 0x4845) {
+            hdp = s == 0x4844;
+            return;
+        }
+        if (s == 0x4846) {
+            // Avatar: anh createRGBImage ke tiep la anh net cao (w, h = diem anh that) - boss dau truong phong to luc chay
+            Image.hdLan = j2n.Ui.HD_MAN;
+            return;
+        }
         if (s != SOLID && s != DOTTED) {
             throw new IllegalArgumentException();
         }
@@ -228,7 +243,8 @@ public class Graphics {
         if (transform < 0 || transform > 7) {
             throw new IllegalArgumentException("transform");
         }
-        if (xs < 0 || ys < 0 || xs + w > src.w || ys + h > src.h) {
+        int sw = src.getWidth(), sh = src.getHeight();
+        if (xs < 0 || ys < 0 || xs + w > sw || ys + h > sh) {
             // May that (Nokia...) cat phan vung nam ngoai anh thay vi nem loi; client Avatar co man (tao nhan vat...) dua
             // vung lo ra -> truoc day ca khung ve bi huy (hinh thieu, nhap nhay). Cat vung, giu dung vi tri phan con lai.
             if (w == 0 || h == 0) {
@@ -248,7 +264,7 @@ public class Graphics {
                 y -= dh;
             }
             int x0 = xs < 0 ? 0 : xs, y0 = ys < 0 ? 0 : ys;
-            int x1 = xs + w > src.w ? src.w : xs + w, y1 = ys + h > src.h ? src.h : ys + h;
+            int x1 = xs + w > sw ? sw : xs + w, y1 = ys + h > sh ? sh : ys + h;
             if (x1 <= x0 || y1 <= y0) {
                 return;
             }

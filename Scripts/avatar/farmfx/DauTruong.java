@@ -84,6 +84,8 @@ public final class DauTruong {
     static Image[] bAnh = new Image[6], bVien = new Image[6];
     static int[] bVienPx;
     static long[] bAnhLuc = new long[6];
+    static int[] bTop = new int[6];       // hang dau tien co hinh trong anh boss phong to (dat ten / thanh mau / so ngay tren dau)
+    static int phongTop = 0;
 
     // ---------------------------------------------------------------- hieu ung (mang song song, so nguyen; toa do the gioi px)
     static final int ND = 40;
@@ -183,11 +185,37 @@ public final class DauTruong {
         return im;
     }
 
-    static void ve(Graphics g, String ten, int x, int y, int neo) {
+    static boolean ve(Graphics g, String ten, int x, int y, int neo) {
         Image im = h(ten);
         if (im != null) {
             g.drawImage(im, x, y, neo);
+            return true;
         }
+        return false;
+    }
+
+    /** app (man net cao): cung / chu nhat bo goc / duong ve o diem anh that -> min. J2ME that nem loi -> khong thu lai */
+    static int coNet = -1;
+
+    static boolean net(Graphics g, boolean on) {
+        if (coNet == 0) {
+            return false;
+        }
+        int st = g.getStrokeStyle();
+        try {
+            g.setStrokeStyle(on ? 0x4844 : 0x4845);
+        } catch (Throwable e) {
+            coNet = 0;
+            return false;
+        }
+        if (g.getStrokeStyle() != st) {
+            // may nhan luon gia tri la: tra lai kieu net cu, coi nhu khong co che do nay
+            g.setStrokeStyle(st == Graphics.DOTTED ? Graphics.DOTTED : Graphics.SOLID);
+            coNet = 0;
+            return false;
+        }
+        coNet = 1;
+        return true;
     }
 
     static Image anh(String p) {
@@ -450,6 +478,7 @@ public final class DauTruong {
                 luong = d.readLong();
                 ngoc = d.readInt();
                 dns = d.readInt();
+                dongBoTien();
             } else if (sub == 8) {
                 int ai = d.readInt(), boss = d.readInt(), g = d.readByte(), lv = d.readByte(), dmg = d.readInt();
                 boolean crit = d.readByte() != 0;
@@ -480,6 +509,17 @@ public final class DauTruong {
         } catch (Throwable t) {
         }
         return true;
+    }
+
+    /** so tien cua game = so tren HUD, khong qua hn.a(int, int, int) (ham do hien chu bay "-2100xu" moi lan doi) */
+    static void dongBoTien() {
+        hn me = main.GameMidlet.i;
+        if (me == null || me.a == null || me.a.length < 3) {
+            return;
+        }
+        me.a[0] = (int) Math.max(0L, Math.min(2147483647L, xu));
+        me.a[2] = (int) Math.max(0L, Math.min(2147483647L, luong));
+        dp.n = true;
     }
 
     static int viTri(int id) {
@@ -539,6 +579,12 @@ public final class DauTruong {
         // camera rung: bu lai do lech khung truoc roi lech moi (lop "do" la tu khoa Java -> qua lop Cam sinh bang ASM)
         Cam.dich(-dx0, -dy0);
         dx0 = dy0 = 0;
+        if (sanMoi()) {
+            // goc nhin doc co dinh: mep duoi san (hang cuoi + bong chan boss) nam ngay tren bang dieu khien
+            // (truoc day camera canh day ban do theo day man hinh -> 2 hang duoi cung nam sau bang, boss / hieu ung bi che)
+            Cam.datDoc(DAY_SAN - (main.a.n - SOFT - PANEL));
+            khungNgang();
+        }
         if (t < rungDen) {
             dx0 = rnd(-rungBien, rungBien + 1);
             dy0 = rnd(-rungBien, rungBien + 1);
@@ -789,7 +835,8 @@ public final class DauTruong {
             } else {
                 hn b = ir.g(boss);
                 if (b != null) {
-                    so(b.aw * js.ay + rnd(-10, 11), b.ax * js.ay - 50, dmg, crit, true);
+                    int dau = dauBoss(k);
+                    so(b.aw * js.ay + rnd(-14, 15), dau > 0 ? dau - 22 : b.ax * js.ay - 50, dmg, crit, true);
                 }
             }
             return;
@@ -808,7 +855,8 @@ public final class DauTruong {
             }
         } else if (b != null) {
             if (crit) {
-                so(b.aw * js.ay, b.ax * js.ay - 50, dmg, crit, false);
+                int dau = dauBoss(k);
+                so(b.aw * js.ay + rnd(-14, 15), dau > 0 ? dau - 28 : b.ax * js.ay - 50, dmg, crit, false);
             }
             chop(k);
         }
@@ -904,6 +952,26 @@ public final class DauTruong {
     }
 
     static void so(int x, int y, int v, boolean crit, boolean toi) {
+        // so moi de len so dang bay (ke ca chu CHI MANG phia tren so chi mang) -> day len tren so do
+        long t0 = now();
+        for (int lan = 0; lan < 6; lan++) {
+            int tren = y - (crit ? 21 : 10), duoi = y + 2;
+            int len = 0;
+            for (int k = 0; k < NS; k++) {
+                if (!sOn[k] || t0 - sT[k] > 700 || Math.abs(sX[k] - x) > 34) {
+                    continue;
+                }
+                int yk = sY[k] - (int) (t0 - sT[k]) * 30 / 900;       // so cu da bay len mot doan
+                int tk = yk - (sCrit[k] ? 21 : 10), dk = yk + 2;
+                if (tren < dk && tk < duoi) {
+                    len = Math.max(len, duoi - tk + 1);
+                }
+            }
+            if (len == 0) {
+                break;
+            }
+            y -= len;
+        }
         int i = trong(sOn);
         if (i < 0) {
             long cu = Long.MAX_VALUE;
@@ -1001,7 +1069,22 @@ public final class DauTruong {
         if (!bat()) {
             return;
         }
+        boolean nt = net(g, true);
+        try {
+            veNen0(g);
+        } finally {
+            if (nt) {
+                net(g, false);
+            }
+        }
+    }
+
+    static void veNen0(Graphics g) {
+        if (!bat()) {
+            return;
+        }
         nap();
+        tenMoi();
         long t = now();
         int cx = Cam.x(), cy = Cam.y();
         if (imGan != null && sanMoi()) {
@@ -1095,6 +1178,118 @@ public final class DauTruong {
     }
 
     // ================================================================ boss: ve thay nhan vat (hn.a dau ham)
+    /** camera ngang: dat ca minh lan boss dang danh vao khung (tam ban xa hon be ngang man -> truoc day boss hay o mep / ngoai man) */
+    static void khungNgang() {
+        hn me = main.GameMidlet.i;
+        hn b = muc >= 0 && muc < nB && bChet[muc] == 0 ? ir.g(bId[muc]) : null;
+        if (me == null || b == null) {
+            return;
+        }
+        int W = main.a.m;
+        int px = me.aw * js.ay, bx = b.aw * js.ay;
+        int le = 30, leBoss = 44;                          // chua cho nguoi + bang ten / thanh mau boss
+        int c;
+        if (Math.abs(px - bx) <= W - le - leBoss) {
+            c = (px + bx) / 2 - W / 2;
+            int lo = (bx > px ? bx + leBoss : px + le) - W, hi = bx > px ? px - le : bx - leBoss;
+            if (c < lo) {
+                c = lo;
+            }
+            if (c > hi) {
+                c = hi;
+            }
+        } else {
+            c = bx > px ? px - le : px + le - W;              // khong vua: minh sat mep, phan con lai danh cho phia boss
+        }
+        int max = ir.e * ir.i * gy.Y - W;
+        if (c > max) {
+            c = max;
+        }
+        if (c < 0) {
+            c = 0;
+        }
+        Cam.datNgang(c);
+    }
+
+    // ================================================================ ten nhan vat (hn.a -> hn.a(G,II) thay bang veTen)
+    // dau truong dong nguoi: ten de len ten / bang ten boss thanh mot dong chu chong nhau -> chi ve ten khong de len
+    // ten da ve truoc (ten cua minh + bang ten boss duoc giu cho truoc). Ngoai dau truong: ve nhu cu.
+    static final int NT = 64;
+    static int nTen;
+    static final int[] tX0 = new int[NT], tY0 = new int[NT], tX1 = new int[NT], tY1 = new int[NT];
+    static final int[] oT = new int[4];
+
+    static void giuTen(int x0, int y0, int x1, int y1) {
+        if (nTen < NT) {
+            tX0[nTen] = x0;
+            tY0[nTen] = y0;
+            tX1[nTen] = x1;
+            tY1[nTen] = y1;
+            nTen++;
+        }
+    }
+
+    static boolean deTen(int x0, int y0, int x1, int y1) {
+        for (int i = 0; i < nTen; i++) {
+            if (x0 < tX1[i] && tX0[i] < x1 && y0 < tY1[i] && tY0[i] < y1) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** o chu ten cua h khi hn.a(G,II) ve tai (x, y) -> oT */
+    static void oTen(hn h, int x, int y) {
+        int w = 24;
+        try {
+            w = (h == main.GameMidlet.i ? main.a.P : main.a.Q).a(h.x) + 4;
+        } catch (Throwable e) {
+        }
+        int top = y - h.aA * js.ay + (h.B + h.h) * js.ay;
+        int icon = (h.X != -1 ? 9 : 0) + (h.aa != -1 ? 9 : 0) + (h.ac != -1 ? 9 : 0);
+        oT[0] = x - w / 2 - 2;
+        oT[1] = top - 1;
+        oT[2] = x + w / 2 + icon + 2;
+        oT[3] = top + gy.ai + 1;
+    }
+
+    /** dau moi khung ve san (veNen0): giu cho ten cua minh + bang ten / thanh mau boss */
+    static void tenMoi() {
+        nTen = 0;
+        hn me = main.GameMidlet.i;
+        if (me != null) {
+            oTen(me, me.aw * js.ay, (me.ax + me.N) * js.ay - gy.ai);
+            giuTen(oT[0], oT[1], oT[2], oT[3]);
+        }
+        int fh = 10;
+        try {
+            fh = main.a.L.a();
+        } catch (Throwable e) {
+        }
+        for (int k = 0; k < nB; k++) {
+            hn b = ir.g(bId[k]);
+            if (b == null || bChet[k] != 0) {
+                continue;
+            }
+            int x = b.aw * js.ay, top = b.ax * js.ay + 6 - BH * 2 + bTop[k] - 8;
+            giuTen(x - 36, top - fh - 3, x + 36, top + 7);
+            giuTen(x - 26, top + 7, x + 26, b.ax * js.ay - 4);        // than boss: ten nguoi khong de len boss
+        }
+    }
+
+    public static void veTen(hn h, Graphics g, int x, int y) {
+        if (!bat() || h == main.GameMidlet.i || h == ir.p) {
+            h.a(g, x, y);
+            return;
+        }
+        oTen(h, x, y);
+        if (deTen(oT[0], oT[1], oT[2], oT[3])) {
+            return;
+        }
+        giuTen(oT[0], oT[1], oT[2], oT[3]);
+        h.a(g, x, y);
+    }
+
     public static boolean veThay(hn h, Graphics g) {
         if (!bat() || h == null) {
             return false;
@@ -1116,6 +1311,7 @@ public final class DauTruong {
                 bAnh[k] = moi;
                 im = moi;
                 bAnhLuc[k] = t;
+                bTop[k] = phongTop;
                 bVien[k] = vien(k == muc ? 0xFF5A3C : 0xFFD23A);
             }
         }
@@ -1145,7 +1341,7 @@ public final class DauTruong {
             return false;
         }
         // ten + thanh mau tren dau
-        int top = y - BH * 2 + 14;
+        int top = y + 6 - BH * 2 + bTop[k] - 8;
         int w = 64;
         g.setColor(0x1A1020);
         g.fillRect(x - w / 2 - 1, top - 1, w + 2, 6);
@@ -1159,6 +1355,8 @@ public final class DauTruong {
         g.drawLine(x - w / 2, top, x - w / 2 + that - 1, top);
         main.a.L.a(g, bTen[k], x, top - main.a.L.a() - 1, 2);
         if (h.O != null) {
+            // bong chat cua boss: game dat o dau anh goc (nho) -> roi vao giua than / de len ten; dua len tren ten
+            h.O.a(h.aw, (top - main.a.L.a() - 3) / Math.max(1, gy.Y));
             h.O.a(g);
         }
         return true;
@@ -1167,17 +1365,107 @@ public final class DauTruong {
     /** bong cua anh boss vua phong to (moi diem khong trong suot -> mau vien) */
     static Image vien(int mau) {
         try {
-            int n = BW * BH * 4;
-            if (bVienPx == null) {
+            int[] src = bHd ? b6 : bOut;
+            int n = src.length;
+            if (bVienPx == null || bVienPx.length != n) {
                 bVienPx = new int[n];
             }
             int c = 0xFF000000 | mau;
             for (int i = 0; i < n; i++) {
-                bVienPx[i] = (bOut[i] >>> 24) != 0 ? c : 0;
+                bVienPx[i] = (src[i] >>> 24) != 0 ? c : 0;
+            }
+            if (bHd) {
+                Image im = anhHd(bVienPx, BW * 6, BH * 6);
+                if (im != null) {
+                    return im;
+                }
+            }
+            if (src != bOut) {
+                return null;
             }
             return Image.createRGBImage(bVienPx, BW * 2, BH * 2, true);
         } catch (Throwable e) {
             return null;
+        }
+    }
+
+    // ---------------------------------------------------------------- anh net cao luc chay (ban app): boss pixel art
+    // phong to x2 bang Scale2x (khong rang cua cheo) roi x3 bang Scale3x -> 6 diem anh that / diem goc, ve tren man x3
+    // net cao ma van giu dung net ve goc. Ban J2ME (khong co anh net cao): x2 nhu cu.
+    static int hdCo = -1;                 // -1 chua thu, 1 co, 0 khong
+    static boolean bHd;
+    static int[] bSrc, b2, b6;
+
+    /** anh RGB net cao: w, h la diem anh that (kich thuoc logic w/3 x h/3). Khong ho tro -> null */
+    static Image anhHd(int[] px, int w, int h) {
+        if (hdCo == 0 || bBufG == null) {
+            return null;
+        }
+        try {
+            int st = bBufG.getStrokeStyle();
+            bBufG.setStrokeStyle(0x4846);           // ban app: anh RGB ke tiep la anh net cao (J2ME that: loi -> bo)
+            if (bBufG.getStrokeStyle() != st) {     // may J2ME luu bua gia tri la -> tra lai, coi nhu khong co
+                bBufG.setStrokeStyle(Graphics.SOLID);
+                hdCo = 0;
+                return null;
+            }
+        } catch (Throwable e) {
+            hdCo = 0;
+            return null;
+        }
+        Image im = Image.createRGBImage(px, w, h, true);
+        if (im.getWidth() * 3 != w) {               // runtime cu khong hieu lenh -> thoi
+            hdCo = 0;
+            return null;
+        }
+        hdCo = 1;
+        return im;
+    }
+
+    static void scale2x(int[] s, int w, int h, int[] d) {
+        int W2 = w * 2;
+        for (int y = 0; y < h; y++) {
+            for (int x = 0; x < w; x++) {
+                int p = s[y * w + x];
+                int a = y > 0 ? s[(y - 1) * w + x] : p;
+                int b = x < w - 1 ? s[y * w + x + 1] : p;
+                int c = x > 0 ? s[y * w + x - 1] : p;
+                int dd = y < h - 1 ? s[(y + 1) * w + x] : p;
+                int o = y * 2 * W2 + x * 2;
+                d[o] = (c == a && c != dd && a != b) ? a : p;
+                d[o + 1] = (a == b && a != c && b != dd) ? b : p;
+                d[o + W2] = (dd == c && dd != b && c != a) ? c : p;
+                d[o + W2 + 1] = (b == dd && b != a && dd != c) ? dd : p;
+            }
+        }
+    }
+
+    static void scale3x(int[] s, int w, int h, int[] d) {
+        int W3 = w * 3;
+        for (int y = 0; y < h; y++) {
+            int y0 = y > 0 ? y - 1 : y, y2 = y < h - 1 ? y + 1 : y;
+            for (int x = 0; x < w; x++) {
+                int x0 = x > 0 ? x - 1 : x, x2 = x < w - 1 ? x + 1 : x;
+                int A = s[y0 * w + x0], B = s[y0 * w + x], C = s[y0 * w + x2];
+                int D = s[y * w + x0], E = s[y * w + x], F = s[y * w + x2];
+                int G = s[y2 * w + x0], H = s[y2 * w + x], I = s[y2 * w + x2];
+                int o = y * 3 * W3 + x * 3;
+                if (B != H && D != F) {
+                    d[o] = D == B ? D : E;
+                    d[o + 1] = (D == B && E != C) || (B == F && E != A) ? B : E;
+                    d[o + 2] = B == F ? F : E;
+                    d[o + W3] = (D == B && E != G) || (D == H && E != A) ? D : E;
+                    d[o + W3 + 1] = E;
+                    d[o + W3 + 2] = (B == F && E != I) || (H == F && E != C) ? F : E;
+                    d[o + W3 * 2] = D == H ? D : E;
+                    d[o + W3 * 2 + 1] = (D == H && E != I) || (H == F && E != G) ? H : E;
+                    d[o + W3 * 2 + 2] = H == F ? F : E;
+                } else {
+                    d[o] = E; d[o + 1] = E; d[o + 2] = E;
+                    d[o + W3] = E; d[o + W3 + 1] = E; d[o + W3 + 2] = E;
+                    d[o + W3 * 2] = E; d[o + W3 * 2 + 1] = E; d[o + W3 * 2 + 2] = E;
+                }
+            }
         }
     }
 
@@ -1189,6 +1477,7 @@ public final class DauTruong {
                 bBufG = bBuf.getGraphics();
                 bPx = new int[BW * BH];
                 bOut = new int[BW * BH * 4];
+                bSrc = new int[BW * BH];
             }
             bBufG.setClip(0, 0, BW, BH);
             bBufG.setColor(0xFF00FF);
@@ -1199,13 +1488,39 @@ public final class DauTruong {
             h.O = o;
             bBuf.getRGB(bPx, 0, BW, 0, 0, BW, BH);
             int W2 = BW * 2;
+            int top = -1;
             for (int yy = 0; yy < BH; yy++) {
-                int r0 = yy * BW, o0 = yy * 2 * W2;
+                int r0 = yy * BW;
                 for (int xx = 0; xx < BW; xx++) {
                     int c = bPx[r0 + xx];
                     int rgb = c & 0xFFFFFF;
                     // nen tim + vien pha nen
                     int v = (rgb == 0xFF00FF || (((rgb >> 16) & 255) > 200 && (rgb & 255) > 200 && ((rgb >> 8) & 255) < 60)) ? 0 : (0xFF000000 | rgb);
+                    if (v != 0 && top < 0) {
+                        top = yy;
+                    }
+                    bSrc[r0 + xx] = v;
+                }
+            }
+            phongTop = top < 0 ? 0 : top * 2;
+            if (hdCo != 0) {
+                if (b2 == null) {
+                    b2 = new int[BW * BH * 4];
+                    b6 = new int[BW * BH * 36];
+                }
+                scale2x(bSrc, BW, BH, b2);
+                scale3x(b2, W2, BH * 2, b6);
+                Image im = anhHd(b6, BW * 6, BH * 6);
+                if (im != null) {
+                    bHd = true;
+                    return im;
+                }
+            }
+            bHd = false;
+            for (int yy = 0; yy < BH; yy++) {
+                int r0 = yy * BW, o0 = yy * 2 * W2;
+                for (int xx = 0; xx < BW; xx++) {
+                    int v = bSrc[r0 + xx];
                     int p = o0 + xx * 2;
                     bOut[p] = v;
                     bOut[p + 1] = v;
@@ -1217,6 +1532,15 @@ public final class DauTruong {
         } catch (Throwable e) {
             return null;
         }
+    }
+
+    /** y man hinh dinh dau boss k (anh phong to x2, chan o y + 6) */
+    static int dauBoss(int k) {
+        hn b = k >= 0 && k < nB ? ir.g(bId[k]) : null;
+        if (b == null) {
+            return -1;
+        }
+        return b.ax * js.ay + 6 - BH * 2 + bTop[k];
     }
 
     // ================================================================ sung tren tay (hn.a truoc gx.a)
@@ -1305,6 +1629,20 @@ public final class DauTruong {
         if (!bat()) {
             return;
         }
+        boolean nt = net(g, true);
+        try {
+            veTren0(g);
+        } finally {
+            if (nt) {
+                net(g, false);
+            }
+        }
+    }
+
+    static void veTren0(Graphics g) {
+        if (!bat()) {
+            return;
+        }
         long t = now();
         if (imTruoc != null && sanMoi()) {
             g.drawImage(imTruoc, 0, 150, 20);
@@ -1340,8 +1678,8 @@ public final class DauTruong {
             }
             veDan(g, i, e, t);
         }
-        if (tongToi > 0 && t - tongLuc > 220) {
-            so(tongX + rnd(-12, 13), tongY - rnd(0, 8), tongToi, false, true);
+        if (tongToi > 0 && t - tongLuc > 600) {               // gop sat thuong cua minh ~0,6 giay / so (khong thanh cot so)
+            so(tongX + rnd(-14, 15), tongY - rnd(0, 6), tongToi, false, true);
             tongToi = 0;
         }
         for (int i = 0; i < NC; i++) {
@@ -1385,9 +1723,15 @@ public final class DauTruong {
             }
             if (c <= 1) {
                 g.setColor(mauO(hMau[i]));
-                g.fillRect(x, y, 2, 2);
-                g.setColor(0xFFFFFF);
-                g.fillRect(x, y, 1, 1);
+                if (coNet == 1) {                              // ban app net cao: hat tron (ve o diem anh that) thay o vuong
+                    g.fillArc(x - 1, y - 1, 3, 3, 0, 360);
+                    g.setColor(0xFFFFFF);
+                    g.fillArc(x, y, 1, 1, 0, 360);
+                } else {
+                    g.fillRect(x, y, 2, 2);
+                    g.setColor(0xFFFFFF);
+                    g.fillRect(x, y, 1, 1);
+                }
             } else {
                 sang(g, hMau[i], c - 2, x, y);
             }
@@ -1581,23 +1925,31 @@ public final class DauTruong {
         }
         if (e >= dai && !cXong[i]) {                       // ket thuc: no lon + so
             cXong[i] = true;
-            int n = 30 + lv * 6;
+            boolean toi = main.GameMidlet.i != null && cAi[i] == main.GameMidlet.i.w;
+            int n = toi ? 30 + lv * 6 : 12 + lv * 2;
             for (int k = 0; k < n; k++) {
                 hat(bx + rnd(-12, 13), tamY + rnd(-12, 13), rnd(-170, 171), rnd(-200, 41), rnd(500, 1000), k % 3 == 0 ? 4 : m, rnd(2, 5), 0);
             }
             int mauNo = gg == 0 ? 0 : gg == 1 ? 1 : gg == 2 ? 2 : 3;
-            no(bx, tamY, mauNo, 1);
-            no(bx - 18, tamY + 8, mauNo, 0);
-            no(bx + 18, tamY - 6, mauNo, 0);
+            if (toi) {
+                no(bx, tamY, mauNo, 1);
+                no(bx - 18, tamY + 8, mauNo, 0);
+                no(bx + 18, tamY - 6, mauNo, 0);
+            } else {
+                no(bx, tamY, mauNo, lv >= 7 ? 1 : 0);
+            }
             song(bx, by, 70 + lv * 7, m, 650);
-            song(bx, by, 40 + lv * 4, 4, 420);
+            if (toi) {
+                song(bx, by, 40 + lv * 4, 4, 420);
+            }
             if (lv >= 10) {
                 song(bx, by, 110, 2, 800);
             }
-            sang(g, m, 5, bx, tamY);
-            sang(g, 4, 4, bx, tamY);
-            boolean toi = main.GameMidlet.i != null && cAi[i] == main.GameMidlet.i.w;
-            so(bx, tamY - 26, cDmg[i], true, toi);
+            sang(g, m, toi ? 5 : 3, bx, tamY);
+            sang(g, 4, toi ? 4 : 2, bx, tamY);
+            if (toi) {
+                so(bx, tamY - 26, cDmg[i], true, toi);
+            }
             if (toi) {
                 rung(5 + to, 350);
             }
@@ -1642,21 +1994,37 @@ public final class DauTruong {
     }
 
     /** dan toi dich: no + so + chop boss */
+    static long noToi, noKhac;
+
     static void trungDich(int i) {
         int gg = dG[i], lv = dLv[i];
         int x = dX1[i], y = dY1[i];
         int m = SANG_SUNG[gg];
-        int n = 8 + lv * 3;
+        boolean toi = dCuaToi[i];
+        long t = now();
+        // phat cua nguoi khac (ca chuc nguoi ao ban lien tuc): it hat hon, may no hiem -> boss khong bi che kin
+        int n = toi ? 8 + lv * 3 : 3 + lv;
+        if (gg == 1) {
+            n = n / 2 + 1;                                 // laser ban nhanh gap doi: chia hat de khong thanh dam may hong
+        }
         for (int k = 0; k < n; k++) {
             hat(x, y, rnd(-90, 91) * (10 + lv) / 12, rnd(-110, 31) * (10 + lv) / 12, rnd(250, 600), k % 3 == 0 ? 4 : m, rnd(1, 3 + lv / 3), 0);
         }
         int bossY = y + 34;
         int mauNo = gg == 0 ? 0 : gg == 1 ? 1 : gg == 2 ? 2 : 3;
-        if (gg == 3 || lv >= 4 || dCrit[i] || rnd(0, 3) == 0) {
-            no(x + rnd(-4, 5), y + rnd(-4, 5), mauNo, (lv >= 8 || (gg == 3 && lv >= 5) || dCrit[i]) ? 1 : 0);
+        if (toi) {
+            if (t - noToi >= 240 && (gg == 3 || lv >= 4 || dCrit[i] || rnd(0, 3) == 0)) {
+                noToi = t;
+                no(x + rnd(-4, 5), y + rnd(-4, 5), mauNo, (dCrit[i] || (lv >= 8 && rnd(0, 2) == 0) || (gg == 3 && lv >= 5 && rnd(0, 3) == 0)) ? 1 : 0);
+            }
+        } else if (lv >= 6 && t - noKhac >= 450 && rnd(0, 3) == 0) {
+            noKhac = t;                                    // sung cap cao cua nguoi khac van no (de khoe) nhung thua
+            no(x + rnd(-4, 5), y + rnd(-4, 5), mauNo, 0);
         }
-        song(x, bossY, 26 + lv * 5, m, 320 + lv * 20);
-        if (gg == 3 || lv >= 7) {
+        if (toi || rnd(0, 3) == 0) {
+            song(x, bossY, 26 + lv * 5, m, 320 + lv * 20);
+        }
+        if (toi && (gg == 3 || lv >= 7)) {
             song(x, bossY, 16 + lv * 4, 4, 240);
         }
         if (gg == 3 && dCuaToi[i]) {
@@ -1664,15 +2032,22 @@ public final class DauTruong {
         }
         int k = viTri(dBoss[i]);
         chop(k);
+        int dau = dauBoss(k);
+        int sx = x, sy = y - 16;
+        if (dau > 0) {
+            hn bb = ir.g(dBoss[i]);
+            sx = bb != null ? bb.aw * js.ay : x;
+            sy = dau - 22;
+        }
         if (dSo[i] >= 0 && dCuaToi[i] && !dCrit[i]) {
             if (tongToi == 0) {
                 tongLuc = now();
             }
             tongToi += dSo[i];
-            tongX = x;
-            tongY = y - 14;
-        } else if (dSo[i] >= 0 && (dCuaToi[i] || dCrit[i])) {
-            so(x + rnd(-10, 11), y - 16, dSo[i], dCrit[i], dCuaToi[i]);
+            tongX = sx;
+            tongY = sy;
+        } else if (dSo[i] >= 0 && dCuaToi[i]) {
+            so(sx + rnd(-16, 17), sy - (dCrit[i] ? 6 : 0), dSo[i], dCrit[i], dCuaToi[i]);
             if (dCrit[i]) {
                 rung(4 + lv / 3, 200);
                 for (int q = 0; q < 12; q++) {
@@ -1734,8 +2109,23 @@ public final class DauTruong {
     // ================================================================ HUD (truoc return cua ae.b, toa do man hinh) - kieu ban demo
     static int pY, the0x, nutY, chX, chY, bnX, bnY, bnW, bnH;
     static final int SOFT = 26, PANEL = 86, THE_W = 54, THE_H = 44;
+    static final int DAY_SAN = 232;       // y the gioi mep duoi san dau truong (hang 8 + vong / bong chan boss)
 
     public static void veHud(Graphics g) {
+        if (!bat()) {
+            return;
+        }
+        boolean nt = net(g, true);
+        try {
+            veHud0(g);
+        } finally {
+            if (nt) {
+                net(g, false);
+            }
+        }
+    }
+
+    static void veHud0(Graphics g) {
         if (!bat()) {
             return;
         }
@@ -1776,6 +2166,13 @@ public final class DauTruong {
             g.setColor(0x0F3438);
             g.fillRect(0, pY + 2, cx - 120, PANEL);
             g.fillRect(cx + 120, pY + 2, W - cx - 120, PANEL);
+        }
+        // dai phim mem (Menu / Chon / ...) lien khoi voi bang: truoc day lo nen ban do phia sau chu -> roi mat
+        if (!ve(g, "h_day", cx - 120, pY + PANEL, 20) || W > 240) {
+            g.setColor(0x0B2629);
+            g.fillRect(0, pY + PANEL, W, SOFT + 2);
+            g.setColor(0x2B6F6E);
+            g.fillRect(0, pY + PANEL, W, 1);
         }
         the0x = cx - (THE_W * 4 + 12) / 2;
         int cy = pY + 5;
@@ -1823,7 +2220,8 @@ public final class DauTruong {
         // ---- nut chieu tron (tren bang, ben phai)
         int kx = W - 24, ky = pY - 26;
         ve(g, "h_chieu" + sung, kx, ky, 3);
-        int con = (int) (chieuCd - (t - chieuLuc));
+        long conL = chieuCd - (t - chieuLuc);              // tinh bang long: chua dung chieu lan nao -> am rat lon (truoc day ep int bi tran -> hien so rac)
+        int con = conL <= 0 ? 0 : conL > chieuCd ? chieuCd : (int) conL;
         if (con > 0) {
             g.setColor(0x140A20);
             int goc = con * 360 / Math.max(1, chieuCd);

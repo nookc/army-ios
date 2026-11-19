@@ -28,6 +28,13 @@ public final class Ui {
     /* man ve phong to (ban ban ca): ve vao anh lon roi trinh bay anh do */
     private static Image hdImg;
     private static Graphics hdG;
+    /* Avatar: man thuong ve net cao (x HD_MAN) khi khung truoc co ve anh dt3/ (dau truong): game van ve toa do logic,
+     * moi lenh ve phong to sac net theo diem anh, rieng anh net cao ve dung diem anh that -> bang sung / nut / chu ro net */
+    public static final int HD_MAN = 3;
+    private static int hdMan = 1;
+    private static int hdKhong;
+    private static Image manImg;
+    private static Graphics manG;
     /* nha phim / nha cham tra ve dung man da nhan luc bam (vd bam X thoat ban ca: lan nha khong thanh cu cham o man moi) */
     private static final Hashtable keyTarget = new Hashtable();
     private static Displayable ptrTarget;
@@ -169,16 +176,39 @@ public final class Ui {
             } else {
                 hdImg = null;
                 hdG = null;
-                if (screen == null) {
-                    screen = Display.screenGraphics();
+                if (Disp.hdSeen()) {
+                    hdKhong = 0;
+                    hdMan = HD_MAN;
+                } else if (hdMan > 1 && ++hdKhong > 6) {
+                    hdMan = 1;      // roi dau truong: ve lai nhu cu (bo anh lon)
+                    manImg = null;
+                    manG = null;
                 }
-                Display.resetGraphics(screen, Disp.width(), Disp.height());
-                try {
-                    Display.paintCanvas(d, screen);
-                } catch (Throwable e) {
-                    System.err.println("[Ui] loi paint: " + e);
+                if (hdMan > 1) {
+                    int w = Disp.width(), h = Disp.height();
+                    if (manImg == null || manImg.getWidth() != w * hdMan || manImg.getHeight() != h * hdMan) {
+                        manImg = Image.createImage(w * hdMan, h * hdMan);
+                        manG = manImg.getGraphics();
+                    }
+                    Display.resetGraphicsK(manG, w, h, hdMan);
+                    try {
+                        Display.paintCanvas(d, manG);
+                    } catch (Throwable e) {
+                        System.err.println("[Ui] loi paint: " + e);
+                    }
+                    Display.presentImage(manImg);
+                } else {
+                    if (screen == null) {
+                        screen = Display.screenGraphics();
+                    }
+                    Display.resetGraphics(screen, Disp.width(), Disp.height());
+                    try {
+                        Display.paintCanvas(d, screen);
+                    } catch (Throwable e) {
+                        System.err.println("[Ui] loi paint: " + e);
+                    }
+                    Disp.present();
                 }
-                Disp.present();
             }
         }
         synchronized (paintLock) {

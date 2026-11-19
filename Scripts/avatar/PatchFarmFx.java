@@ -64,6 +64,7 @@ public class PatchFarmFx {
                 case "ae.class": data = va(data, PatchFarmFx::dauTruongAe, can, name); break;
                 case "hn.class": data = va(data, PatchFarmFx::dauTruongHn, can, name); break;
                 case "ce.class": data = va(data, PatchFarmFx::dauTruongCe, can, name); break;
+                case "do.class": data = va(data, PatchFarmFx::camMo, can, name); break;
                 default: break;
             }
             zo.putNextEntry(new ZipEntry(name));
@@ -87,7 +88,7 @@ public class PatchFarmFx {
                 && can.getOrDefault("tocdo_caidat", 0) == 1 && can.getOrDefault("tocdo_doi", 0) == 1
                 && can.getOrDefault("dt_k", 0) >= 1 && can.getOrDefault("dt_nen", 0) == 1 && can.getOrDefault("dt_tren", 0) == 1
                 && can.getOrDefault("dt_hud", 0) >= 1 && can.getOrDefault("dt_thay", 0) == 1 && can.getOrDefault("dt_sau", 0) == 1
-                && can.getOrDefault("dt_tin", 0) == 1;
+                && can.getOrDefault("dt_tin", 0) == 1 && can.getOrDefault("cam_mo", 0) == 1 && can.getOrDefault("dt_ten", 0) == 1;
         if (!ok) {
             System.out.println("PatchFarmFx: SO CHO SUA KHONG KHOP -> dung");
             new File(a[1]).delete();
@@ -386,6 +387,12 @@ public class PatchFarmFx {
                     mn.instructions.insertBefore(n, l);
                     dem(can, "dt_sau");
                 }
+                // ten tren dau: this.a(g, x, y) -> DauTruong.veTen(this, g, x, y) (dau truong: bo ten de len ten khac)
+                if (n instanceof MethodInsnNode && n.getOpcode() == Opcodes.INVOKEVIRTUAL && ((MethodInsnNode) n).owner.equals("hn")
+                        && ((MethodInsnNode) n).name.equals("a") && ((MethodInsnNode) n).desc.equals("(" + G + "II)V")) {
+                    mn.instructions.set(n, new MethodInsnNode(Opcodes.INVOKESTATIC, "DauTruong", "veTen", "(Lhn;" + G + "II)V", false));
+                    dem(can, "dt_ten");
+                }
             }
             InsnList l = new InsnList();
             LabelNode tiep = new LabelNode();
@@ -419,6 +426,16 @@ public class PatchFarmFx {
     }
 
     /** lop Cam: x() = do.a().a, y() = do.a().b, dich(dx, dy) cong vao camera (Java khong viet duoc ten lop "do") */
+    // camera ("do"): mo truong k (gioi han cuon doc) de dau truong dat goc nhin doc co dinh (san nam tron tren bang dieu khien)
+    static void camMo(ClassNode cn, Map<String, Integer> can) {
+        for (FieldNode f : cn.fields) {
+            if (f.name.equals("k") && f.desc.equals("I") && (f.access & Opcodes.ACC_STATIC) == 0) {
+                f.access = (f.access & ~(Opcodes.ACC_PRIVATE | Opcodes.ACC_PROTECTED)) | Opcodes.ACC_PUBLIC;
+                dem(can, "cam_mo");
+            }
+        }
+    }
+
     static byte[] taoCam() {
         ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS);
         cw.visit(Opcodes.V1_1, Opcodes.ACC_PUBLIC | Opcodes.ACC_FINAL | Opcodes.ACC_SUPER, "Cam", null, "java/lang/Object", null);
@@ -449,6 +466,38 @@ public class PatchFarmFx {
             mv.visitInsn(Opcodes.IADD);
             mv.visitFieldInsn(Opcodes.PUTFIELD, "do", f, "I");
         }
+        mv.visitInsn(Opcodes.RETURN);
+        mv.visitMaxs(0, 0);
+        mv.visitEnd();
+        // datDoc(y): camera doc co dinh = y (dich d, gioi han k >= y, vi tri b)
+        mv = cw.visitMethod(Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC, "datDoc", "(I)V", null, null);
+        mv.visitCode();
+        mv.visitMethodInsn(Opcodes.INVOKESTATIC, "do", "a", "()Ldo;", false);
+        mv.visitVarInsn(Opcodes.ASTORE, 1);
+        mv.visitVarInsn(Opcodes.ALOAD, 1);
+        mv.visitVarInsn(Opcodes.ILOAD, 0);
+        mv.visitFieldInsn(Opcodes.PUTFIELD, "do", "d", "I");
+        org.objectweb.asm.Label du = new org.objectweb.asm.Label();
+        mv.visitVarInsn(Opcodes.ALOAD, 1);
+        mv.visitFieldInsn(Opcodes.GETFIELD, "do", "k", "I");
+        mv.visitVarInsn(Opcodes.ILOAD, 0);
+        mv.visitJumpInsn(Opcodes.IF_ICMPGE, du);
+        mv.visitVarInsn(Opcodes.ALOAD, 1);
+        mv.visitVarInsn(Opcodes.ILOAD, 0);
+        mv.visitFieldInsn(Opcodes.PUTFIELD, "do", "k", "I");
+        mv.visitLabel(du);
+        mv.visitVarInsn(Opcodes.ALOAD, 1);
+        mv.visitVarInsn(Opcodes.ILOAD, 0);
+        mv.visitFieldInsn(Opcodes.PUTFIELD, "do", "b", "I");
+        mv.visitInsn(Opcodes.RETURN);
+        mv.visitMaxs(0, 0);
+        mv.visitEnd();
+        // datNgang(x): dich ngang cua camera (c) - camera tu truot muot toi (do.c())
+        mv = cw.visitMethod(Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC, "datNgang", "(I)V", null, null);
+        mv.visitCode();
+        mv.visitMethodInsn(Opcodes.INVOKESTATIC, "do", "a", "()Ldo;", false);
+        mv.visitVarInsn(Opcodes.ILOAD, 0);
+        mv.visitFieldInsn(Opcodes.PUTFIELD, "do", "c", "I");
         mv.visitInsn(Opcodes.RETURN);
         mv.visitMaxs(0, 0);
         mv.visitEnd();
