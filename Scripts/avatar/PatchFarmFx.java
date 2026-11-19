@@ -31,11 +31,12 @@ public class PatchFarmFx {
                 moi.put(f.getName(), java.nio.file.Files.readAllBytes(f.toPath()));
             }
         }
-        for (String c : new String[]{"KeyTap.class", "LandFx.class", "CayRong.class", "TocDo.class"}) {
+        for (String c : new String[]{"KeyTap.class", "LandFx.class", "CayRong.class", "TocDo.class", "DauTruong.class"}) {
             if (!moi.containsKey(c)) {
                 throw new IllegalStateException("thieu " + c);
             }
         }
+        moi.put("Cam.class", taoCam());              // lop "do" (camera) trung tu khoa Java -> lop Cam goi ho
         Map<String, Integer> can = new HashMap<>();
         ZipInputStream zin = new ZipInputStream(new FileInputStream(a[0]));
         ZipOutputStream zo = new ZipOutputStream(new FileOutputStream(a[1]));
@@ -60,6 +61,9 @@ public class PatchFarmFx {
                 case "go.class": data = va(data, PatchFarmFx::luatDat, can, name); break;
                 case "kz.class": data = va(data, PatchFarmFx::lenh118, can, name); break;
                 case "b.class": data = va(data, PatchFarmFx::banPhim, can, name); break;
+                case "ae.class": data = va(data, PatchFarmFx::dauTruongAe, can, name); break;
+                case "hn.class": data = va(data, PatchFarmFx::dauTruongHn, can, name); break;
+                case "ce.class": data = va(data, PatchFarmFx::dauTruongCe, can, name); break;
                 default: break;
             }
             zo.putNextEntry(new ZipEntry(name));
@@ -80,7 +84,10 @@ public class PatchFarmFx {
                 && can.getOrDefault("odat", 0) == 1 && can.getOrDefault("dau", 0) == 2 && can.getOrDefault("logic", 0) == 3
                 && can.getOrDefault("l118", 0) == 1 && can.getOrDefault("banphim", 0) >= 1
                 && can.getOrDefault("tocdo_khung", 0) == 2 && can.getOrDefault("tocdo_ve", 0) == 1
-                && can.getOrDefault("tocdo_caidat", 0) == 1 && can.getOrDefault("tocdo_doi", 0) == 1;
+                && can.getOrDefault("tocdo_caidat", 0) == 1 && can.getOrDefault("tocdo_doi", 0) == 1
+                && can.getOrDefault("dt_k", 0) >= 1 && can.getOrDefault("dt_nen", 0) == 1 && can.getOrDefault("dt_tren", 0) == 1
+                && can.getOrDefault("dt_hud", 0) >= 1 && can.getOrDefault("dt_thay", 0) == 1 && can.getOrDefault("dt_sau", 0) == 1
+                && can.getOrDefault("dt_tin", 0) == 1;
         if (!ok) {
             System.out.println("PatchFarmFx: SO CHO SUA KHONG KHOP -> dung");
             new File(a[1]).delete();
@@ -323,5 +330,129 @@ public class PatchFarmFx {
             mn.instructions.insert(l);
             dem(can, "l118");
         }
+    }
+
+    // 8) Dau truong boss (DauTruong): ae.k() truoc moi return -> capNhat(); ae.b(Graphics): sau ir.b(g) -> veNen(g),
+    //    sau ir.d(g) -> veTren(g), truoc moi return -> veHud(g)
+    static void dauTruongAe(ClassNode cn, Map<String, Integer> can) {
+        for (MethodNode mn : cn.methods) {
+            if ((mn.access & Opcodes.ACC_STATIC) != 0) {
+                continue;
+            }
+            if (mn.name.equals("k") && mn.desc.equals("()V")) {
+                for (AbstractInsnNode n : mn.instructions.toArray()) {
+                    if (n.getOpcode() == Opcodes.RETURN) {
+                        mn.instructions.insertBefore(n, new MethodInsnNode(Opcodes.INVOKESTATIC, "DauTruong", "capNhat", "()V", false));
+                        dem(can, "dt_k");
+                    }
+                }
+            } else if (mn.name.equals("b") && mn.desc.equals("(" + G + ")V")) {
+                for (AbstractInsnNode n : mn.instructions.toArray()) {
+                    if (n instanceof MethodInsnNode && n.getOpcode() == Opcodes.INVOKEVIRTUAL && ((MethodInsnNode) n).owner.equals("ir")
+                            && ((MethodInsnNode) n).desc.equals("(" + G + ")V")) {
+                        String nm = ((MethodInsnNode) n).name;
+                        if (nm.equals("b") || nm.equals("d")) {
+                            InsnList l = new InsnList();
+                            l.add(new VarInsnNode(Opcodes.ALOAD, 1));
+                            l.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "DauTruong", nm.equals("b") ? "veNen" : "veTren", "(" + G + ")V", false));
+                            mn.instructions.insert(n, l);
+                            dem(can, nm.equals("b") ? "dt_nen" : "dt_tren");
+                        }
+                    } else if (n.getOpcode() == Opcodes.RETURN) {
+                        InsnList l = new InsnList();
+                        l.add(new VarInsnNode(Opcodes.ALOAD, 1));
+                        l.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "DauTruong", "veHud", "(" + G + ")V", false));
+                        mn.instructions.insertBefore(n, l);
+                        dem(can, "dt_hud");
+                    }
+                }
+            }
+        }
+    }
+
+    //    hn.a(Graphics)V: dau ham if (DauTruong.veThay(this, g)) return;  truoc super.a(g) (gx.a) -> DauTruong.sauNguoi(this, g)
+    static void dauTruongHn(ClassNode cn, Map<String, Integer> can) {
+        for (MethodNode mn : cn.methods) {
+            if (!mn.name.equals("a") || !mn.desc.equals("(" + G + ")V") || (mn.access & Opcodes.ACC_STATIC) != 0) {
+                continue;
+            }
+            for (AbstractInsnNode n : mn.instructions.toArray()) {
+                if (n instanceof MethodInsnNode && n.getOpcode() == Opcodes.INVOKESPECIAL && ((MethodInsnNode) n).owner.equals("gx")
+                        && ((MethodInsnNode) n).name.equals("a") && ((MethodInsnNode) n).desc.equals("(" + G + ")V")) {
+                    InsnList l = new InsnList();
+                    l.add(new VarInsnNode(Opcodes.ALOAD, 0));
+                    l.add(new VarInsnNode(Opcodes.ALOAD, 1));
+                    l.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "DauTruong", "sauNguoi", "(Lhn;" + G + ")V", false));
+                    mn.instructions.insertBefore(n, l);
+                    dem(can, "dt_sau");
+                }
+            }
+            InsnList l = new InsnList();
+            LabelNode tiep = new LabelNode();
+            l.add(new VarInsnNode(Opcodes.ALOAD, 0));
+            l.add(new VarInsnNode(Opcodes.ALOAD, 1));
+            l.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "DauTruong", "veThay", "(Lhn;" + G + ")Z", false));
+            l.add(new JumpInsnNode(Opcodes.IFEQ, tiep));
+            l.add(new InsnNode(Opcodes.RETURN));
+            l.add(tiep);
+            mn.instructions.insert(l);
+            dem(can, "dt_thay");
+        }
+    }
+
+    //    ce.a(jr)V (xu ly tin tu may chu): if (DauTruong.tin(jr)) return;   (lenh 119)
+    static void dauTruongCe(ClassNode cn, Map<String, Integer> can) {
+        for (MethodNode mn : cn.methods) {
+            if (!mn.name.equals("a") || !mn.desc.equals("(Ljr;)V") || (mn.access & Opcodes.ACC_STATIC) != 0) {
+                continue;
+            }
+            InsnList l = new InsnList();
+            LabelNode tiep = new LabelNode();
+            l.add(new VarInsnNode(Opcodes.ALOAD, 1));
+            l.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "DauTruong", "tin", "(Ljr;)Z", false));
+            l.add(new JumpInsnNode(Opcodes.IFEQ, tiep));
+            l.add(new InsnNode(Opcodes.RETURN));
+            l.add(tiep);
+            mn.instructions.insert(l);
+            dem(can, "dt_tin");
+        }
+    }
+
+    /** lop Cam: x() = do.a().a, y() = do.a().b, dich(dx, dy) cong vao camera (Java khong viet duoc ten lop "do") */
+    static byte[] taoCam() {
+        ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS);
+        cw.visit(Opcodes.V1_1, Opcodes.ACC_PUBLIC | Opcodes.ACC_FINAL | Opcodes.ACC_SUPER, "Cam", null, "java/lang/Object", null);
+        org.objectweb.asm.MethodVisitor mv = cw.visitMethod(Opcodes.ACC_PUBLIC, "<init>", "()V", null, null);
+        mv.visitCode();
+        mv.visitVarInsn(Opcodes.ALOAD, 0);
+        mv.visitMethodInsn(Opcodes.INVOKESPECIAL, "java/lang/Object", "<init>", "()V", false);
+        mv.visitInsn(Opcodes.RETURN);
+        mv.visitMaxs(0, 0);
+        mv.visitEnd();
+        for (String f : new String[]{"a", "b"}) {
+            mv = cw.visitMethod(Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC, f.equals("a") ? "x" : "y", "()I", null, null);
+            mv.visitCode();
+            mv.visitMethodInsn(Opcodes.INVOKESTATIC, "do", "a", "()Ldo;", false);
+            mv.visitFieldInsn(Opcodes.GETFIELD, "do", f, "I");
+            mv.visitInsn(Opcodes.IRETURN);
+            mv.visitMaxs(0, 0);
+            mv.visitEnd();
+        }
+        mv = cw.visitMethod(Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC, "dich", "(II)V", null, null);
+        mv.visitCode();
+        for (int k = 0; k < 2; k++) {
+            String f = k == 0 ? "a" : "b";
+            mv.visitMethodInsn(Opcodes.INVOKESTATIC, "do", "a", "()Ldo;", false);
+            mv.visitInsn(Opcodes.DUP);
+            mv.visitFieldInsn(Opcodes.GETFIELD, "do", f, "I");
+            mv.visitVarInsn(Opcodes.ILOAD, k);
+            mv.visitInsn(Opcodes.IADD);
+            mv.visitFieldInsn(Opcodes.PUTFIELD, "do", f, "I");
+        }
+        mv.visitInsn(Opcodes.RETURN);
+        mv.visitMaxs(0, 0);
+        mv.visitEnd();
+        cw.visitEnd();
+        return cw.toByteArray();
     }
 }

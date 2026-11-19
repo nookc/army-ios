@@ -32,6 +32,9 @@ public final class KeyTap {
     }
 
     public static void g(int x, int y) {
+        if (DauTruong.cham(x, y)) {
+            return;                      // cham vao bang sung / nut / boss o dau truong
+        }
         if (main.a.z != null) {
             // man doc: ban phim nam duoi (y >= chieu cao man choi); man ngang: ban phim nam ben phai
             if (main.a.G ? x >= main.a.m : y >= main.a.n) {
