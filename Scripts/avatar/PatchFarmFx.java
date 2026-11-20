@@ -31,7 +31,7 @@ public class PatchFarmFx {
                 moi.put(f.getName(), java.nio.file.Files.readAllBytes(f.toPath()));
             }
         }
-        for (String c : new String[]{"KeyTap.class", "LandFx.class", "CayRong.class", "TocDo.class", "DauTruong.class", "GiaLuong.class", "KhoO.class", "ChamVat.class"}) {
+        for (String c : new String[]{"KeyTap.class", "LandFx.class", "CayRong.class", "TocDo.class", "DauTruong.class", "GiaLuong.class", "KhoO.class", "ChamVat.class", "CuoiAn.class"}) {
             if (!moi.containsKey(c)) {
                 throw new IllegalStateException("thieu " + c);
             }
@@ -61,7 +61,7 @@ public class PatchFarmFx {
                 case "go.class": data = va(va(va(data, PatchFarmFx::luatDat, can, name), PatchFarmFx::tromCay, can, name), PatchFarmFx::nhanChon, can, name); break;
                 case "kz.class": data = va(data, PatchFarmFx::lenh118, can, name); break;
                 case "b.class": data = va(data, PatchFarmFx::banPhim, can, name); break;
-                case "ae.class": data = va(data, PatchFarmFx::dauTruongAe, can, name); break;
+                case "ae.class": data = va(va(data, PatchFarmFx::dauTruongAe, can, name), PatchFarmFx::cuoiAn, can, name); break;
                 case "hn.class": data = va(data, PatchFarmFx::dauTruongHn, can, name); break;
                 case "ce.class": data = va(data, PatchFarmFx::dauTruongCe, can, name); break;
                 case "do.class": data = va(data, PatchFarmFx::camMo, can, name); break;
@@ -98,7 +98,8 @@ public class PatchFarmFx {
                 && can.getOrDefault("hd_tat", 0) == 2 && can.getOrDefault("hd_hoi", 0) == 1
                 && can.getOrDefault("gia_luong", 0) == 1 && can.getOrDefault("phien_ban", 0) == 1
                 && can.getOrDefault("trom_cay", 0) == 1 && can.getOrDefault("o_kho", 0) == 2
-                && can.getOrDefault("cham_vat", 0) == 1 && can.getOrDefault("nhan_chon", 0) == 1;
+                && can.getOrDefault("cham_vat", 0) == 1 && can.getOrDefault("nhan_chon", 0) == 1
+                && can.getOrDefault("cuoi_cho", 0) == 1 && can.getOrDefault("cuoi_kiem", 0) == 1;
         if (!ok) {
             System.out.println("PatchFarmFx: SO CHO SUA KHONG KHOP -> dung");
             new File(a[1]).delete();
@@ -382,6 +383,30 @@ public class PatchFarmFx {
                         dem(can, "dt_hud");
                     }
                 }
+            }
+        }
+    }
+
+    // le cuoi: ae.e(II)V dau ham  if (!CuoiAn.cho(chuRe, coDau)) return;   ae.k()V dau ham  CuoiAn.kiem();
+    static void cuoiAn(ClassNode cn, Map<String, Integer> can) {
+        for (MethodNode mn : cn.methods) {
+            if ((mn.access & Opcodes.ACC_STATIC) != 0) {
+                continue;
+            }
+            if (mn.name.equals("e") && mn.desc.equals("(II)V")) {
+                InsnList l = new InsnList();
+                LabelNode tiep = new LabelNode();
+                l.add(new VarInsnNode(Opcodes.ILOAD, 1));
+                l.add(new VarInsnNode(Opcodes.ILOAD, 2));
+                l.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "CuoiAn", "cho", "(II)Z", false));
+                l.add(new JumpInsnNode(Opcodes.IFNE, tiep));
+                l.add(new InsnNode(Opcodes.RETURN));
+                l.add(tiep);
+                mn.instructions.insert(l);
+                dem(can, "cuoi_cho");
+            } else if (mn.name.equals("k") && mn.desc.equals("()V")) {
+                mn.instructions.insert(new MethodInsnNode(Opcodes.INVOKESTATIC, "CuoiAn", "kiem", "()V", false));
+                dem(can, "cuoi_kiem");
             }
         }
     }
