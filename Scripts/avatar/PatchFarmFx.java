@@ -31,7 +31,7 @@ public class PatchFarmFx {
                 moi.put(f.getName(), java.nio.file.Files.readAllBytes(f.toPath()));
             }
         }
-        for (String c : new String[]{"KeyTap.class", "LandFx.class", "CayRong.class", "TocDo.class", "DauTruong.class"}) {
+        for (String c : new String[]{"KeyTap.class", "LandFx.class", "CayRong.class", "TocDo.class", "DauTruong.class", "GiaLuong.class"}) {
             if (!moi.containsKey(c)) {
                 throw new IllegalStateException("thieu " + c);
             }
@@ -58,13 +58,17 @@ public class PatchFarmFx {
                 case "dm.class": data = va(data, PatchFarmFx::tocDoCaiDat, can, name); break;
                 case "kc.class": data = va(data, PatchFarmFx::cayRong, can, name); break;
                 case "ir.class": data = va(data, PatchFarmFx::oDat, can, name); break;
-                case "go.class": data = va(data, PatchFarmFx::luatDat, can, name); break;
+                case "go.class": data = va(va(data, PatchFarmFx::luatDat, can, name), PatchFarmFx::tromCay, can, name); break;
                 case "kz.class": data = va(data, PatchFarmFx::lenh118, can, name); break;
                 case "b.class": data = va(data, PatchFarmFx::banPhim, can, name); break;
                 case "ae.class": data = va(data, PatchFarmFx::dauTruongAe, can, name); break;
                 case "hn.class": data = va(data, PatchFarmFx::dauTruongHn, can, name); break;
                 case "ce.class": data = va(data, PatchFarmFx::dauTruongCe, can, name); break;
                 case "do.class": data = va(data, PatchFarmFx::camMo, can, name); break;
+                case "ic.class":
+                case "bb.class": data = va(data, PatchFarmFx::tatHuongDan, can, name); break;
+                case "fx.class": data = va(data, PatchFarmFx::giaLuong, can, name); break;
+                case "cx.class": data = va(data, PatchFarmFx::phienBan, can, name); break;
                 default: break;
             }
             zo.putNextEntry(new ZipEntry(name));
@@ -84,11 +88,14 @@ public class PatchFarmFx {
                 && can.getOrDefault("vecay", 0) == 1
                 && can.getOrDefault("odat", 0) == 1 && can.getOrDefault("dau", 0) == 2 && can.getOrDefault("logic", 0) == 3
                 && can.getOrDefault("l118", 0) == 1 && can.getOrDefault("banphim", 0) >= 1
-                && can.getOrDefault("tocdo_khung", 0) == 2 && can.getOrDefault("tocdo_ve", 0) == 1
+                && can.getOrDefault("tocdo_khung", 0) == 2 && can.getOrDefault("tocdo_ve", 0) == 1 && can.getOrDefault("tocdo_ngu", 0) == 2
                 && can.getOrDefault("tocdo_caidat", 0) == 1 && can.getOrDefault("tocdo_doi", 0) == 1
                 && can.getOrDefault("dt_k", 0) >= 1 && can.getOrDefault("dt_nen", 0) == 1 && can.getOrDefault("dt_tren", 0) == 1
                 && can.getOrDefault("dt_hud", 0) >= 1 && can.getOrDefault("dt_thay", 0) == 1 && can.getOrDefault("dt_sau", 0) == 1
-                && can.getOrDefault("dt_tin", 0) == 1 && can.getOrDefault("cam_mo", 0) == 1 && can.getOrDefault("dt_ten", 0) == 1;
+                && can.getOrDefault("dt_tin", 0) == 1 && can.getOrDefault("cam_mo", 0) == 1 && can.getOrDefault("dt_ten", 0) == 1
+                && can.getOrDefault("hd_tat", 0) == 2 && can.getOrDefault("hd_hoi", 0) == 1
+                && can.getOrDefault("gia_luong", 0) == 1 && can.getOrDefault("phien_ban", 0) == 1
+                && can.getOrDefault("trom_cay", 0) == 1;
         if (!ok) {
             System.out.println("PatchFarmFx: SO CHO SUA KHONG KHOP -> dung");
             new File(a[1]).delete();
@@ -162,6 +169,11 @@ public class PatchFarmFx {
                         && ((MethodInsnNode) n).name.equals("repaint") && ((MethodInsnNode) n).desc.equals("()V")) {
                     mn.instructions.set(n, new MethodInsnNode(Opcodes.INVOKESTATIC, "TocDo", "ve", "(Ljavax/microedition/lcdui/Canvas;)V", false));
                     dem(can, "tocdo_ve");
+                } else if (n instanceof MethodInsnNode && n.getOpcode() == Opcodes.INVOKESTATIC && ((MethodInsnNode) n).owner.equals("java/lang/Thread")
+                        && ((MethodInsnNode) n).name.equals("sleep") && ((MethodInsnNode) n).desc.equals("(J)V")) {
+                    // ngu giua 2 vong: x1 giu nguyen; x2..x10 ngu theo lich logic (bat kip thi khong ngu)
+                    mn.instructions.set(n, new MethodInsnNode(Opcodes.INVOKESTATIC, "TocDo", "ngu", "(J)V", false));
+                    dem(can, "tocdo_ngu");
                 }
             }
         }
@@ -422,6 +434,100 @@ public class PatchFarmFx {
             l.add(tiep);
             mn.instructions.insert(l);
             dem(can, "dt_tin");
+        }
+    }
+
+    // 9) Huong dan tan thu (lop bb) tat han: ban goc hoi "Ban co muon xem huong dan choi game khong?" nhung ca "Co" lan
+    //    "Khong" deu goi ic.f() -> main.a.I = true -> vao nong trai camera tu keo toi o dat / chuong / cay khe..., khoa phim
+    //    di chuyen trong luc hien chu; nhieu buoc tro toi NPC / khu khong co tren may chu nay nen de ket.
+    //    - moi "iconst_1; putstatic main/a.I" (ic.f, bb.h) -> iconst_0
+    //    - ic.a(II)V: "main.a.a(kf.dC, menu Co/Khong)" -> goi thang ic.f() (vao game luon, khong hoi)
+    static void tatHuongDan(ClassNode cn, Map<String, Integer> can) {
+        for (MethodNode mn : cn.methods) {
+            for (AbstractInsnNode n : mn.instructions.toArray()) {
+                if (n.getOpcode() == Opcodes.ICONST_1) {
+                    AbstractInsnNode p = sau(n);
+                    if (p instanceof FieldInsnNode && p.getOpcode() == Opcodes.PUTSTATIC && ((FieldInsnNode) p).owner.equals("main/a")
+                            && ((FieldInsnNode) p).name.equals("I") && ((FieldInsnNode) p).desc.equals("Z")) {
+                        mn.instructions.set(n, new InsnNode(Opcodes.ICONST_0));
+                        dem(can, "hd_tat");
+                    }
+                }
+            }
+            if (!cn.name.equals("ic") || !mn.name.equals("a") || !mn.desc.equals("(II)V")) {
+                continue;
+            }
+            for (AbstractInsnNode n : mn.instructions.toArray()) {
+                if (n instanceof FieldInsnNode && n.getOpcode() == Opcodes.GETSTATIC && ((FieldInsnNode) n).owner.equals("kf")
+                        && ((FieldInsnNode) n).name.equals("dC")) {
+                    AbstractInsnNode v = sau(n);
+                    AbstractInsnNode g = v == null ? null : sau(v);
+                    if (v != null && v.getOpcode() == Opcodes.ALOAD && g instanceof MethodInsnNode && g.getOpcode() == Opcodes.INVOKESTATIC
+                            && ((MethodInsnNode) g).owner.equals("main/a") && ((MethodInsnNode) g).name.equals("a")
+                            && ((MethodInsnNode) g).desc.equals("(Ljava/lang/String;Ljava/util/Vector;)V")) {
+                        mn.instructions.set(g, new MethodInsnNode(Opcodes.INVOKESTATIC, "ic", "f", "()V", false));
+                        mn.instructions.remove(v);
+                        mn.instructions.remove(n);
+                        dem(can, "hd_hoi");
+                    }
+                }
+            }
+        }
+    }
+
+    // 10) Gia luong > 32.767: fx.a([BZ) (doc danh muc do): readShort() ngay sau readInt() (gia xu) -> GiaLuong.doc(in)
+    static void giaLuong(ClassNode cn, Map<String, Integer> can) {
+        for (MethodNode mn : cn.methods) {
+            if (!mn.name.equals("a") || !mn.desc.equals("([BZ)Ljava/util/Vector;")) {
+                continue;
+            }
+            for (AbstractInsnNode n : mn.instructions.toArray()) {
+                if (n instanceof MethodInsnNode && ((MethodInsnNode) n).owner.equals("java/io/DataInputStream")
+                        && ((MethodInsnNode) n).name.equals("readInt")) {
+                    // aload in; invokevirtual readShort -> chi doi lenh goi
+                    AbstractInsnNode st = sau(n);           // istore (gia xu)
+                    AbstractInsnNode ld = st == null ? null : sau(st);
+                    AbstractInsnNode rs = ld == null ? null : sau(ld);
+                    if (rs instanceof MethodInsnNode && ((MethodInsnNode) rs).name.equals("readShort")) {
+                        mn.instructions.set(rs, new MethodInsnNode(Opcodes.INVOKESTATIC, "GiaLuong", "doc", "(Ljava/io/DataInputStream;)I", false));
+                        dem(can, "gia_luong");
+                    }
+                    break;
+                }
+            }
+        }
+    }
+
+    // 11) An trom: go.u() (thu hoach o dat chin) chi chay o trai minh ("if (w != go.b) return") -> bo dieu kien:
+    //     o trai nguoi khac app gui lenh 66 voi id chu trai, may chu tinh la an trom (o dat ben chu van con cay)
+    static void tromCay(ClassNode cn, Map<String, Integer> can) {
+        for (MethodNode mn : cn.methods) {
+            if (!mn.name.equals("u") || !mn.desc.equals("()V")) {
+                continue;
+            }
+            for (AbstractInsnNode n : mn.instructions.toArray()) {
+                if (n.getOpcode() == Opcodes.IF_ICMPEQ) {
+                    AbstractInsnNode r = sau(n);
+                    if (r != null && r.getOpcode() == Opcodes.RETURN) {
+                        mn.instructions.insertBefore(n, new InsnNode(Opcodes.POP2));
+                        ((JumpInsnNode) n).setOpcode(Opcodes.GOTO);
+                        dem(can, "trom_cay");
+                    }
+                    break;
+                }
+            }
+        }
+    }
+
+    //    cx.b() (lenh -17 thong tin may): "2.5.8" -> "2.5.8L" = app doc duoc gia luong lon
+    static void phienBan(ClassNode cn, Map<String, Integer> can) {
+        for (MethodNode mn : cn.methods) {
+            for (AbstractInsnNode n : mn.instructions.toArray()) {
+                if (n instanceof LdcInsnNode && "2.5.8".equals(((LdcInsnNode) n).cst) && mn.name.equals("b") && mn.desc.equals("()V")) {
+                    ((LdcInsnNode) n).cst = "2.5.8L";
+                    dem(can, "phien_ban");
+                }
+            }
         }
     }
 

@@ -104,8 +104,12 @@ public final class Ui {
         Disp.postEvent(Disp.EV_SERIAL, 0, 0);
     }
 
+    /* luong game vua xin ve (Canvas.repaint) tu lan serviceRepaints truoc */
+    private static volatile boolean daXinVe;
+
     public static void repaint(Displayable c) {
         if (c == cur) {
+            daXinVe = true;
             Disp.requestRepaint();
         }
     }
@@ -115,8 +119,11 @@ public final class Ui {
             // Canvas khong hien (vd vong lap thanh pho chay ngam khi dang o ban ban ca): khong gianh nhip quet cua man dang hien
             return;
         }
-        if (Thread.currentThread() != evThread) {
-            // v8h-31: vong lap game ve xong 1 khung -> ngu giua 2 khung theo nhip quet man hinh (neu nen tang co)
+        if (Thread.currentThread() != evThread && daXinVe) {
+            // v8h-31: vong lap game ve xong 1 khung -> ngu giua 2 khung theo nhip quet man hinh (neu nen tang co).
+            // Chi danh dau khi vong nay CO xin ve: Avatar toc do x2..x10 chay nhieu vong logic khong ve - truoc day moi vong
+            // deu doi 1 nhip quet (16,7 ms) -> toc do that ket o ~x3 va x7 chi con ~8 khung / giay (giat)
+            daXinVe = false;
             Disp.frameMark();
         }
         if (c != cur) {

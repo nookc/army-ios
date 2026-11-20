@@ -154,6 +154,11 @@ static void run_cmd(char *line) {
             j2n_post(J2N_POINTER_DRAG, a + (c - a) * i / 10, b + (d - b) * i / 10);
         }
         j2n_post(J2N_POINTER_RELEASE, c, d);
+    } else if (!strcmp(op, "frames")) {
+        /* do toc do ve: so khung da trinh chieu + dong ho (ms) */
+        struct timespec t;
+        clock_gettime(CLOCK_MONOTONIC, &t);
+        fprintf(stderr, "[frames] %d %lld\n", j2n_frames(), (long long)t.tv_sec * 1000LL + t.tv_nsec / 1000000L);
     } else if (!strcmp(op, "quit")) {
         exit(0);
     }

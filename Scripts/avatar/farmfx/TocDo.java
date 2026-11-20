@@ -2,15 +2,26 @@ import javax.microedition.lcdui.Canvas;
 
 /**
  * Toc do game x1..x10 (Cai dat > "Toc do game", hang thu 5 truoc day an - "Ngon ngu").
- * PatchFarmFx sua vong lap main.a.run(): khung hinh 50 ms -> TocDo.khung() (50 / x ms), this.repaint() ->
- * TocDo.ve(this) (x > 1: logic chay du moi khung, chi ve 1 trong x khung). Ket qua: di lai, hieu ung, NPC... nhanh gap x
- * lan ma may khong phai ve them. x = 1 giong het ban goc. Luu trong RMS "avatarTocDo".
+ * PatchFarmFx sua vong lap main.a.run(): khung hinh 50 ms -> TocDo.khung(), this.repaint() -> TocDo.ve(this),
+ * 2 lenh Thread.sleep cuoi vong -> TocDo.ngu(ms). x = 1 giong het ban goc. Luu trong RMS "avatarTocDo".
+ * x > 1: logic chay x vong moi 50 ms theo LICH dong ho (khong troi), con viec ve thi theo suc may:
+ *  - ve khi logic da kip dong ho, nhanh nhat ~60 khung / giay (app: khop nhip quet man hinh, moi nhip 1 khung)
+ *  - logic bi cham (ve nang) -> chay bu cac vong logic lien tiep khong ve, khong ngu; van ve it nhat 10 khung / giay
+ * Truoc day: ve 1 trong x vong (x4..x7 chi con ~20 khung / giay ma moi khung nhay 4..7 buoc -> giat).
+ * CLDC 1.0: khong co so thuc - lich tinh bang micro giay (long).
  */
 public final class TocDo {
 
     public static int x = 1;
-    private static int dem;
     private static boolean daDoc;
+    /** thoi diem (micro giay) vong logic ke tiep den han (x > 1) */
+    private static long lich;
+    /** ms lan xin ve gan nhat */
+    private static long veLuc;
+    /** 2 lan ve cach nhau it nhat (ms): ~60 khung / giay */
+    private static final long VE_NHANH = 15;
+    /** logic khong kip dong ho van ve it nhat 1 lan moi 100 ms */
+    private static final long VE_CHAM = 100;
 
     private TocDo() {
     }
@@ -18,14 +29,42 @@ public final class TocDo {
     /** thay hang so 50 (ms moi khung) trong vong lap game */
     public static long khung() {
         doc();
-        return 50 / x;
+        return x <= 1 ? 50 : 50 / x;
     }
 
-    /** thay Canvas.repaint() trong vong lap game */
+    /** thay Canvas.repaint() trong vong lap game (sau phan logic cua vong) */
     public static void ve(Canvas c) {
-        if (x <= 1 || ++dem >= x) {
-            dem = 0;
+        if (x <= 1) {
             c.repaint();
+            return;
+        }
+        long bay = System.currentTimeMillis();
+        long nay = bay * 1000L;
+        if (lich <= 0 || nay - lich > 250000L || lich - nay > 250000L) {
+            lich = nay;                       // vua doi toc do / app ra nen / may treo lau: tinh lai lich tu bay gio
+        }
+        lich += 50000L / x;                   // vong logic vua chay xong -> han vong ke tiep
+        long cach = bay - veLuc;
+        if (cach < 0) {
+            cach = VE_CHAM;                   // dong ho bi chinh lui
+        }
+        if ((lich >= nay && cach >= VE_NHANH) || cach >= VE_CHAM) {
+            veLuc = bay;
+            c.repaint();
+        }
+    }
+
+    /** thay Thread.sleep(ms) cuoi vong lap game */
+    public static void ngu(long ms) throws InterruptedException {
+        if (x <= 1) {
+            Thread.sleep(ms);
+            return;
+        }
+        long con = (lich - System.currentTimeMillis() * 1000L) / 1000L;
+        if (con >= 1) {
+            Thread.sleep(con > 50 ? 50 : con);
+        } else {
+            Thread.yield();                   // logic dang cham hon dong ho: chay bu vong ke tiep ngay
         }
     }
 
@@ -53,7 +92,7 @@ public final class TocDo {
         if (x > 10) {
             x = 1;
         }
-        dem = 0;
+        lich = 0;
         if (d.b != null && d.b.length > 4) {
             d.b[4] = 0;
         }
