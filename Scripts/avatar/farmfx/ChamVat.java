@@ -11,7 +11,9 @@ public final class ChamVat {
 
     public static boolean cham() {
         try {
-            if (!(main.a.r instanceof go) || go.y || go.b != main.GameMidlet.i.w || go.i == null) {
+            // chi o nong trai cua minh (ban do 24 / 53); man khu nong trai (25) cung la go nhung con vat khong ve o do
+            if (!(main.a.r instanceof go) || (ir.a != 24 && ir.a != 53) || go.y || go.b != main.GameMidlet.i.w
+                    || go.i == null || ir.m == null) {
                 return false;
             }
             int x = ir.u.a, y = ir.u.b;
@@ -24,6 +26,9 @@ public final class ChamVat {
                     continue;
                 }
                 ai a = (ai) o;
+                if (!dangVe(a)) {
+                    continue;                                                 // chi con dang hien tren ban do
+                }
                 boolean ca = a instanceof ip;                                 // ca / rua trong ao
                 int cao = a.aA > 0 ? a.aA : 16 * s;                           // aA = chieu cao khung hinh (diem man hinh)
                 int cx = a.aw * s;
@@ -44,5 +49,15 @@ public final class ChamVat {
         } catch (Throwable t) {
             return false;
         }
+    }
+
+    private static boolean dangVe(Object a) {
+        java.util.Vector v = ir.m;
+        for (int k = v.size() - 1; k >= 0; k--) {
+            if (v.elementAt(k) == a) {
+                return true;
+            }
+        }
+        return false;
     }
 }
