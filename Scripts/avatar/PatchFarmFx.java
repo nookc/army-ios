@@ -935,7 +935,7 @@ public class PatchFarmFx {
             for (AbstractInsnNode n : mn.instructions.toArray()) {
                 if (n instanceof LdcInsnNode && "2.5.8".equals(((LdcInsnNode) n).cst) && mn.name.equals("b") && mn.desc.equals("()V")) {
                     // "L" cuoi: doc duoc gia luong lon; ".19": ban giao lan 19 (may chu: Session.banApp - luoi xem do co trang phuc)
-                    ((LdcInsnNode) n).cst = "2.5.8.19L";
+                    ((LdcInsnNode) n).cst = "2.5.8.20L";
                     dem(can, "phien_ban");
                 }
             }

@@ -2,6 +2,7 @@
  *   army2n <jar> <lop MIDlet> <rong> <cao> <tep lenh> <thu muc ra>
  * Lenh: key N | down N | up N | type:abc | sleep MS | shot TEN | tap X Y | drag X1 Y1 X2 Y2 |
  *       text:chuoi (OK hop nhap chu) | textcancel | quit
+ *       rec TEP.mp4 RONG CAO FPS (quay video bang ffmpeg, dung thoi gian that) | recstop
  * Tep lenh ket thuc ".live": doc tiep dong moi ghi them.
  */
 #include <errno.h>
@@ -19,7 +20,82 @@ static char g_jar[1024], g_out[1024], g_data[1100];
 static int W, H;
 static volatile int textbox_open;
 
-void plat_present(const uint32_t *fb, int w, int h) { (void)fb; (void)w; (void)h; }
+/* quay video (lenh rec): moi khung trinh chieu -> ffmpeg; nhan / bo khung de video dung nhip thoi gian that */
+static pthread_mutex_t rec_mu = PTHREAD_MUTEX_INITIALIZER;
+static FILE *rec_pipe;
+static int rec_w, rec_h, rec_fps;
+static long long rec_t0, rec_n;
+static uint32_t *rec_buf;
+
+static long long now_ms(void) {
+    struct timespec t;
+    clock_gettime(CLOCK_MONOTONIC, &t);
+    return (long long)t.tv_sec * 1000LL + t.tv_nsec / 1000000L;
+}
+
+void plat_present(const uint32_t *fb, int w, int h) {
+    /* J2N_FPS=1: in so khung / giay + khoang cach lon nhat giua 2 khung (do do muot) */
+    static int fps_on = -1, fps_n;
+    static long long fps_t0, fps_last, fps_gap;
+    if (fps_on < 0) fps_on = getenv("J2N_FPS") != NULL;
+    if (fps_on) {
+        long long t = now_ms();
+        if (fps_t0 == 0) fps_t0 = fps_last = t;
+        if (t - fps_last > fps_gap) fps_gap = t - fps_last;
+        fps_last = t;
+        fps_n++;
+        if (t - fps_t0 >= 1000) {
+            fprintf(stderr, "[fps] %d khung/giay, khoang ho lon nhat %lld ms\n", fps_n, fps_gap);
+            fps_n = 0; fps_gap = 0; fps_t0 = t;
+        }
+    }
+    pthread_mutex_lock(&rec_mu);
+    if (rec_pipe && fb && w > 0 && h > 0) {
+        /* khac co: phong / thu nho gan nhat ve co video */
+        for (int y = 0; y < rec_h; y++) {
+            const uint32_t *src = fb + (size_t)(y * h / rec_h) * w;
+            uint32_t *dst = rec_buf + (size_t)y * rec_w;
+            for (int x = 0; x < rec_w; x++) dst[x] = src[x * w / rec_w] | 0xFF000000u;
+        }
+        long long can = (now_ms() - rec_t0) * rec_fps / 1000 + 1;
+        while (rec_n < can) {
+            fwrite(rec_buf, 4, (size_t)rec_w * rec_h, rec_pipe);
+            rec_n++;
+        }
+    }
+    pthread_mutex_unlock(&rec_mu);
+}
+
+static void rec_start(const char *file, int w, int h, int fps) {
+    pthread_mutex_lock(&rec_mu);
+    if (!rec_pipe && w > 0 && h > 0) {
+        char cmd[1600];
+        snprintf(cmd, sizeof cmd,
+                 "ffmpeg -loglevel error -y -f rawvideo -pix_fmt bgra -s %dx%d -r %d -i - -c:v libx264 -preset veryfast "
+                 "-crf 20 -pix_fmt yuv420p -movflags +faststart '%s'", w, h, fps, file);
+        rec_buf = (uint32_t *)malloc((size_t)w * h * 4);
+        rec_pipe = rec_buf ? popen(cmd, "w") : 0;
+        rec_w = w;
+        rec_h = h;
+        rec_fps = fps > 0 ? fps : 30;
+        rec_t0 = now_ms();
+        rec_n = 0;
+        fprintf(stderr, "[harness] rec %s %dx%d %d khung/giay\n", file, w, h, rec_fps);
+    }
+    pthread_mutex_unlock(&rec_mu);
+}
+
+static void rec_stop(void) {
+    pthread_mutex_lock(&rec_mu);
+    if (rec_pipe) {
+        pclose(rec_pipe);
+        rec_pipe = 0;
+        free(rec_buf);
+        rec_buf = 0;
+        fprintf(stderr, "[harness] recstop %lld khung\n", rec_n);
+    }
+    pthread_mutex_unlock(&rec_mu);
+}
 
 void plat_show_textbox(const char *title, const char *text, int max, int cons) {
     fprintf(stderr, "[harness] TextBox '%s' text='%s' max=%d cons=0x%x\n", title, text, max, cons);
@@ -129,6 +205,18 @@ static void run_cmd(char *line) {
     if (sscanf(line, "shot %255s", name) == 1) {
         shot(name);
         return;
+    }
+    {
+        char f[512];
+        int rw = 0, rh = 0, rf = 30;
+        if (sscanf(line, "rec %511s %d %d %d", f, &rw, &rh, &rf) >= 3) {
+            rec_start(f, rw, rh, rf);
+            return;
+        }
+        if (strcmp(line, "recstop") == 0) {
+            rec_stop();
+            return;
+        }
     }
     int k = sscanf(line, "%31s %d %d %d %d", op, &a, &b, &c, &d);
     if (k < 1) return;
