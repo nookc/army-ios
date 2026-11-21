@@ -1,0 +1,15 @@
+Tasks: 1 total,   0 running,   1 sleeping,   0 stopped,   0 zombie
+  Mem:  2028600K total,  1848272K used,   180328K free,  16928768 buffers
+ Swap:  1521444K total,   2097152 used,  1519396K free,  1043648K cached
+200%cpu   0%user   0%nice  40%sys 140%idle   0%iow   4%irq   0%sirq  16%host
+   PID USER         PR  NI VIRT  RES  SHR S[%CPU] %MEM     TIME+ ARGS
+  2433 u0_a130      10 -10  13G 136M  86M S 24.0   6.8   0:05.82 vn.avatar.diemky
+
+
+
+Tasks: 1 total,   0 running,   1 sleeping,   0 stopped,   0 zombie
+  Mem:  2028600K total,  1848244K used,   180356K free,  17149952 buffers
+ Swap:  1521444K total,   2097152 used,  1519396K free,  1043696K cached
+200%cpu   5%user   0%nice  36%sys 131%idle   0%iow   2%irq   0%sirq  27%host
+   PID USER         PR  NI VIRT  RES  SHR S[%CPU] %MEM     TIME+ ARGS
+  2433 u0_a130      10 -10  13G 136M  86M S 26.0   6.8   0:05.88 vn.avatar.diemky

@@ -1,0 +1,15 @@
+21/11 09:32:28 [app] khoi dong Avatar 2.5.8 (30), iOS 26.2, ban thuan (ma may)
+21/11 09:32:29 [app] vao game: man 241x466 (vung an toan 402x778 diem)
+21/11 09:32:29 [gc] khoi dong: 471 thu vien da nap, GC xet 1021 vung du lieu (giu 3 cua app, bo 1018 cua he thong)
+21/11 09:32:29 [Boot] khoi dong main.GameMidlet
+21/11 09:32:31 index: 25
+21/11 09:32:31 saveLogin
+21/11 09:32:32 [Boot] giai nen san anh lon: 0 ms
+21/11 09:32:41 clickNewGame: false    1
+21/11 09:32:49 clickNewGame: false    0
+21/11 09:32:53 setProviderAndClientType: frp2qrxacmig_,nld1com.noig_,trfrp1qr3555d164824d87-2t250ig_,fvfrp1qr211233r8ddd242srg-1t252ig_,trfrp1qr3555d164824d870t250ig_,fvfrp1qr211233r8ddd242srg1t252ig_,trfrp1qr3555d164824d872t250ig_,xs2frp1qr11233r3yr78391863t251ig_,trfrp1qr3555d164824d874t250ig_,fvfrp1qr211233r8ddd242srg5t252ig_,trfrp1qr3555d164824d876t250ig_,fvfrp1qr211233r8ddd242srg7t252    nld1    2nld1
+21/11 09:32:53 login: true    0
+21/11 09:32:53 loginaaaaaaaaaaaaaa: test1    123456
+21/11 09:32:53 [mang] 127.0.0.1:14444 -> may chu
+21/11 09:32:58 [gc] sau tu kiem thu: 724 thu vien da nap, GC xet 1620 vung du lieu (giu 3 cua app, bo 1617 cua he thong)
+21/11 09:33:03 onDisconnected

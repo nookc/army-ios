@@ -1,0 +1,21 @@
+--------- beginning of main
+--------- beginning of system
+--------- beginning of kernel
+11-21 09:28:37.411  2433  2433 I Avatar  : [app] activity tao (game chua chay)
+11-21 09:28:37.447  2433  2433 I Avatar  : [app] khoi dong main.GameMidlet (Android), man 270x570, jar 34773091 byte
+11-21 09:28:37.447  2433  2433 I Avatar  : [app] vao game: man 270x570
+11-21 09:28:37.449  2433  2459 I Avatar  : [app] luong game bat dau
+11-21 09:28:37.453  2433  2433 I Avatar  : [bocuc] canvas 0 0 1080 2280 aa 1026 1002 game 270 570
+11-21 09:28:37.455  2433  2459 I Avatar  : [Boot] khoi dong main.GameMidlet
+11-21 09:28:40.288  2433  2461 I Avatar  : index: 25
+11-21 09:28:40.296  2433  2461 I Avatar  : saveLogin
+11-21 09:28:40.527  2433  2462 I Avatar  : [Boot] giai nen san anh lon: 0 ms
+11-21 09:29:03.127  2433  2461 I Avatar  : clickNewGame: false    1
+11-21 09:29:15.127  2433  2461 I Avatar  : clickNewGame: false    0
+11-21 09:29:20.594  2433  2461 I Avatar  : setProviderAndClientType: frp2qrxacmig_,nld1com.noig_,trfrp1qr3555d328824d87-4t250ig_,xs4frp1qr11233r3yr7839372-3t251ig_,trfrp1qr3555d328824d87-2t250ig_,fvfrp1qr411233r8ddd484srg-1t252ig_,trfrp1qr3555d328824d870t250ig_,fvfrp1qr411233r8ddd484srg1t252ig_,trfrp1qr3555d328824d872t250ig_,xs4frp1qr11233r3yr78393723t251ig_,trfrp1qr3555d328824d874t250ig_,fvfrp1qr411233r8ddd484srg5t252    nld1    4nld1
+11-21 09:29:20.594  2433  2461 I Avatar  : login: true    0
+11-21 09:29:20.594  2433  2461 I Avatar  : loginaaaaaaaaaaaaaa: test1    123456
+11-21 09:29:20.594  2433  2616 I Avatar  : [mang] 127.0.0.1:14444 -> may chu
+11-21 09:29:28.273  2433  2433 I Avatar  : [bocuc] canvas 216 0 864 1368 aa 1026 1002 game 270 570
+11-21 09:29:30.606  2433  2619 I Avatar  : onDisconnected
+11-21 09:29:31.298  2433  2433 I Avatar  : [bocuc] canvas 0 0 1080 2280 aa 1026 1002 game 270 570

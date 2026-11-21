@@ -1,0 +1,261 @@
+chon: iPhone 17
+simulator C968A77F-9372-445C-A35F-236E6036AD78
+Monitoring boot status for iPhone 17 (C968A77F-9372-445C-A35F-236E6036AD78).
+[2026-11-21 09:28:45 +0000] Status=2, isTerminal=NO, Elapsed=00:40.
+	Waiting on Data Migration
+		Reason:Running plugin com.apple.-0LaunchServicesMigrator (00LaunchServicesMigrator.migrator, user-agnostic)
+		Migration Elapsed:00:33 seconds
+
+[2026-11-21 09:28:46 +0000] Status=2, isTerminal=NO, Elapsed=00:41.
+	Waiting on Data Migration
+		Reason:Running plugin com.apple.-0LaunchServicesMigrator (00LaunchServicesMigrator.migrator, user-agnostic)
+		Migration Elapsed:00:34 seconds
+
+[2026-11-21 09:28:47 +0000] Status=2, isTerminal=NO, Elapsed=00:42.
+	Waiting on Data Migration
+		Reason:Running plugin com.apple.-0LaunchServicesMigrator (00LaunchServicesMigrator.migrator, user-agnostic)
+		Migration Elapsed:00:35 seconds
+
+[2026-11-21 09:28:48 +0000] Status=2, isTerminal=NO, Elapsed=00:43.
+	Waiting on Data Migration
+		Reason:Running plugin com.apple.-0LaunchServicesMigrator (00LaunchServicesMigrator.migrator, user-agnostic)
+		Migration Elapsed:00:36 seconds
+
+[2026-11-21 09:28:49 +0000] Status=2, isTerminal=NO, Elapsed=00:44.
+	Waiting on Data Migration
+		Reason:Running plugin com.apple.-0LaunchServicesMigrator (00LaunchServicesMigrator.migrator, user-agnostic)
+		Migration Elapsed:00:37 seconds
+
+[2026-11-21 09:28:50 +0000] Status=2, isTerminal=NO, Elapsed=00:45.
+	Waiting on Data Migration
+		Reason:Running plugin com.apple.-0LaunchServicesMigrator (00LaunchServicesMigrator.migrator, user-agnostic)
+		Migration Elapsed:00:38 seconds
+
+[2026-11-21 09:28:51 +0000] Status=2, isTerminal=NO, Elapsed=00:46.
+	Waiting on Data Migration
+		Reason:Running plugin com.apple.-0LaunchServicesMigrator (00LaunchServicesMigrator.migrator, user-agnostic)
+		Migration Elapsed:00:39 seconds
+
+[2026-11-21 09:28:52 +0000] Status=2, isTerminal=NO, Elapsed=00:47.
+	Waiting on Data Migration
+		Reason:Running plugin com.apple.-0LaunchServicesMigrator (00LaunchServicesMigrator.migrator, user-agnostic)
+		Migration Elapsed:00:40 seconds
+
+[2026-11-21 09:28:53 +0000] Status=2, isTerminal=NO, Elapsed=00:47.
+	Waiting on Data Migration
+		Reason:Running plugin com.apple.-0LaunchServicesMigrator (00LaunchServicesMigrator.migrator, user-agnostic)
+		Migration Elapsed:00:41 seconds
+
+[2026-11-21 09:28:54 +0000] Status=2, isTerminal=NO, Elapsed=00:49.
+	Waiting on Data Migration
+		Reason:Running plugin com.apple.-0LaunchServicesMigrator (00LaunchServicesMigrator.migrator, user-agnostic)
+		Migration Elapsed:00:42 seconds
+
+[2026-11-21 09:28:55 +0000] Status=2, isTerminal=NO, Elapsed=00:50.
+	Waiting on Data Migration
+		Reason:Running plugin com.apple.-0LaunchServicesMigrator (00LaunchServicesMigrator.migrator, user-agnostic)
+		Migration Elapsed:00:43 seconds
+
+[2026-11-21 09:28:56 +0000] Status=2, isTerminal=NO, Elapsed=00:51.
+	Waiting on Data Migration
+		Reason:Running plugin com.apple.-0LaunchServicesMigrator (00LaunchServicesMigrator.migrator, user-agnostic)
+		Migration Elapsed:00:44 seconds
+
+[2026-11-21 09:28:57 +0000] Status=2, isTerminal=NO, Elapsed=00:51.
+	Waiting on Data Migration
+		Reason:Running plugin com.apple.-0LaunchServicesMigrator (00LaunchServicesMigrator.migrator, user-agnostic)
+		Migration Elapsed:00:45 seconds
+
+[2026-11-21 09:28:58 +0000] Status=2, isTerminal=NO, Elapsed=00:53.
+	Waiting on Data Migration
+		Reason:Running plugin com.apple.-0LaunchServicesMigrator (00LaunchServicesMigrator.migrator, user-agnostic)
+		Migration Elapsed:00:46 seconds
+
+[2026-11-21 09:28:59 +0000] Status=2, isTerminal=NO, Elapsed=00:54.
+	Waiting on Data Migration
+		Reason:Running plugin com.apple.-0LaunchServicesMigrator (00LaunchServicesMigrator.migrator, user-agnostic)
+		Migration Elapsed:00:47 seconds
+
+[2026-11-21 09:29:00 +0000] Status=2, isTerminal=NO, Elapsed=00:55.
+	Waiting on Data Migration
+		Reason:Running plugin com.apple.-0LaunchServicesMigrator (00LaunchServicesMigrator.migrator, user-agnostic)
+		Migration Elapsed:00:48 seconds
+
+[2026-11-21 09:29:01 +0000] Status=2, isTerminal=NO, Elapsed=00:55.
+	Waiting on Data Migration
+		Reason:Running plugin com.apple.-0LaunchServicesMigrator (00LaunchServicesMigrator.migrator, user-agnostic)
+		Migration Elapsed:00:49 seconds
+
+[2026-11-21 09:29:02 +0000] Status=2, isTerminal=NO, Elapsed=00:57.
+	Waiting on Data Migration
+		Reason:Running plugin com.apple.-0LaunchServicesMigrator (00LaunchServicesMigrator.migrator, user-agnostic)
+		Migration Elapsed:00:50 seconds
+
+[2026-11-21 09:29:03 +0000] Status=2, isTerminal=NO, Elapsed=00:57.
+	Waiting on Data Migration
+		Reason:Running plugin com.apple.-0LaunchServicesMigrator (00LaunchServicesMigrator.migrator, user-agnostic)
+		Migration Elapsed:00:51 seconds
+
+[2026-11-21 09:29:04 +0000] Status=2, isTerminal=NO, Elapsed=00:58.
+	Waiting on Data Migration
+		Reason:Running plugin com.apple.-0LaunchServicesMigrator (00LaunchServicesMigrator.migrator, user-agnostic)
+		Migration Elapsed:00:52 seconds
+
+[2026-11-21 09:29:05 +0000] Status=2, isTerminal=NO, Elapsed=00:59.
+	Waiting on Data Migration
+		Reason:Running plugin com.apple.-0LaunchServicesMigrator (00LaunchServicesMigrator.migrator, user-agnostic)
+		Migration Elapsed:00:53 seconds
+
+[2026-11-21 09:29:06 +0000] Status=2, isTerminal=NO, Elapsed=01:00.
+	Waiting on Data Migration
+		Reason:Running plugin com.apple.-0LaunchServicesMigrator (00LaunchServicesMigrator.migrator, user-agnostic)
+		Migration Elapsed:00:54 seconds
+
+[2026-11-21 09:29:07 +0000] Status=2, isTerminal=NO, Elapsed=01:02.
+	Waiting on Data Migration
+		Reason:Running plugin com.apple.-0LaunchServicesMigrator (00LaunchServicesMigrator.migrator, user-agnostic)
+		Migration Elapsed:00:55 seconds
+
+[2026-11-21 09:29:08 +0000] Status=2, isTerminal=NO, Elapsed=01:02.
+	Waiting on Data Migration
+		Reason:Running plugin com.apple.-0LaunchServicesMigrator (00LaunchServicesMigrator.migrator, user-agnostic)
+		Migration Elapsed:00:56 seconds
+
+[2026-11-21 09:29:09 +0000] Status=2, isTerminal=NO, Elapsed=01:03.
+	Waiting on Data Migration
+		Reason:Running plugin com.apple.-0LaunchServicesMigrator (00LaunchServicesMigrator.migrator, user-agnostic)
+		Migration Elapsed:00:57 seconds
+
+[2026-11-21 09:29:10 +0000] Status=2, isTerminal=NO, Elapsed=01:05.
+	Waiting on Data Migration
+		Reason:Running plugin com.apple.-0LaunchServicesMigrator (00LaunchServicesMigrator.migrator, user-agnostic)
+		Migration Elapsed:00:58 seconds
+
+[2026-11-21 09:29:16 +0000] Status=2, isTerminal=NO, Elapsed=01:11.
+	Waiting on Data Migration
+		Reason:Running plugin com.apple.securityd.KeychainMigrator (KeychainMigrator.migrator, user-agnostic)
+		Migration Elapsed:01:00 seconds
+
+[2026-11-21 09:29:18 +0000] Status=2, isTerminal=NO, Elapsed=01:13.
+	Waiting on Data Migration
+		Reason:Running plugin com.apple.managedconfiguration.migrator (MCProfile.migrator, user-agnostic)
+		Migration Elapsed:01:05 seconds
+
+[2026-11-21 09:29:19 +0000] Status=2, isTerminal=NO, Elapsed=01:14.
+	Waiting on Data Migration
+		Reason:Running plugin com.apple.managedconfiguration.migrator (MCProfile.migrator, user-agnostic)
+		Migration Elapsed:01:06 seconds
+
+[2026-11-21 09:29:19 +0000] Status=2, isTerminal=NO, Elapsed=01:14.
+	Waiting on Data Migration
+		Reason:Running plugin com.apple.managedconfiguration.migrator (MCProfile.migrator, user-agnostic)
+		Migration Elapsed:01:07 seconds
+
+[2026-11-21 09:29:20 +0000] Status=2, isTerminal=NO, Elapsed=01:15.
+	Waiting on Data Migration
+		Reason:Running plugin com.apple.managedconfiguration.migrator (MCProfile.migrator, user-agnostic)
+		Migration Elapsed:01:08 seconds
+
+[2026-11-21 09:29:23 +0000] Status=2, isTerminal=NO, Elapsed=01:17.
+	Waiting on Data Migration
+		Reason:Running plugin com.apple.managedconfiguration.migrator (MCProfile.migrator, user-agnostic)
+		Migration Elapsed:01:09 seconds
+
+[2026-11-21 09:29:24 +0000] Status=2, isTerminal=NO, Elapsed=01:19.
+	Waiting on Data Migration
+		Reason:Running plugin com.apple.managedconfiguration.migrator (MCProfile.migrator, user-agnostic)
+		Migration Elapsed:01:11 seconds
+
+[2026-11-21 09:29:27 +0000] Status=2, isTerminal=NO, Elapsed=01:22.
+	Waiting on Data Migration
+		Reason:Running plugin com.apple.addressbook.migrator (AddressBookLegacy.migrator)
+		Migration Elapsed:01:13 seconds
+
+[2026-11-21 09:29:30 +0000] Status=2, isTerminal=NO, Elapsed=01:25.
+	Waiting on Data Migration
+		Reason:Running plugin com.apple.PreferencesMigrator (PreferencesMigrator.migrator)
+		Migration Elapsed:01:15 seconds
+
+[2026-11-21 09:29:33 +0000] Status=4, isTerminal=NO, Elapsed=01:28.
+	Waiting on System App
+
+[2026-11-21 09:29:33 +0000] Status=4, isTerminal=NO, Elapsed=01:28.
+	Waiting on System App
+
+[2026-11-21 09:29:34 +0000] Status=4, isTerminal=NO, Elapsed=01:29.
+	Waiting on System App
+
+[2026-11-21 09:29:35 +0000] Status=4, isTerminal=NO, Elapsed=01:30.
+	Waiting on System App
+
+[2026-11-21 09:29:36 +0000] Status=4, isTerminal=NO, Elapsed=01:31.
+	Waiting on System App
+
+[2026-11-21 09:29:40 +0000] Status=4, isTerminal=NO, Elapsed=01:34.
+	Waiting on System App
+
+[2026-11-21 09:29:45 +0000] Status=4, isTerminal=NO, Elapsed=01:40.
+	Waiting on System App
+
+[2026-11-21 09:29:51 +0000] Status=4294967295, isTerminal=YES, Elapsed=01:46.
+	Finished
+
+app khoi dong sau 23 giay
+Detected file type 'PNG' from extension
+Wrote screenshot to: /Users/runner/work/army-ios/army-ios/native/build/avatar-ios/test/man_hinh_simulator.png
+total 1080
+drwxr-xr-x  17 runner  staff     544 Nov 21 09:33 .
+drwxr-xr-x   7 runner  staff     224 Nov 21 09:28 ..
+-rw-r--r--@  1 runner  staff      43 Nov 21 09:33 autotest.txt
+-rw-r--r--   1 runner  staff    2389 Nov 21 09:33 console.log
+-rw-r--r--   1 runner  staff       0 Nov 21 09:33 crash_app.txt
+-rw-r--r--   1 runner  staff    1186 Nov 21 09:33 log_app.txt
+-rw-r--r--@  1 runner  staff   94161 Nov 21 09:33 man_hinh_simulator.png
+-rw-r--r--   1 runner  staff     551 Nov 21 09:28 may_chu_gia.py
+-rw-r--r--   1 runner  staff      47 Nov 21 09:32 may_chu_gia.txt
+-rw-r--r--   1 runner  staff   15703 Nov 21 09:33 t1_mo_dau.png
+-rw-r--r--   1 runner  staff   16514 Nov 21 09:33 t2_o_dang_nhap.png
+-rw-r--r--   1 runner  staff  326511 Nov 21 09:33 t3_ban_phim.png
+-rw-r--r--   1 runner  staff   16600 Nov 21 09:33 t4_da_go.png
+-rw-r--r--   1 runner  staff   16202 Nov 21 09:33 t5_choi_tiep.png
+-rw-r--r--   1 runner  staff   13922 Nov 21 09:33 t6_thanh_pho.png
+-rw-r--r--   1 runner  staff   12542 Nov 21 09:33 t7_ket_noi.png
+-rw-r--r--   1 runner  staff      13 Nov 21 09:33 trang_thai_app.txt
+native/tools/avatar_sim_test.sh: line 97:  3709 Terminated: 15          python3 "$OUT/may_chu_gia.py" "$OUT/may_chu_gia.txt"
+app con chay
+man 241x466
+fps man mo dau 20.0
+ram 184 MB
+== may chu gia:
+ket noi tu 127.0.0.1:50337 nhan 3 byte: e50000
+21/11 09:32:28 [app] khoi dong Avatar 2.5.8 (30), iOS 26.2, ban thuan (ma may)
+21/11 09:32:29 [app] vao game: man 241x466 (vung an toan 402x778 diem)
+21/11 09:32:53 [mang] 127.0.0.1:14444 -> may chu
+2026-11-21 09:32:28.843 Avatar[6636:27112] [app] khoi dong Avatar 2.5.8 (30), iOS 26.2, ban thuan (ma may)
+2026-11-21 09:32:29.225 Avatar[6636:27112] [app] vao game: man 241x466 (vung an toan 402x778 diem)
+2026-11-21 09:32:29.243 Avatar[6636:27112] [gc] khoi dong: 471 thu vien da nap, GC xet 1021 vung du lieu (giu 3 cua app, bo 1018 cua he thong)
+2026-11-21 09:32:29.247 Avatar[6636:27185] [Boot] khoi dong main.GameMidlet
+2026-11-21 09:32:31.854 Avatar[6636:27188] index: 25
+2026-11-21 09:32:31.855 Avatar[6636:27188] saveLogin
+2026-11-21 09:32:32.393 Avatar[6636:27189] [Boot] giai nen san anh lon: 0 ms
+2026-11-21 09:32:36.764 Avatar[6636:27123] [autotest] t1_mo_dau 241x466 khung 152
+2026-11-21 09:32:41.904 Avatar[6636:27188] clickNewGame: false    1
+2026-11-21 09:32:43.383 Avatar[6636:27123] [autotest] t2_o_dang_nhap 241x466 khung 284
+2026-11-21 09:32:45.812 Avatar[6636:27112] [autotest] t3_ban_phim (cua so)
+2026-11-21 09:32:47.452 Avatar[6636:27123] [autotest] t4_da_go 241x466 khung 358
+2026-11-21 09:32:49.943 Avatar[6636:27123] [autotest] t5_choi_tiep 241x466 khung 408
+2026-11-21 09:32:49.956 Avatar[6636:27188] clickNewGame: false    0
+2026-11-21 09:32:53.181 Avatar[6636:27123] [autotest] t6_thanh_pho 241x466 khung 473
+2026-11-21 09:32:53.209 Avatar[6636:27188] setProviderAndClientType: frp2qrxacmig_,nld1com.noig_,trfrp1qr3555d164824d87-2t250ig_,fvfrp1qr211233r8ddd242srg-1t252ig_,trfrp1qr3555d164824d870t250ig_,fvfrp1qr211233r8ddd242srg1t252ig_,trfrp1qr3555d164824d872t250ig_,xs2frp1qr11233r3yr78391863t251ig_,trfrp1qr3555d164824d874t250ig_,fvfrp1qr211233r8ddd242srg5t252ig_,trfrp1qr3555d164824d876t250ig_,fvfrp1qr211233r8ddd242srg7t252    nld1    2nld1
+2026-11-21 09:32:53.210 Avatar[6636:27188] login: true    0
+2026-11-21 09:32:53.210 Avatar[6636:27188] loginaaaaaaaaaaaaaa: test1    123456
+2026-11-21 09:32:53.216 Avatar[6636:29706] [mang] 127.0.0.1:14444 -> may chu
+2026-11-21 09:32:58.303 Avatar[6636:27123] [autotest] t7_ket_noi 241x466 khung 576
+2026-11-21 09:32:58.304 Avatar[6636:27123] [autotest] man 241x466
+fps man mo dau 20.0
+ram 184 MB
+2026-11-21 09:32:58.304 Avatar[6636:27123] [gc] sau tu kiem thu: 724 thu vien da nap, GC xet 1620 vung du lieu (giu 3 cua app, bo 1617 cua he thong)
+2026-11-21 09:32:58.305 Avatar[6636:27123] [autotest] xong
+2026-11-21 09:33:03.424 Avatar[6636:29709] onDisconnected
+vn.avatar.diemky: 6636
+KET QUA: client da ket noi va gui goi dang nhap toi may chu (OK)

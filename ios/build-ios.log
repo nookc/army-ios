@@ -1,0 +1,58 @@
+warning: refs/tags/v8.2.8 d54010c33189bfac434d85d315ad69783be7ea9b is not a commit!
+j2c: 499 lop, 8 tep, 0 loi dich, 0 tham chieu thieu
+classes 499
+methods 3669
+literals 1166
+selectors 166
+icache 446
+loi dich 0
+tham chieu thieu:
+== bien dich (iphoneos)
+== lien ket
+== Info.plist: Xcode 26.3 (17C529) -> DTXcode 2630, SDK iphoneos26.2 (23C57), macOS 24H232
+/Users/runner/work/army-ios/army-ios/native/platform/avatar-ios/PrivacyInfo.xcprivacy: OK
+/Users/runner/work/army-ios/army-ios/native/build/avatar-ios/dev/Avatar.app/AppIcon60x60@2x.png
+/Users/runner/work/army-ios/army-ios/native/build/avatar-ios/dev/Avatar.app/AppIcon76x76@2x~ipad.png
+/Users/runner/work/army-ios/army-ios/native/build/avatar-ios/dev/Avatar.app/Assets.car
+/Users/runner/work/army-ios/army-ios/native/build/avatar-ios/dev/icon-info.plist
+
+co Assets.car
+total 74880
+drwxr-xr-x  12 runner  staff       384 Nov 21 09:27 .
+drwxr-xr-x   8 runner  staff       256 Nov 21 09:27 ..
+-rw-r--r--   1 runner  staff     22627 Nov 21 09:27 AppIcon60x60@2x.png
+-rw-r--r--   1 runner  staff     35666 Nov 21 09:27 AppIcon60x60@3x.png
+-rw-r--r--   1 runner  staff     33091 Nov 21 09:27 AppIcon76x76@2x~ipad.png
+-rw-r--r--   1 runner  staff    669512 Nov 21 09:27 Assets.car
+-rwxr-xr-x   1 runner  staff   2780840 Nov 21 09:27 Avatar
+-rw-r--r--   1 runner  staff  34773091 Nov 21 09:27 Avatar258.jar
+-rw-r--r--   1 runner  staff      1568 Nov 21 09:27 Info.plist
+-rw-r--r--   1 runner  staff         8 Nov 21 09:27 PkgInfo
+-rw-r--r--   1 runner  staff       549 Nov 21 09:27 PrivacyInfo.xcprivacy
+-rw-r--r--   1 runner  staff         0 Nov 21 09:27 server.txt
+-rw-r--r--  1 runner  staff  36635540 Nov 21 09:27 /Users/runner/work/army-ios/army-ios/native/build/avatar-ios/Avatar-Thuan.ipa
+Non-fat file: /Users/runner/work/army-ios/army-ios/native/build/avatar-ios/dev/Avatar.app/Avatar is architecture: arm64
+== bien dich (iphonesimulator)
+== lien ket
+== Info.plist: Xcode 26.3 (17C529) -> DTXcode 2630, SDK iphonesimulator26.2 (23C57), macOS 24H232
+/Users/runner/work/army-ios/army-ios/native/platform/avatar-ios/PrivacyInfo.xcprivacy: OK
+/Users/runner/work/army-ios/army-ios/native/build/avatar-ios/sim/Avatar.app/AppIcon60x60@2x.png
+/Users/runner/work/army-ios/army-ios/native/build/avatar-ios/sim/Avatar.app/AppIcon76x76@2x~ipad.png
+/Users/runner/work/army-ios/army-ios/native/build/avatar-ios/sim/Avatar.app/Assets.car
+/Users/runner/work/army-ios/army-ios/native/build/avatar-ios/sim/icon-info.plist
+
+co Assets.car
+total 74928
+drwxr-xr-x  12 runner  staff       384 Nov 21 09:28 .
+drwxr-xr-x   8 runner  staff       256 Nov 21 09:28 ..
+-rw-r--r--   1 runner  staff     22627 Nov 21 09:27 AppIcon60x60@2x.png
+-rw-r--r--   1 runner  staff     35666 Nov 21 09:27 AppIcon60x60@3x.png
+-rw-r--r--   1 runner  staff     33091 Nov 21 09:27 AppIcon76x76@2x~ipad.png
+-rw-r--r--   1 runner  staff    669512 Nov 21 09:28 Assets.car
+-rwxr-xr-x   1 runner  staff   2802904 Nov 21 09:27 Avatar
+-rw-r--r--   1 runner  staff  34773091 Nov 21 09:27 Avatar258.jar
+-rw-r--r--   1 runner  staff      1595 Nov 21 09:27 Info.plist
+-rw-r--r--   1 runner  staff         8 Nov 21 09:28 PkgInfo
+-rw-r--r--   1 runner  staff       549 Nov 21 09:27 PrivacyInfo.xcprivacy
+-rw-r--r--   1 runner  staff         0 Nov 21 09:27 server.txt
+/Users/runner/work/army-ios/army-ios/native/build/avatar-ios/sim/Avatar.app: replacing existing signature

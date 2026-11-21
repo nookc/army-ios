@@ -1,0 +1,81 @@
+NDK /usr/local/lib/android/sdk/ndk/27.3.13750724
+build-tools /usr/local/lib/android/sdk/build-tools/37.0.0
+platform /usr/local/lib/android/sdk/platforms/android-37.2-beta3
+warning: refs/tags/v8.2.8 d54010c33189bfac434d85d315ad69783be7ea9b is not a commit!
+Note: switching to 'ee59af3722e56de8404de6cd0c21c2493cc4d855'.
+
+You are in 'detached HEAD' state. You can look around, make experimental
+changes and commit them, and you can discard any commits you make in this
+state without impacting any branches by switching back to a branch.
+
+If you want to create a new branch to retain commits you create, you may
+do so (now or later) by using -c with the switch command. Example:
+
+  git switch -c <new-branch-name>
+
+Or undo this operation with:
+
+  git switch -
+
+Turn off this advice by setting config variable advice.detachedHead to false
+
+j2c: 499 lop, 8 tep, 0 loi dich, 0 tham chieu thieu
+classes 499
+methods 3669
+literals 1166
+== bien dich arm64-v8a
+-rwxr-xr-x 1 runner runner 3709848 Nov 21 09:26 /home/runner/work/army-ios/army-ios/native/build/avatar-android/stage/lib/arm64-v8a/libavatar.so
+11
+== bien dich armeabi-v7a
+-rwxr-xr-x 1 runner runner 3287080 Nov 21 09:27 /home/runner/work/army-ios/army-ios/native/build/avatar-android/stage/lib/armeabi-v7a/libavatar.so
+11
+== bien dich x86_64
+-rwxr-xr-x 1 runner runner 3786016 Nov 21 09:27 /home/runner/work/army-ios/army-ios/native/build/avatar-android/stage/lib/x86_64/libavatar.so
+11
+== java
+Note: Some input files use or override a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+MainActivity$1.class
+MainActivity$10.class
+MainActivity$11.class
+MainActivity$2.class
+MainActivity$3.class
+MainActivity$4.class
+MainActivity$5.class
+MainActivity$6.class
+MainActivity$7.class
+MainActivity$8.class
+MainActivity$9.class
+MainActivity$GameView$1.class
+MainActivity$GameView$2$1.class
+MainActivity$GameView$2.class
+MainActivity$GameView.class
+MainActivity$TextReq.class
+MainActivity.class
+Native$1.class
+Native$2.class
+Native$3.class
+Native$4.class
+Native$5.class
+Native$6.class
+Native.class
+Sound.class
+== apk
+ 34773091  1980-01-01 00:00   assets/Avatar258.jar
+        0  1980-01-01 00:00   assets/server.txt
+    32816  2026-11-21 09:27   classes.dex
+        0  2026-11-21 09:27   lib/
+        0  2026-11-21 09:27   lib/x86_64/
+  3786016  2026-11-21 09:27   lib/x86_64/libavatar.so
+        0  2026-11-21 09:27   lib/armeabi-v7a/
+  3287080  2026-11-21 09:27   lib/armeabi-v7a/libavatar.so
+        0  2026-11-21 09:26   lib/arm64-v8a/
+  3709848  2026-11-21 09:26   lib/arm64-v8a/libavatar.so
+---------                     -------
+ 45669725                     17 files
+V3.0 Signer: certificate DN: CN=Avatar Test
+V3.0 Signer: certificate SHA-256 digest: 50c65e94055c0e933d53e133ca42c84c7a2f20a55f1450ada7ea55d42f92a629
+V3.0 Signer: certificate SHA-1 digest: 7d47152089f4d0bd6335a0174c7b9f6892841403
+-rw-r--r-- 1 runner runner 39056599 Nov 21 09:27 /home/runner/work/army-ios/army-ios/native/build/avatar-android/Avatar-test.apk
+-rw-r--r-- 1 runner runner 39048432 Nov 21 09:27 /home/runner/work/army-ios/army-ios/native/build/avatar-android/Avatar-unsigned.apk
+-rw-r--r-- 1 runner runner 39048420 Nov 21 09:27 /home/runner/work/army-ios/army-ios/native/build/avatar-android/base.apk
