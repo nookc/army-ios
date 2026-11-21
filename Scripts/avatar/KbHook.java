@@ -34,14 +34,34 @@ public final class KbHook {
         return x >= p.b && y >= p.c && x < p.b + p.d && y < p.c + p.e;
     }
 
+    /** kieu ban phim dang xin: 1 chu thuong, 2 mat khau (o dx.H == 2) */
+    static int kieu;
+    /** o chu dang go luc xin ban phim (doi o -> bao lai de ban phim dien thoai xoa bo dem go: Telex khong ghep chu
+     *  cua o truoc vao o sau) */
+    static Object oCu;
+
+    static int kieuO(dx o) {
+        return o != null && o.H == 2 ? 2 : 1;
+    }
+
     /** dau b.a() moi khung khi co ban phim ao. true = bo qua xu ly goc (go chu: ban phim dien thoai lo) */
     public static boolean tick(b p) {
         if (p.a) {
+            dx o = KeyTap.oDangGo();
+            int k = kieuO(o);
             if (!shown) {
                 shown = true;
                 chat = im.c;
                 dx.m = true; // go thang ky tu (khong T9)
-                j2n.Disp.wantKeyboard(1, main.a.n);
+                kieu = k;
+                oCu = o;
+                j2n.Disp.wantKeyboard(k, main.a.n);   // 1 / 2: nen tang coi khac 0 la hien, 2 = o mat khau
+            } else if (o != null && (o != oCu || k != kieu)) {
+                // sang o chu khac (vd tai khoan -> mat khau): bao lai. Khung nao chua thay o nao (o == null) thi bo qua,
+                // khong lam ban phim xoa bo dem giua chung (Telex dang ghep dau)
+                kieu = k;
+                oCu = o;
+                j2n.Disp.wantKeyboard(k, main.a.n);
             } else if (chat && !im.c) {
                 // da gui / dong o chat: tat che do go chu nhu khi bam lai bong chat (ban phim ao + ban phim dien thoai)
                 chat = false;
@@ -53,6 +73,7 @@ public final class KbHook {
         }
         if (shown) {
             shown = false;
+            oCu = null;
             j2n.Disp.wantKeyboard(0, 0);
         }
         return false;
@@ -83,6 +104,7 @@ public final class KbHook {
         if (shown && (p == null || !p.a)) {
             shown = false;
             chat = false;
+            oCu = null;
             j2n.Disp.wantKeyboard(0, 0);
         }
     }

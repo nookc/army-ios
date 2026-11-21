@@ -100,10 +100,15 @@ static void run_cmd(char *line) {
     while (n && (line[n - 1] == '\n' || line[n - 1] == '\r')) line[--n] = 0;
     if (!n || line[0] == '#') return;
     if (strncmp(line, "type:", 5) == 0) {
-        for (char *c = line + 5; *c; c++) {
-            j2n_post(J2N_KEY_PRESS, (unsigned char)*c, 0);
+        /* giai UTF-8 -> ma Unicode (nhu ban phim that cua iOS/Android gui tung ky tu) */
+        const unsigned char *c = (const unsigned char *)line + 5;
+        while (*c) {
+            int cp = *c++;
+            if (cp >= 0xE0 && c[0] && c[1]) { cp = ((cp & 0x0F) << 12) | ((c[0] & 0x3F) << 6) | (c[1] & 0x3F); c += 2; }
+            else if (cp >= 0xC0 && c[0]) { cp = ((cp & 0x1F) << 6) | (c[0] & 0x3F); c += 1; }
+            j2n_post(J2N_KEY_PRESS, cp, 0);
             msleep(60);
-            j2n_post(J2N_KEY_RELEASE, (unsigned char)*c, 0);
+            j2n_post(J2N_KEY_RELEASE, cp, 0);
             msleep(60);
         }
         return;
@@ -185,7 +190,8 @@ static void *vsync_thread(void *arg) {
 
 static void kb_hook_log(int show, int area_bottom) {
     char b[96];
-    snprintf(b, sizeof b, "[banphim] %s (vung game toi y=%d)", show ? "hien" : "an", area_bottom);
+    snprintf(b, sizeof b, "[banphim] %s%s (vung game toi y=%d)", show ? "hien" : "an", show == 2 ? " - o mat khau" : "",
+             area_bottom);
     plat_log(b);
 }
 

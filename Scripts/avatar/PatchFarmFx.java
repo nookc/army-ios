@@ -16,6 +16,14 @@ import java.util.zip.*;
  *  3) ir: ve tile ban do qua LandFx.oDat() (o dat cap 3..10: dong, bac, vang, ngoc... kim cuong cau vong)
  *  4) go: luat cap o dat (gieo hat / hinh dat / nang cap) doc qua LandFx.logic() / LandFx.dau() -> nang dat toi cap 10
  *  5) kz.a(jr): lenh 118 (cap that cua o dat) -> LandFx.tin()
+ *  6) dh (phong chu): String.indexOf(char) -> KeyTap.chu(): chu hoa co dau khong co trong phong chu thi ve chu thuong
+ *     (truoc day bien mat: "Ơi" -> " i")
+ *  7) ea.b(Graphics) (ban do thanh pho): ve nhan khu qua KeyTap.nhanBanDo(): nhan kep mep khong chong len nhau
+ *  8) dx.e(): KeyTap.oChu(this) (o chu dang chon, KbHook ban app biet o mat khau); dx.H mo public
+ *  9) cy (danh sach co nhan vat: bang xep hang, ban be): dong cao hon (KeyTap.caoHang) + nhan vat cat theo o dong
+ * 10) ae.a(...) / gt.a(): luoi do "chi xem" (cua hang 27 / 28 may chu gui khi xem ruong / do dang mac nguoi khac):
+ *     nut "Chi tiết" thay "Mua", bam vao hien hop thong tin thay vi hoi Co / Khong; jx.a(): khung thong tin cua mon
+ *     ghi dong may chu gui (KeyTap.thongTinXem) thay cho tien cua minh. Truong cua jx / gt mo public (KeyTap doc)
  * Dung: java -cp asm.jar:asm-tree.jar:. PatchFarmFx vao.jar ra.jar thu_muc_class_moi
  * (thu muc chua KeyTap.class, LandFx.class, CayRong.class da bien dich -target 1.3)
  */
@@ -54,14 +62,14 @@ public class PatchFarmFx {
                 continue;                      // ban cu cua lop moi (chay lai patcher tren jar da va)
             }
             switch (name) {
-                case "main/a.class": data = va(va(data, PatchFarmFx::keyTap, can, name), PatchFarmFx::tocDoVongLap, can, name); break;
+                case "main/a.class": data = va(va(va(data, PatchFarmFx::keyTap, can, name), PatchFarmFx::tocDoVongLap, can, name), PatchFarmFx::veNoi, can, name); break;
                 case "dm.class": data = va(data, PatchFarmFx::tocDoCaiDat, can, name); break;
                 case "kc.class": data = va(data, PatchFarmFx::cayRong, can, name); break;
                 case "ir.class": data = va(va(data, PatchFarmFx::oDat, can, name), PatchFarmFx::chamVat, can, name); break;
                 case "go.class": data = va(va(va(data, PatchFarmFx::luatDat, can, name), PatchFarmFx::tromCay, can, name), PatchFarmFx::nhanChon, can, name); break;
                 case "kz.class": data = va(data, PatchFarmFx::lenh118, can, name); break;
                 case "b.class": data = va(data, PatchFarmFx::banPhim, can, name); break;
-                case "ae.class": data = va(va(data, PatchFarmFx::dauTruongAe, can, name), PatchFarmFx::cuoiAn, can, name); break;
+                case "ae.class": data = va(va(va(data, PatchFarmFx::dauTruongAe, can, name), PatchFarmFx::cuoiAn, can, name), PatchFarmFx::nutShop, can, name); break;
                 case "hn.class": data = va(data, PatchFarmFx::dauTruongHn, can, name); break;
                 case "ce.class": data = va(data, PatchFarmFx::dauTruongCe, can, name); break;
                 case "do.class": data = va(data, PatchFarmFx::camMo, can, name); break;
@@ -71,6 +79,14 @@ public class PatchFarmFx {
                 case "cx.class": data = va(data, PatchFarmFx::phienBan, can, name); break;
                 case "j.class":
                 case "ko.class": data = va(data, PatchFarmFx::oKho, can, name); break;
+                case "dh.class": data = va(data, PatchFarmFx::chuHoa, can, name); break;
+                case "ea.class": data = va(data, PatchFarmFx::nhanBanDo, can, name); break;
+                case "dx.class": data = va(data, PatchFarmFx::oChu, can, name); break;
+                case "cy.class": data = va(data, PatchFarmFx::danhSach, can, name); break;
+                case "gt.class": data = va(va(data, PatchFarmFx::hoiShop, can, name), PatchFarmFx::moTruong, can, name); break;
+                case "jx.class": data = va(va(va(data, PatchFarmFx::thongTinXem, can, name), PatchFarmFx::moTruong, can, name), PatchFarmFx::veO, can, name); break;
+                case "fz.class": data = va(data, PatchFarmFx::veO, can, name); break;
+                case "dp.class": data = va(data, PatchFarmFx::dauShop, can, name); break;
                 default: break;
             }
             zo.putNextEntry(new ZipEntry(name));
@@ -99,12 +115,255 @@ public class PatchFarmFx {
                 && can.getOrDefault("gia_luong", 0) == 1 && can.getOrDefault("phien_ban", 0) == 1
                 && can.getOrDefault("trom_cay", 0) == 1 && can.getOrDefault("o_kho", 0) == 2
                 && can.getOrDefault("cham_vat", 0) == 1 && can.getOrDefault("nhan_chon", 0) == 1
-                && can.getOrDefault("cuoi_cho", 0) == 1 && can.getOrDefault("cuoi_kiem", 0) == 1;
+                && can.getOrDefault("cuoi_cho", 0) == 1 && can.getOrDefault("cuoi_kiem", 0) == 1
+                && can.getOrDefault("chu_hoa", 0) == 2 && can.getOrDefault("nhan_bd", 0) == 1
+                && can.getOrDefault("o_chu", 0) == 1 && can.getOrDefault("o_chu_h", 0) == 1
+                && can.getOrDefault("ds_cao", 0) == 1 && can.getOrDefault("ds_cat", 0) == 1
+                && can.getOrDefault("nut_shop", 0) == 1 && can.getOrDefault("hoi_shop", 0) == 2
+                && can.getOrDefault("tt_xem", 0) == 1 && can.getOrDefault("mo_truong", 0) == 2
+                && can.getOrDefault("dau_shop", 0) == 1 && can.getOrDefault("ve_o", 0) == 2
+                && can.getOrDefault("ve_preview", 0) == 1 && can.getOrDefault("ve_noi", 0) == 1;
         if (!ok) {
             System.out.println("PatchFarmFx: SO CHO SUA KHONG KHOP -> dung");
             new File(a[1]).delete();
             System.exit(1);
         }
+    }
+
+    // 6) dh: moi String.indexOf(I)I (tim chu trong bang phong chu) -> KeyTap.chu(String, int)
+    static void chuHoa(ClassNode cn, Map<String, Integer> can) {
+        for (MethodNode mn : cn.methods) {
+            for (AbstractInsnNode n = mn.instructions.getFirst(); n != null; n = n.getNext()) {
+                if (n instanceof MethodInsnNode) {
+                    MethodInsnNode m = (MethodInsnNode) n;
+                    if (m.getOpcode() == Opcodes.INVOKEVIRTUAL && m.owner.equals("java/lang/String") && m.name.equals("indexOf")
+                            && m.desc.equals("(I)I")) {
+                        MethodInsnNode moi = new MethodInsnNode(Opcodes.INVOKESTATIC, "KeyTap", "chu", "(Ljava/lang/String;I)I", false);
+                        mn.instructions.set(m, moi);
+                        n = moi;
+                        dem(can, "chu_hoa");
+                    }
+                }
+            }
+        }
+    }
+
+    // 7) ea.b(Graphics): invokeinterface cs.a(Graphics,String,III)V -> invokestatic KeyTap.nhanBanDo(cs,Graphics,String,III)V
+    static void nhanBanDo(ClassNode cn, Map<String, Integer> can) {
+        for (MethodNode mn : cn.methods) {
+            if (!mn.name.equals("b") || !mn.desc.equals("(" + G + ")V")) {
+                continue;
+            }
+            for (AbstractInsnNode n = mn.instructions.getFirst(); n != null; n = n.getNext()) {
+                if (n instanceof MethodInsnNode) {
+                    MethodInsnNode m = (MethodInsnNode) n;
+                    if (m.getOpcode() == Opcodes.INVOKEINTERFACE && m.owner.equals("cs") && m.name.equals("a")
+                            && m.desc.equals("(" + G + "Ljava/lang/String;III)V")) {
+                        MethodInsnNode moi = new MethodInsnNode(Opcodes.INVOKESTATIC, "KeyTap", "nhanBanDo",
+                                "(Lcs;" + G + "Ljava/lang/String;III)V", false);
+                        mn.instructions.set(m, moi);
+                        n = moi;
+                        dem(can, "nhan_bd");
+                    }
+                }
+            }
+        }
+    }
+
+    // 8) dx: truong H (kieu o: 2 = mat khau) public; dau e()V goi KeyTap.oChu(this)
+    static void oChu(ClassNode cn, Map<String, Integer> can) {
+        for (FieldNode f : cn.fields) {
+            if (f.name.equals("H") && f.desc.equals("I")) {
+                f.access = (f.access & ~(Opcodes.ACC_PRIVATE | Opcodes.ACC_PROTECTED)) | Opcodes.ACC_PUBLIC;
+                dem(can, "o_chu_h");
+            }
+        }
+        for (MethodNode mn : cn.methods) {
+            if (!mn.name.equals("e") || !mn.desc.equals("()V") || (mn.access & Opcodes.ACC_STATIC) != 0) {
+                continue;
+            }
+            InsnList dau = new InsnList();
+            dau.add(new VarInsnNode(Opcodes.ALOAD, 0));
+            dau.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "KeyTap", "oChu", "(Ldx;)V", false));
+            mn.instructions.insert(dau);
+            dem(can, "o_chu");
+        }
+    }
+
+    // 9) cy: <init> "bipush 40 (* gy.Y) -> l" thanh KeyTap.caoHang(); a(Graphics): hn.a(Graphics,IIZ)V -> KeyTap.veHangAvatar
+    static void danhSach(ClassNode cn, Map<String, Integer> can) {
+        for (MethodNode mn : cn.methods) {
+            if (mn.name.equals("<init>") && mn.desc.equals("()V")) {
+                for (AbstractInsnNode n = mn.instructions.getFirst(); n != null; n = n.getNext()) {
+                    if (n.getOpcode() == Opcodes.BIPUSH && ((IntInsnNode) n).operand == 40) {
+                        AbstractInsnNode s1 = sau(n), s2 = s1 == null ? null : sau(s1), s3 = s2 == null ? null : sau(s2);
+                        if (s1 instanceof FieldInsnNode && ((FieldInsnNode) s1).owner.equals("gy") && s2 != null
+                                && s2.getOpcode() == Opcodes.IMUL && s3 instanceof FieldInsnNode
+                                && ((FieldInsnNode) s3).owner.equals("cy") && ((FieldInsnNode) s3).name.equals("l")) {
+                            MethodInsnNode moi = new MethodInsnNode(Opcodes.INVOKESTATIC, "KeyTap", "caoHang", "()I", false);
+                            mn.instructions.set(n, moi);
+                            n = moi;
+                            dem(can, "ds_cao");
+                        }
+                    }
+                }
+            }
+            if (mn.name.equals("a") && mn.desc.equals("(" + G + ")V")) {
+                for (AbstractInsnNode n = mn.instructions.getFirst(); n != null; n = n.getNext()) {
+                    if (n instanceof MethodInsnNode) {
+                        MethodInsnNode m = (MethodInsnNode) n;
+                        if (m.getOpcode() == Opcodes.INVOKEVIRTUAL && m.owner.equals("hn") && m.name.equals("a")
+                                && m.desc.equals("(" + G + "IIZ)V")) {
+                            MethodInsnNode moi = new MethodInsnNode(Opcodes.INVOKESTATIC, "KeyTap", "veHangAvatar",
+                                    "(Lhn;" + G + "IIZ)V", false);
+                            mn.instructions.set(m, moi);
+                            n = moi;
+                            dem(can, "ds_cat");
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // 10a) ae.a(BILjava/lang/String;[SI[Ljava/lang/String;)V: getstatic kf.Z (chu "Mua") -> iload_2 (ma cua hang); KeyTap.nutShop(I)
+    static void nutShop(ClassNode cn, Map<String, Integer> can) {
+        for (MethodNode mn : cn.methods) {
+            if (!mn.name.equals("a") || !mn.desc.equals("(BILjava/lang/String;[SI[Ljava/lang/String;)V")) {
+                continue;
+            }
+            for (AbstractInsnNode n = mn.instructions.getFirst(); n != null; n = n.getNext()) {
+                if (n.getOpcode() == Opcodes.GETSTATIC && ((FieldInsnNode) n).owner.equals("kf") && ((FieldInsnNode) n).name.equals("Z")) {
+                    InsnList moi = new InsnList();
+                    moi.add(new VarInsnNode(Opcodes.ILOAD, 2));
+                    MethodInsnNode goi = new MethodInsnNode(Opcodes.INVOKESTATIC, "KeyTap", "nutShop", "(I)Ljava/lang/String;", false);
+                    moi.add(goi);
+                    mn.instructions.insert(n, moi);
+                    mn.instructions.remove(n);
+                    n = goi;
+                    dem(can, "nut_shop");
+                }
+            }
+        }
+    }
+
+    // 10b) gt.a()V: main/a.a(String, ii) -> aload_0; getfield gt.e (ma cua hang); KeyTap.hoiShop(String, ii, I)
+    static void hoiShop(ClassNode cn, Map<String, Integer> can) {
+        for (MethodNode mn : cn.methods) {
+            if (!mn.name.equals("a") || !mn.desc.equals("()V")) {
+                continue;
+            }
+            for (AbstractInsnNode n = mn.instructions.getFirst(); n != null; n = n.getNext()) {
+                if (n instanceof MethodInsnNode) {
+                    MethodInsnNode m = (MethodInsnNode) n;
+                    if (m.getOpcode() == Opcodes.INVOKESTATIC && m.owner.equals("main/a") && m.name.equals("a")
+                            && m.desc.equals("(Ljava/lang/String;Lii;)V")) {
+                        InsnList moi = new InsnList();
+                        moi.add(new VarInsnNode(Opcodes.ALOAD, 0));
+                        moi.add(new FieldInsnNode(Opcodes.GETFIELD, "gt", "e", "I"));
+                        MethodInsnNode goi = new MethodInsnNode(Opcodes.INVOKESTATIC, "KeyTap", "hoiShop", "(Ljava/lang/String;Lii;I)V", false);
+                        moi.add(goi);
+                        mn.instructions.insert(m, moi);
+                        mn.instructions.remove(m);
+                        n = goi;
+                        dem(can, "hoi_shop");
+                    }
+                }
+            }
+        }
+    }
+
+    // dp.a(Graphics): sau BigMoney.a3(...) (dong tien cua minh dau luoi) -> KeyTap.dauShop(String);
+    //                 hn.a(Graphics,IIZ)V (nhan vat xem truoc) -> KeyTap.vePreview(hn, Graphics, IIZ)
+    static void dauShop(ClassNode cn, Map<String, Integer> can) {
+        for (MethodNode mn : cn.methods) {
+            if (!mn.name.equals("a") || !mn.desc.equals("(" + G + ")V")) {
+                continue;
+            }
+            for (AbstractInsnNode n = mn.instructions.getFirst(); n != null; n = n.getNext()) {
+                if (n instanceof MethodInsnNode && ((MethodInsnNode) n).owner.equals("hn") && ((MethodInsnNode) n).name.equals("a")
+                        && ((MethodInsnNode) n).desc.equals("(" + G + "IIZ)V") && n.getOpcode() == Opcodes.INVOKEVIRTUAL) {
+                    MethodInsnNode moi = new MethodInsnNode(Opcodes.INVOKESTATIC, "KeyTap", "vePreview", "(Lhn;" + G + "IIZ)V", false);
+                    mn.instructions.set(n, moi);
+                    n = moi;
+                    dem(can, "ve_preview");
+                    continue;
+                }
+                if (n instanceof MethodInsnNode && ((MethodInsnNode) n).owner.equals("BigMoney") && ((MethodInsnNode) n).name.equals("a3")) {
+                    MethodInsnNode moi = new MethodInsnNode(Opcodes.INVOKESTATIC, "KeyTap", "dauShop", "(Ljava/lang/String;)Ljava/lang/String;", false);
+                    mn.instructions.insert(n, moi);
+                    n = moi;
+                    dem(can, "dau_shop");
+                }
+            }
+        }
+    }
+
+    // jx / fz .a(Graphics,II)V (o luoi): ld.a(Graphics,III)V -> KeyTap.veO(ld, Graphics, III) (thu nho hinh to hon o)
+    static void veO(ClassNode cn, Map<String, Integer> can) {
+        for (MethodNode mn : cn.methods) {
+            if (!mn.name.equals("a") || !mn.desc.equals("(" + G + "II)V")) {
+                continue;
+            }
+            for (AbstractInsnNode n = mn.instructions.getFirst(); n != null; n = n.getNext()) {
+                if (n instanceof MethodInsnNode) {
+                    MethodInsnNode m = (MethodInsnNode) n;
+                    if (m.getOpcode() == Opcodes.INVOKEVIRTUAL && m.owner.equals("ld") && m.name.equals("a")
+                            && m.desc.equals("(" + G + "III)V")) {
+                        MethodInsnNode moi = new MethodInsnNode(Opcodes.INVOKESTATIC, "KeyTap", "veO", "(Lld;" + G + "III)V", false);
+                        mn.instructions.set(m, moi);
+                        n = moi;
+                        dem(can, "ve_o");
+                    }
+                }
+            }
+        }
+    }
+
+    // main/a.paint(Graphics): cp.a(Graphics)V (chu bay) -> KeyTap.veNoi(cp, Graphics): khong ve len hop thoai / menu
+    static void veNoi(ClassNode cn, Map<String, Integer> can) {
+        for (MethodNode mn : cn.methods) {
+            if (!mn.name.equals("paint") || !mn.desc.equals("(" + G + ")V")) {
+                continue;
+            }
+            for (AbstractInsnNode n = mn.instructions.getFirst(); n != null; n = n.getNext()) {
+                if (n instanceof MethodInsnNode && n.getOpcode() == Opcodes.INVOKEVIRTUAL && ((MethodInsnNode) n).owner.equals("cp")
+                        && ((MethodInsnNode) n).name.equals("a") && ((MethodInsnNode) n).desc.equals("(" + G + ")V")) {
+                    MethodInsnNode moi = new MethodInsnNode(Opcodes.INVOKESTATIC, "KeyTap", "veNoi", "(Lcp;" + G + ")V", false);
+                    mn.instructions.set(n, moi);
+                    n = moi;
+                    dem(can, "ve_noi");
+                }
+            }
+        }
+    }
+
+    // jx.a()V dau ham: if (KeyTap.thongTinXem(this)) return;
+    static void thongTinXem(ClassNode cn, Map<String, Integer> can) {
+        for (MethodNode mn : cn.methods) {
+            if (!mn.name.equals("a") || !mn.desc.equals("()V")) {
+                continue;
+            }
+            InsnList dau = new InsnList();
+            LabelNode tiep = new LabelNode();
+            dau.add(new VarInsnNode(Opcodes.ALOAD, 0));
+            dau.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "KeyTap", "thongTinXem", "(Ljx;)Z", false));
+            dau.add(new JumpInsnNode(Opcodes.IFEQ, tiep));
+            dau.add(new InsnNode(Opcodes.RETURN));
+            dau.add(tiep);
+            mn.instructions.insert(dau);
+            dem(can, "tt_xem");
+        }
+    }
+
+    // mo public moi truong (khong static) cua lop: KeyTap doc truc tiep
+    static void moTruong(ClassNode cn, Map<String, Integer> can) {
+        for (FieldNode f : cn.fields) {
+            if ((f.access & Opcodes.ACC_STATIC) == 0) {
+                f.access = (f.access & ~(Opcodes.ACC_PRIVATE | Opcodes.ACC_PROTECTED)) | Opcodes.ACC_PUBLIC;
+            }
+        }
+        dem(can, "mo_truong");
     }
 
     interface Va {
@@ -675,7 +934,8 @@ public class PatchFarmFx {
         for (MethodNode mn : cn.methods) {
             for (AbstractInsnNode n : mn.instructions.toArray()) {
                 if (n instanceof LdcInsnNode && "2.5.8".equals(((LdcInsnNode) n).cst) && mn.name.equals("b") && mn.desc.equals("()V")) {
-                    ((LdcInsnNode) n).cst = "2.5.8L";
+                    // "L" cuoi: doc duoc gia luong lon; ".19": ban giao lan 19 (may chu: Session.banApp - luoi xem do co trang phuc)
+                    ((LdcInsnNode) n).cst = "2.5.8.19L";
                     dem(can, "phien_ban");
                 }
             }

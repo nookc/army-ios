@@ -60,7 +60,7 @@ final class Native {
 
     /** game vao / ra o go chu (KbHook trong client) -> bat / tat ban phim dien thoai */
     static void wantKeyboard(int show, int areaBottom) {
-        MainActivity.wantKeyboard(show != 0, areaBottom);
+        MainActivity.wantKeyboard(show, areaBottom);   // 0 tat, 1 o chu, 2 o mat khau
     }
 
     static int soundCreate(byte[] data, String type) {

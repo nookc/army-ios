@@ -16,6 +16,7 @@ import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.text.Editable;
 import android.text.InputFilter;
 import android.text.InputType;
 import android.util.Log;
@@ -119,8 +120,9 @@ public final class MainActivity extends Activity {
         }
     }
 
-    /** goi tu luong game (KbHook): game vao / ra o go chu -> bat / tat ban phim dien thoai */
-    static void wantKeyboard(final boolean show, final int areaBottom) {
+    /** goi tu luong game (KbHook): game vao / ra o go chu -> bat / tat ban phim dien thoai.
+     *  show: 0 tat, 1 o chu thuong, 2 o mat khau (KbHook goi lai khi doi o chu -> bat dau lai bo dem go) */
+    static void wantKeyboard(final int show, final int areaBottom) {
         final MainActivity a = Native.act;
         if (a == null) {
             return;
@@ -436,7 +438,7 @@ public final class MainActivity extends Activity {
                 keyTap(-5);
                 continue;
             }
-            if (ch < 32) {
+            if (ch < 32 || (ch >= 0xD800 && ch <= 0xDFFF)) {   // dieu khien / emoji: font game khong ve duoc
                 continue;
             }
             if (!mode) {
@@ -819,12 +821,19 @@ public final class MainActivity extends Activity {
         }
 
         /** game xin / tra ban phim (o go chu): areaBottom = day vung game con dung (diem anh Canvas) */
-        void gameKeyboard(boolean show, int areaBottom) {
+        /** kieu o chu game dang go: 1 chu thuong, 2 mat khau */
+        int kieuGo = 1;
+
+        void gameKeyboard(int kieu, int areaBottom) {
+            boolean show = kieu != 0;
             InputMethodManager im = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
             gameKbArea = show ? Math.max(1, areaBottom) : 0;
             if (im != null) {
                 if (show) {
+                    kieuGo = kieu == 2 ? 2 : 1;
                     requestFocus();
+                    // o moi / kieu moi: ban phim tao lai ket noi (kieu o, bo dem go trong) - Telex khong ghep vao chu o truoc
+                    im.restartInput(this);
                     im.showSoftInput(this, InputMethodManager.SHOW_FORCED);
                 } else {
                     im.hideSoftInputFromWindow(getWindowToken(), 0);
@@ -853,74 +862,161 @@ public final class MainActivity extends Activity {
 
         @Override
         public InputConnection onCreateInputConnection(EditorInfo out) {
-            out.inputType = InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
-                    | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS;
+            // chu thuong: ban phim go duoc tieng Viet (Telex / VNI cua Gboard, Laban Key...) - truoc day de kieu "mat khau
+            // hien" nen nhieu ban phim tat Telex, khong go duoc dau. Khong goi y / tu sua (ten tai khoan khong bi doi).
+            out.inputType = kieuGo == 2
+                    ? InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD
+                    : InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS;
             out.imeOptions = EditorInfo.IME_FLAG_NO_EXTRACT_UI | EditorInfo.IME_ACTION_DONE | EditorInfo.IME_FLAG_NO_FULLSCREEN;
-            return new BaseInputConnection(this, false) {
-                String composing = "";
+            out.initialSelStart = 0;
+            out.initialSelEnd = 0;
+            final View v = this;
+            // ban sao chu da go (ban phim doc lai duoc chu truoc con tro de ghep dau). Moi lan ban phim sua: so voi chu da
+            // gui vao game -> gui so lan xoa (-8) + phan chu moi. Vd Telex "tie" + "e" -> "tiê": xoa 1, go "ê".
+            return new BaseInputConnection(this, true) {
+                String daGui = "";
 
-                void back(int n) {
-                    for (int i = 0; i < n; i++) {
+                boolean kyTuGame(char c) {
+                    return c >= 32 && !(c >= 0xD800 && c <= 0xDFFF);
+                }
+
+                int soKyTu(String s, int tu) {
+                    int n = 0;
+                    for (int i = tu; i < s.length(); i++) {
+                        if (kyTuGame(s.charAt(i))) {
+                            n++;
+                        }
+                    }
+                    return n;
+                }
+
+                void dongBo() {
+                    Editable e = getEditable();
+                    String t = e == null ? "" : e.toString();
+                    if (t.equals(daGui)) {
+                        return;
+                    }
+                    String cu = daGui;
+                    int p = 0, n = Math.min(t.length(), cu.length());
+                    while (p < n && t.charAt(p) == cu.charAt(p)) {
+                        p++;
+                    }
+                    if (p > 0 && p < cu.length() && Character.isLowSurrogate(cu.charAt(p))) {
+                        p--;
+                    }
+                    daGui = t;
+                    int xoa = soKyTu(cu, p);
+                    for (int i = 0; i < xoa; i++) {
                         keyTap(-8);
+                    }
+                    if (t.length() > p) {
+                        typeText(t.substring(p));
                     }
                 }
 
-                /** chi gui phan chu moi so voi doan dang soan (tranh go lap) */
-                void diff(String t) {
-                    if (t.startsWith(composing)) {
-                        typeText(t.substring(composing.length()));
-                    } else {
-                        back(composing.length());
-                        typeText(t);
+                /** xoa ban sao (sau Enter / chu qua dai) va bao ban phim doc lai */
+                void datLai() {
+                    Editable e = getEditable();
+                    if (e != null) {
+                        e.clear();
                     }
+                    daGui = "";
+                    v.post(new Runnable() {
+                        public void run() {
+                            InputMethodManager im = (InputMethodManager) v.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                            if (im != null) {
+                                im.restartInput(v);
+                            }
+                        }
+                    });
+                }
+
+                void xuongDong() {
+                    dongBo();
+                    keyTap(-5);
+                    datLai();
                 }
 
                 @Override
                 public boolean commitText(CharSequence t, int pos) {
-                    diff(t.toString());
-                    composing = "";
-                    return true;
+                    if (t != null && t.length() > 0 && (t.charAt(t.length() - 1) == '\n')) {
+                        super.commitText(t.subSequence(0, t.length() - 1), pos);
+                        xuongDong();
+                        return true;
+                    }
+                    boolean r = super.commitText(t, pos);
+                    dongBo();
+                    Editable e = getEditable();
+                    if (e != null && e.length() > 200 && getComposingSpanStart(e) < 0) {
+                        datLai();
+                    }
+                    return r;
                 }
 
                 @Override
                 public boolean setComposingText(CharSequence t, int pos) {
-                    String s = t.toString();
-                    diff(s);
-                    composing = s;
-                    return true;
+                    boolean r = super.setComposingText(t, pos);
+                    dongBo();
+                    return r;
+                }
+
+                @Override
+                public boolean setComposingRegion(int a, int b) {
+                    boolean r = super.setComposingRegion(a, b);
+                    dongBo();
+                    return r;
                 }
 
                 @Override
                 public boolean finishComposingText() {
-                    composing = "";
-                    return true;
+                    boolean r = super.finishComposingText();
+                    dongBo();
+                    return r;
                 }
 
                 @Override
                 public boolean deleteSurroundingText(int before, int after) {
-                    back(Math.max(1, before));
-                    composing = "";
-                    return true;
-                }
-
-                @Override
-                public boolean sendKeyEvent(KeyEvent e) {
-                    int code = e.getKeyCode();
-                    if (code == KeyEvent.KEYCODE_DEL || code == KeyEvent.KEYCODE_ENTER) {
-                        int kk = code == KeyEvent.KEYCODE_DEL ? -8 : -5;
-                        if (e.getAction() == KeyEvent.ACTION_DOWN) {
-                            Native.post(Native.KEY_PRESS, kk, 0);
-                        } else if (e.getAction() == KeyEvent.ACTION_UP) {
-                            Native.post(Native.KEY_RELEASE, kk, 0);
+                    Editable e = getEditable();
+                    if (e == null || e.length() == 0) {
+                        // ban sao trong (chu da gui luc truoc / o khac): van xoa trong o game
+                        for (int i = 0; i < Math.max(1, before); i++) {
+                            keyTap(-8);
                         }
                         return true;
                     }
-                    return super.sendKeyEvent(e);
+                    boolean r = super.deleteSurroundingText(before, after);
+                    dongBo();
+                    return r;
+                }
+
+                @Override
+                public boolean sendKeyEvent(KeyEvent ev) {
+                    int code = ev.getKeyCode();
+                    if (code == KeyEvent.KEYCODE_DEL) {
+                        if (ev.getAction() == KeyEvent.ACTION_DOWN) {
+                            Editable e = getEditable();
+                            int c = e == null ? 0 : android.text.Selection.getSelectionEnd(e);
+                            if (e != null && c > 0) {
+                                e.delete(c - 1, c);
+                                dongBo();
+                            } else {
+                                keyTap(-8);
+                            }
+                        }
+                        return true;
+                    }
+                    if (code == KeyEvent.KEYCODE_ENTER) {
+                        if (ev.getAction() == KeyEvent.ACTION_DOWN) {
+                            xuongDong();
+                        }
+                        return true;
+                    }
+                    return super.sendKeyEvent(ev);
                 }
 
                 @Override
                 public boolean performEditorAction(int action) {
-                    keyTap(-5);
+                    xuongDong();
                     return true;
                 }
             };

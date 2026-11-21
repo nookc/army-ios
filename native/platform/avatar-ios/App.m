@@ -156,6 +156,11 @@ static void key_tap(int code) {
     j2n_post(J2N_KEY_RELEASE, code, 0);
 }
 
+/* ky tu game nhan duoc (font game: khong co ky tu dieu khien, emoji / cap thay the UTF-16) */
+static BOOL ky_tu_game(unichar c) {
+    return c >= 32 && !(c >= 0xD800 && c <= 0xDFFF);
+}
+
 static void type_text(NSString *text) {
     if (!gStarted || !text.length) return;
     BOOL mode = NO;
@@ -165,7 +170,7 @@ static void type_text(NSString *text) {
             key_tap(-5);
             continue;
         }
-        if (c < 32) continue;
+        if (!ky_tu_game(c)) continue;
         if (!mode) {
             key_tap(-1000);
             mode = YES;
@@ -174,23 +179,109 @@ static void type_text(NSString *text) {
     }
 }
 
-@interface KeyView : UIView <UIKeyInput>
+/* so ky tu cua doan chu da thuc su vao o chu game (de xoa dung bang so lan -8) */
+static NSUInteger so_ky_tu_game(NSString *s, NSUInteger tu) {
+    NSUInteger n = 0;
+    for (NSUInteger i = tu; i < s.length; i++) {
+        if (ky_tu_game([s characterAtIndex:i])) n++;
+    }
+    return n;
+}
+
+/* O chu an (UITextField that, khong phai UIKeyInput tron): ban phim iPhone go duoc tieng Viet Telex / VNI (ban phim
+ * can doc chu truoc con tro de ghep dau), go nhieu ngon ngu, ban phim mat khau. Moi lan chu trong o doi: so voi chu da
+ * gui vao game -> gui so lan xoa (-8) + phan chu moi. Vd Telex "tie" + "e" -> "tiê": xoa 1, go "ê". */
+@interface KeyView : UITextField <UITextFieldDelegate>
+- (void)datLai;
+- (void)kieuMatKhau:(BOOL)mk;
+- (void)doiChu;
 @end
 
-@implementation KeyView
-- (BOOL)canBecomeFirstResponder { return YES; }
-- (BOOL)hasText { return YES; }   /* luon cho nut xoa hoat dong */
-- (void)insertText:(NSString *)text { type_text(text); }
-- (void)deleteBackward { if (gStarted) key_tap(-8); }
-- (UIKeyboardType)keyboardType { return UIKeyboardTypeDefault; }
-- (UIReturnKeyType)returnKeyType { return UIReturnKeyDefault; }
-- (UITextAutocorrectionType)autocorrectionType { return UITextAutocorrectionTypeNo; }
-- (UITextAutocapitalizationType)autocapitalizationType { return UITextAutocapitalizationTypeNone; }
-- (UITextSpellCheckingType)spellCheckingType { return UITextSpellCheckingTypeNo; }
-- (UITextSmartQuotesType)smartQuotesType { return UITextSmartQuotesTypeNo; }
-- (UITextSmartDashesType)smartDashesType { return UITextSmartDashesTypeNo; }
-- (UITextSmartInsertDeleteType)smartInsertDeleteType { return UITextSmartInsertDeleteTypeNo; }
-- (UIKeyboardAppearance)keyboardAppearance { return UIKeyboardAppearanceDark; }
+@implementation KeyView {
+    NSString *_daGui;   /* chu cua o nay da gui vao game */
+}
+
+- (instancetype)initWithFrame:(CGRect)f {
+    if ((self = [super initWithFrame:f])) {
+        _daGui = @"";
+        self.delegate = self;
+        self.autocorrectionType = UITextAutocorrectionTypeNo;
+        self.autocapitalizationType = UITextAutocapitalizationTypeNone;
+        self.spellCheckingType = UITextSpellCheckingTypeNo;
+        self.smartQuotesType = UITextSmartQuotesTypeNo;
+        self.smartDashesType = UITextSmartDashesTypeNo;
+        self.smartInsertDeleteType = UITextSmartInsertDeleteTypeNo;
+        self.keyboardType = UIKeyboardTypeDefault;
+        self.returnKeyType = UIReturnKeyDefault;
+        self.keyboardAppearance = UIKeyboardAppearanceDark;
+        self.textColor = UIColor.clearColor;
+        self.tintColor = UIColor.clearColor;
+        self.backgroundColor = UIColor.clearColor;
+        self.borderStyle = UITextBorderStyleNone;
+        [self addTarget:self action:@selector(doiChu) forControlEvents:UIControlEventEditingChanged];
+    }
+    return self;
+}
+
+/* o moi / kieu moi / mo lai ban phim: bat dau lai tu o trong (ban phim khong ghep dau voi chu cua o truoc; o mat khau
+ * iPhone tu xoa chu cu khi go tiep - o trong thi khong co gi bi xoa nham trong game) */
+- (void)datLai {
+    _daGui = @"";
+    self.text = @"";
+}
+
+- (void)kieuMatKhau:(BOOL)mk {
+    if (self.secureTextEntry == mk) return;
+    self.secureTextEntry = mk;
+    [self datLai];
+    if (self.isFirstResponder) [self reloadInputViews];
+}
+
+- (BOOL)becomeFirstResponder {
+    if (!self.isFirstResponder) [self datLai];
+    return [super becomeFirstResponder];
+}
+
+- (void)doiChu {
+    NSString *t = self.text ?: @"";
+    NSString *cu = _daGui ?: @"";
+    if ([t isEqualToString:cu]) return;
+    NSUInteger p = 0, n = MIN(t.length, cu.length);
+    while (p < n && [t characterAtIndex:p] == [cu characterAtIndex:p]) p++;
+    /* khong cat giua cap thay the UTF-16 (emoji) */
+    if (p > 0 && p < cu.length && CFStringIsSurrogateLowCharacter([cu characterAtIndex:p])) p--;
+    _daGui = [t copy];
+    if (!gStarted) return;
+    NSUInteger xoa = so_ky_tu_game(cu, p);
+    for (NSUInteger i = 0; i < xoa; i++) key_tap(-8);
+    if (t.length > p) type_text([t substringFromIndex:p]);
+    if (t.length > 200 && !self.markedTextRange) [self datLai];  /* chat dai: khong giu mai */
+}
+
+- (void)insertText:(NSString *)text {
+    [super insertText:text];
+    [self doiChu];
+}
+
+- (void)deleteBackward {
+    if (self.text.length == 0) {
+        if (gStarted) key_tap(-8);   /* o an da trong (chu cu tu o truoc / da gui): van xoa trong o game */
+        return;
+    }
+    [super deleteBackward];
+    [self doiChu];
+}
+
+- (BOOL)textFieldShouldReturn:(UITextField *)tf {
+    [self doiChu];
+    if (gStarted) key_tap(-5);
+    [self datLai];
+    return NO;
+}
+
+/* khong hien menu Chep / Dan, kinh lup... cho o an */
+- (BOOL)canPerformAction:(SEL)action withSender:(id)sender { return NO; }
+- (CGRect)caretRectForPosition:(UITextPosition *)position { return CGRectZero; }
 @end
 
 /* ============================================================ man cai dat (chi co giao dien, giu nut Aa 1 giay) */
@@ -494,6 +585,9 @@ static void ios_kb_hook(int show, int area);
     if (!gStarted) return;
     _gameKbArea = show ? MAX(1, area) : 0;
     if (show) {
+        /* KbHook: 1 o chu thuong, 2 o mat khau; goi lai khi doi o -> o an bat dau lai tu dau */
+        [_keys kieuMatKhau:(show == 2)];
+        [_keys datLai];
         if (!_keys.isFirstResponder) [_keys becomeFirstResponder];
     } else if (_keys.isFirstResponder) {
         [_keys resignFirstResponder];
