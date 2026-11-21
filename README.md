@@ -22,8 +22,18 @@ Trang web có thể dùng tên miền khác bật proxy (đám mây cam); `web.p
 ## Trang quản trị
 
 Vào `http://ten.mien.cua.ban/quan-tri/` bằng tài khoản admin (mật khẩu in ra lúc cài lần đầu, xem `/opt/avatar/THONG_TIN.txt`).
+Giao diện sáng / tối, dùng tốt trên điện thoại. Mọi thao tác được ghi vào **Nhật ký**.
 
-- **Cài đặt game**: ô đất, cây khế, auto đập đồ, điểm danh. **Nâng cấp**: tỉ lệ / giá đập đồ (Thợ kim hoàn, Pay To Win, Chay To Win).
-- **Tặng quà**: tặng xu / lượng / vật phẩm cho một tài khoản (online nhận ngay, offline vào game nhận).
+- **Tổng quan**: người online, tài khoản, tiền nạp hôm nay / 30 ngày, đơn nạp đang chờ, thao tác gần đây.
+- **Người chơi**: tìm / lọc / sắp xếp; trang từng người: cộng trừ xu, lượng, xèng + tặng đồ, nhắn tin, mời ra khỏi game,
+  khóa (có thời hạn, lý do) / mở khóa, đặt mật khẩu mới, xóa tài khoản (sao lưu trước, khôi phục được).
+- **Nạp tiền**: gói nạp (giá, xu, lượng, xèng, vật phẩm); người chơi nạp ở trang Tài khoản bằng mã QR chuyển khoản.
+  Thanh toán tự động qua SePay: tạo webhook trỏ tới `http(s)://ten.mien.cua.ban/api/pl/sepay`, chứng thực API Key
+  (tạo khóa ở tab "Tài khoản nhận & SePay"). Chưa cài SePay thì xác nhận tay từng đơn.
+- **Thông báo**: gửi chạy chữ / hộp thông báo cho mọi người đang online. **Máy chủ**: bật / tắt bảo trì (báo trước rồi mời ra,
+  chỉ quản trị viên vào được game, khởi động lại vẫn giữ).
+- **Cửa hàng & giá**: giá từng vật phẩm, đồ ăn, bộ thời trang. **Cài đặt game**: nông trại, cây khế, auto, sòng bài
+  (Bầu Cua, Tiến Lên, Phỏm, Kim Cương). **Nâng cấp**: tỉ lệ / giá đập đồ.
+- **Tặng quà**, **Mã quà tặng**, **Sự kiện** đua top, **Người ảo**, **Đấu trường boss**, **Bắn cá**.
 - **Trang web**: link nhóm Zalo / Zalo admin / Facebook trên trang chủ; tải APK / IPA / JAR mới lên – máy chủ tự gắn địa chỉ (mã hóa) rồi thay file tải.
   Chạy lại lệnh cài vẫn giữ các link này, và giữ app đã tải lên nếu nó mới hơn bản trong gói.
