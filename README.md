@@ -35,5 +35,7 @@ Giao diện sáng / tối, dùng tốt trên điện thoại. Mọi thao tác đ
 - **Cửa hàng & giá**: giá từng vật phẩm, đồ ăn, bộ thời trang. **Cài đặt game**: nông trại, cây khế, auto, sòng bài
   (Bầu Cua, Tiến Lên, Phỏm, Kim Cương). **Nâng cấp**: tỉ lệ / giá đập đồ.
 - **Tặng quà**, **Mã quà tặng**, **Sự kiện** đua top, **Người ảo**, **Đấu trường boss**, **Bắn cá**.
-- **Trang web**: link nhóm Zalo / Zalo admin / Facebook trên trang chủ; tải APK / IPA / JAR mới lên – máy chủ tự gắn địa chỉ (mã hóa) rồi thay file tải.
+- **Trang web**: link nhóm Zalo / Zalo admin / Facebook trên trang chủ; tải APK / JAR mới lên – máy chủ tự gắn địa chỉ (mã hóa) rồi thay file tải.
+  iPhone: dán link cài (TestFlight hoặc link tải trực tiếp `https://` / `itms-services://`) – nút iPhone trên trang tải mở link này,
+  kèm hướng dẫn cài theo loại link; bỏ link thì quay lại tải file IPA.
   Chạy lại lệnh cài vẫn giữ các link này, và giữ app đã tải lên nếu nó mới hơn bản trong gói.

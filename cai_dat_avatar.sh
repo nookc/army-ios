@@ -245,7 +245,7 @@ except Exception:
     sys.exit(0)
 p = sys.argv[2]
 s = open(p, encoding='utf-8').read()
-for k in ('tenGame', 'nhom', 'zalo', 'zaloAdmin', 'facebook', 'thongBao'):
+for k in ('tenGame', 'nhom', 'zalo', 'zaloAdmin', 'facebook', 'thongBao', 'ipaLink'):
     m = re.search(r"\b%s:\s*'([^'\\]*)'" % k, old)
     if not (m and m.group(1)):
         continue
