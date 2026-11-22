@@ -128,7 +128,11 @@ cat "$G/PHIEN_BAN.txt" 2>/dev/null || true
 
 # ---------------------------------------------------------------- 3. dia chi may chu
 IP=$(curl -4 -fsS --max-time 8 https://api.ipify.org 2>/dev/null || curl -4 -fsS --max-time 8 https://ifconfig.me 2>/dev/null || hostname -I | awk '{print $1}')
-HOSTNAME_GAME="${MAY_CHU:-$IP}"
+# chay lai lenh cap nhat ma quen MAY_CHU: dung lai ten mien lan truoc (chi ten mien; IP thi lay IP hien tai vi doi VPS la doi IP)
+CU=$(cut -d: -f1 "$DIR/client/DIA_CHI.txt" 2>/dev/null | head -n 1 | tr -d '[:space:]')
+case "$CU" in *[a-zA-Z]*) ;; *) CU="" ;; esac
+[ -z "${MAY_CHU:-}" ] && [ -n "$CU" ] && echo "Dung lai ten mien lan truoc: $CU (muon doi thi dat MAY_CHU=... truoc lenh)"
+HOSTNAME_GAME="${MAY_CHU:-${CU:-$IP}}"
 [ -n "$HOSTNAME_GAME" ] || loi "khong biet IP cong khai cua VPS: dat MAY_CHU=ip-hoac-ten-mien truoc lenh"
 DIACHI="$HOSTNAME_GAME:$GAME_PORT"
 echo "Dia chi may chu game: $DIACHI"

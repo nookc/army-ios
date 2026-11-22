@@ -16,6 +16,8 @@ Thêm `MAY_CHU=ten.mien.cua.ban` trước `bash`: APK / IPA / JAR trên trang t�
 
     curl -fsSL https://raw.githubusercontent.com/nookc/army-ios/avatar-vps/cai_dat_avatar.sh | sudo MAY_CHU=ten.mien.cua.ban bash -s -- MAT_KHAU_GOI
 
+Chạy lại lệnh để cập nhật mà quên `MAY_CHU=...` thì tự dùng lại tên miền của lần cài trước (app trên trang tải không bị đổi sang IP).
+
 Tên miền cho game phải trỏ thẳng về VPS (bản ghi A). Nếu dùng Cloudflare thì để **DNS only** (đám mây xám), vì game chạy cổng TCP 19128.
 Trang web có thể dùng tên miền khác bật proxy (đám mây cam); `web.py` tự lấy IP thật của người dùng qua `CF-Connecting-IP`.
 
