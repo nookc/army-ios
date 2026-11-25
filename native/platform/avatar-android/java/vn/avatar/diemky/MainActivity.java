@@ -935,6 +935,14 @@ public final class MainActivity extends Activity {
                     dongBo();
                     keyTap(-5);
                     datLai();
+                    // ban phim bat bang nut Aa (game khong xin): bam Gui / Xong la xong cau chat -> dong ban phim
+                    // (tester: chat xong ban phim van mo). Game dang xin (o go chu cua game) thi de game tu dong (KbHook).
+                    if (gameKbArea == 0) {
+                        InputMethodManager imm = (InputMethodManager) v.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                        if (imm != null) {
+                            imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+                        }
+                    }
                 }
 
                 @Override

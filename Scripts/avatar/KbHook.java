@@ -68,6 +68,13 @@ public final class KbHook {
                 dm.d = false;
                 dm.b().b[4] = 0;
                 main.a.a.b(); // -> sync() tat ban phim dien thoai
+                return true;
+            }
+            // Bam bong chat roi moi go: luc bat ban phim o chat chua mo (im.c chi bat khi da co chu) -> truoc day "chat"
+            // ghi false mai, gui xong ban phim van mo (tester: "chat xong ban phim khong tat"). Nay o chat mo luc nao
+            // trong lan go nay cung nho, gui / dong o chat la tat ban phim.
+            if (im.c) {
+                chat = true;
             }
             return true;
         }

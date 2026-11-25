@@ -40,6 +40,8 @@ static NSString *gArgServer;
 static void log_roots(const char *when);
 static void autotest(void);
 static __weak GameVC *gVC;
+/* game dang xin ban phim (KbHook: o go chu cua game). 0 = ban phim do nguoi choi tu bat bang nut Aa */
+static int gGameXinPhim = 0;
 
 static const int SIZES[] = {240, 320, 360};
 static NSString *const SIZE_NAMES[] = {@"To (240)", @"Vừa (320)", @"Nhỏ (360)"};
@@ -276,6 +278,10 @@ static NSUInteger so_ky_tu_game(NSString *s, NSUInteger tu) {
     [self doiChu];
     if (gStarted) key_tap(-5);
     [self datLai];
+    /* ban phim bat bang nut Aa (game khong xin): bam Gui / Xong la xong cau chat -> dong ban phim (tester: chat xong ban
+     * phim van mo che man hinh). Game dang xin ban phim (o go chu cua game) thi de game tu dong (KbHook) - vd dang nhap
+     * xong o tai khoan con sang o mat khau. */
+    if (!gGameXinPhim) [self resignFirstResponder];
     return NO;
 }
 
@@ -584,6 +590,7 @@ static void ios_kb_hook(int show, int area);
 - (void)gameKeyboard:(int)show area:(int)area {
     if (!gStarted) return;
     _gameKbArea = show ? MAX(1, area) : 0;
+    gGameXinPhim = show ? 1 : 0;
     if (show) {
         /* KbHook: 1 o chu thuong, 2 o mat khau; goi lai khi doi o -> o an bat dau lai tu dau */
         [_keys kieuMatKhau:(show == 2)];
