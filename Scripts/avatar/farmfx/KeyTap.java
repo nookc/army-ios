@@ -457,7 +457,50 @@ public final class KeyTap {
         main.a.a(s, h);
     }
 
+    /**
+     * Bau Cua (ja.l / ja.j, lan 34 "cuoc khong gioi han"): game goc chi cho bam dat 6 chip / van. Nay moi o toi da 127 chip
+     * (so chip 1 o gui may chu bang 1 byte). o = ja.O (cac o kl, kl.b = so chip dang bam), v = o dang chon.
+     */
+    public static boolean chipO(java.util.Vector o, int v) {
+        try {
+            return ((kl) o.elementAt(v)).b < 127;
+        } catch (Throwable t) {
+            return false;
+        }
+    }
+
+    /** Bau Cua: tien bay giua 2 ghe (lenh 60). Game goc luu so tien vao short (dn.o) -> tren 32.767 hien so sai: giu so
+     *  int o dn.c (truong khong dung toi o hieu ung nay) */
+    public static void datTienBay(dn d, int n) {
+        d.o = (short) n;
+        d.c = n;
+    }
+
+    /** chu "+..." tren dong tien bay: so day du (phong so nay khong co dau cham - ve '.' thanh '0') */
+    public static String tienBay(dn d) {
+        return String.valueOf(d.c != 0 ? d.c : d.o);
+    }
+
+    /** lan cham nay da keo ngang la bai (khoa huong toi khi nhac tay) - xem keoDoc() */
+    static boolean keoNgang;
+
+    /**
+     * Tien len (kd.l) / Phom (kg.l): thay main.a.l() (do lech doc tu luc cham). Game goc: lech doc qua 10 diem anh la
+     * "chon / bo chon" la bai NGAY CA khi dang keo ngang de doi cho -> tren dien thoai ngon tay hoi xien la la bai khong
+     * dich duoc ("danh bai khong sap xep duoc la bai"). Nay: keo ngang la chinh (ngang >= doc) hoac lan cham nay da keo
+     * ngang qua 10 diem anh thi coi nhu khong lech doc, cho toi khi nhac tay.
+     */
+    public static int keoDoc() {
+        int dx = main.a.k(), dy = main.a.l();
+        int ax = Math.abs(dx), ay = Math.abs(dy);
+        if (!keoNgang && ax > 10 && ax >= ay) {
+            keoNgang = true;
+        }
+        return keoNgang || ax >= ay ? 0 : dy;
+    }
+
     public static void g(int x, int y) {
+        keoNgang = false;                // lan cham moi: chua keo ngang
         if (DauTruong.cham(x, y)) {
             return;                      // cham vao bang sung / nut / boss o dau truong
         }

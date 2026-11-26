@@ -21,6 +21,10 @@ import java.util.zip.*;
  *  7) ea.b(Graphics) (ban do thanh pho): ve nhan khu qua KeyTap.nhanBanDo(): nhan kep mep khong chong len nhau
  *  8) dx.e(): KeyTap.oChu(this) (o chu dang chon, KbHook ban app biet o mat khau); dx.H mo public
  *  9) cy (danh sach co nhan vat: bang xep hang, ban be): dong cao hon (KeyTap.caoHang) + nhan vat cat theo o dong
+ * 11) kd.l() (Tien len) / kg.l() (Phom): main.a.l() (lech doc khi keo) -> KeyTap.keoDoc(): keo ngang de doi cho la bai
+ *     khong con bi "chon / bo chon" chen ngang khi ngon tay hoi xien (lan 34)
+ * 12) ja (Bau Cua, lan 34): bam dat chip "az < 6" (6 lan / van) -> KeyTap.chipO(O, V): cuoc khong gioi han, moi o toi da
+ *     127 chip (1 byte); tien bay giua 2 ghe (lenh 60) luu short (tren 32.767 hien sai) -> KeyTap.datTienBay / tienBay
  * 10) ae.a(...) / gt.a(): luoi do "chi xem" (cua hang 27 / 28 may chu gui khi xem ruong / do dang mac nguoi khac):
  *     nut "Chi tiết" thay "Mua", bam vao hien hop thong tin thay vi hoi Co / Khong; jx.a(): khung thong tin cua mon
  *     ghi dong may chu gui (KeyTap.thongTinXem) thay cho tien cua minh. Truong cua jx / gt mo public (KeyTap doc)
@@ -87,6 +91,9 @@ public class PatchFarmFx {
                 case "jx.class": data = va(va(va(data, PatchFarmFx::thongTinXem, can, name), PatchFarmFx::moTruong, can, name), PatchFarmFx::veO, can, name); break;
                 case "fz.class": data = va(data, PatchFarmFx::veO, can, name); break;
                 case "dp.class": data = va(data, PatchFarmFx::dauShop, can, name); break;
+                case "kd.class":
+                case "kg.class": data = va(data, PatchFarmFx::keoBai, can, name); break;
+                case "ja.class": data = va(data, PatchFarmFx::bauCua, can, name); break;
                 default: break;
             }
             zo.putNextEntry(new ZipEntry(name));
@@ -122,7 +129,9 @@ public class PatchFarmFx {
                 && can.getOrDefault("nut_shop", 0) == 1 && can.getOrDefault("hoi_shop", 0) == 2
                 && can.getOrDefault("tt_xem", 0) == 1 && can.getOrDefault("mo_truong", 0) == 2
                 && can.getOrDefault("dau_shop", 0) == 1 && can.getOrDefault("ve_o", 0) == 2
-                && can.getOrDefault("ve_preview", 0) == 1 && can.getOrDefault("ve_noi", 0) == 1;
+                && can.getOrDefault("ve_preview", 0) == 1 && can.getOrDefault("ve_noi", 0) == 1
+                && can.getOrDefault("keo_bai", 0) == 2
+                && can.getOrDefault("bc_chip", 0) == 2 && can.getOrDefault("bc_bay", 0) == 1 && can.getOrDefault("bc_bay_ve", 0) == 1;
         if (!ok) {
             System.out.println("PatchFarmFx: SO CHO SUA KHONG KHOP -> dung");
             new File(a[1]).delete();
@@ -357,6 +366,79 @@ public class PatchFarmFx {
     }
 
     // mo public moi truong (khong static) cua lop: KeyTap doc truc tiep
+    // 11) kd.l() / kg.l(): INVOKESTATIC main/a.l()I (lech doc tu luc cham) -> KeyTap.keoDoc()I. Moi lop dung 1 cho.
+    static void keoBai(ClassNode cn, Map<String, Integer> can) {
+        int n0 = 0;
+        for (MethodNode mn : cn.methods) {
+            if (!mn.name.equals("l") || !mn.desc.equals("()V")) {
+                continue;
+            }
+            for (AbstractInsnNode n = mn.instructions.getFirst(); n != null; n = n.getNext()) {
+                if (n instanceof MethodInsnNode) {
+                    MethodInsnNode m = (MethodInsnNode) n;
+                    if (m.getOpcode() == Opcodes.INVOKESTATIC && m.owner.equals("main/a") && m.name.equals("l") && m.desc.equals("()I")) {
+                        m.owner = "KeyTap";
+                        m.name = "keoDoc";
+                        n0++;
+                    }
+                }
+            }
+        }
+        if (n0 == 1) {
+            dem(can, "keo_bai");
+        } else {
+            System.out.println("keoBai " + cn.name + ": " + n0 + " cho (can 1)");
+        }
+    }
+
+    // 12) ja (Bau Cua): ALOAD x; GETFIELD ja.az B; BIPUSH 6; IF_ICMPGE L (l() va j()) -> ALOAD x; GETFIELD ja.O; ALOAD x;
+    //     GETFIELD ja.V; INVOKESTATIC KeyTap.chipO(Vector,I)Z; IFEQ L. ja.a(BBI)V: I2S; PUTFIELD dn.o S -> KeyTap.datTienBay.
+    //     ja.a(Graphics): GETFIELD dn.o S; StringBuffer.append(I) -> KeyTap.tienBay(dn) + append(String)
+    static void bauCua(ClassNode cn, Map<String, Integer> can) {
+        for (MethodNode mn : cn.methods) {
+            for (AbstractInsnNode n = mn.instructions.getFirst(); n != null; n = n.getNext()) {
+                if (n.getOpcode() == Opcodes.GETFIELD && ((FieldInsnNode) n).owner.equals("ja") && ((FieldInsnNode) n).name.equals("az")) {
+                    AbstractInsnNode truoc = n.getPrevious(), sau = n.getNext(), nhay = sau == null ? null : sau.getNext();
+                    if (truoc instanceof VarInsnNode && truoc.getOpcode() == Opcodes.ALOAD && sau instanceof IntInsnNode
+                            && ((IntInsnNode) sau).operand == 6 && nhay != null && nhay.getOpcode() == Opcodes.IF_ICMPGE) {
+                        int x = ((VarInsnNode) truoc).var;
+                        FieldInsnNode f = (FieldInsnNode) n;
+                        f.name = "O";
+                        f.desc = "Ljava/util/Vector;";
+                        InsnList them = new InsnList();
+                        them.add(new VarInsnNode(Opcodes.ALOAD, x));
+                        them.add(new FieldInsnNode(Opcodes.GETFIELD, "ja", "V", "B"));
+                        them.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "KeyTap", "chipO", "(Ljava/util/Vector;I)Z", false));
+                        mn.instructions.insert(sau, them);
+                        mn.instructions.remove(sau);
+                        ((JumpInsnNode) nhay).setOpcode(Opcodes.IFEQ);
+                        n = nhay;
+                        dem(can, "bc_chip");
+                        continue;
+                    }
+                }
+                if (n.getOpcode() == Opcodes.PUTFIELD && ((FieldInsnNode) n).owner.equals("dn") && ((FieldInsnNode) n).name.equals("o")
+                        && mn.desc.equals("(BBI)V") && n.getPrevious() != null && n.getPrevious().getOpcode() == Opcodes.I2S) {
+                    mn.instructions.remove(n.getPrevious());
+                    MethodInsnNode m = new MethodInsnNode(Opcodes.INVOKESTATIC, "KeyTap", "datTienBay", "(Ldn;I)V", false);
+                    mn.instructions.set(n, m);
+                    n = m;
+                    dem(can, "bc_bay");
+                    continue;
+                }
+                if (n.getOpcode() == Opcodes.GETFIELD && ((FieldInsnNode) n).owner.equals("dn") && ((FieldInsnNode) n).name.equals("o")
+                        && n.getNext() instanceof MethodInsnNode && ((MethodInsnNode) n.getNext()).owner.equals("java/lang/StringBuffer")
+                        && ((MethodInsnNode) n.getNext()).name.equals("append") && ((MethodInsnNode) n.getNext()).desc.equals("(I)Ljava/lang/StringBuffer;")) {
+                    ((MethodInsnNode) n.getNext()).desc = "(Ljava/lang/String;)Ljava/lang/StringBuffer;";
+                    MethodInsnNode m = new MethodInsnNode(Opcodes.INVOKESTATIC, "KeyTap", "tienBay", "(Ldn;)Ljava/lang/String;", false);
+                    mn.instructions.set(n, m);
+                    n = m;
+                    dem(can, "bc_bay_ve");
+                }
+            }
+        }
+    }
+
     static void moTruong(ClassNode cn, Map<String, Integer> can) {
         for (FieldNode f : cn.fields) {
             if ((f.access & Opcodes.ACC_STATIC) == 0) {
