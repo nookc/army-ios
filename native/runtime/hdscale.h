@@ -13,6 +13,7 @@ void hd_bicubic(int N, const uint32_t *src, uint32_t *dst, int w, int h);
 /* doi co bat ky bang trung binh dien tich */
 void hd_area(const uint32_t *src, int sw, int sh, uint32_t *dst, int dw, int dh);
 /* 1 = anh x2 chi la anh x1 nhan doi tung diem */
+void hd_lin(const uint32_t *src, int sw, int sh, uint32_t *dst, int dw, int dh);   /* noi suy 2 chieu, alpha nhan truoc */
 int hd_doubled(const uint32_t *src, int w, int h);
 /* 1 = anh "min" (khong phai pixel art) */
 int hd_smooth(const uint32_t *src, int w, int h);

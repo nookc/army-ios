@@ -10,6 +10,7 @@ public final class ChamVat {
     }
 
     public static boolean cham() {
+        HdUi.chamNuoc();        // ban HD: cham vao nuoc o khu cau ca -> quang can (xem HdUi)
         try {
             // chi o nong trai cua minh (ban do 24 / 53); man khu nong trai (25) cung la go nhung con vat khong ve o do
             if (!(main.a.r instanceof go) || (ir.a != 24 && ir.a != 53) || go.y || go.b != main.GameMidlet.i.w

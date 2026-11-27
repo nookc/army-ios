@@ -15,6 +15,14 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 #include "font_data.h"
+/* lenh vector (ve hang nhanh, hieu ung HD): phai nam truoc moi tep gop ben duoi */
+#if defined(__aarch64__)
+#include <arm_neon.h>
+#define ROW_NEON 1
+#elif defined(__SSE2__)
+#include <emmintrin.h>
+#define ROW_SSE2 1
+#endif
 #include "hdscale.c"   /* may HD: phong to anh (xBRZ / bicubic). Gop vao day de cac kich ban build khong phai them tep */
 
 #define G(o) ((struct O_javax_microedition_lcdui_Graphics *)(o))
@@ -106,10 +114,10 @@ static hd_ent *hd_get(struct O_javax_microedition_lcdui_Image *im, int rq) {
             return 0;
         }
         int lw = im->f_w_I / s, lh = im->f_h_I / s, k = rq;
-        while (k > 1 && (int64_t)lw * k * lh * k > HD_BIG_MAX) k--;
+        while (k > 1 && k > s && (int64_t)lw * k * lh * k > HD_BIG_MAX) k--;
         size_t est = (size_t)lw * k * lh * k * 4;
         int md = (gfx_hd_fx && im->f_smooth_I != 1) ? want_mode : 0;
-        int ok = k > 1 && (k != s || md != 0);        /* cung he so van lam neu can hieu ung (ban sao da xu ly) */
+        int ok = (k > 1 || s > 1) && (k != s || md != 0);       /* cung he so van lam neu can hieu ung (ban sao da xu ly) */
         if (ok && !hd_room(est)) {
             /* het han muc va moi thu dang duoc dung: ve tam ban goc, thu lai o khung sau */
             pthread_mutex_unlock(&hd_mu);
@@ -211,8 +219,8 @@ static const uint32_t *img_px(jctx *t, struct O_javax_microedition_lcdui_Image *
     (void)t;
     int s = im->f_hd_I > 1 ? im->f_hd_I : 1;
     *pin = 0;
-    if (gfx_hdk > 1 && k > 1 && !im->f_mutable_Z) {
-        int rq = k > gfx_hdk ? gfx_hdk : k;
+    if (gfx_hdk > 1 && !im->f_mutable_Z) {
+        int rq = k > gfx_hdk ? gfx_hdk : k;     /* k = 1: Canvas rieng (ban ca) - anh net cao hon thi thu nho min */
         if (s != rq || (gfx_hd_mode && im->f_smooth_I != 1) || im->f_bslot_I) {
             hd_ent *e = hd_get(im, rq);
             if (e) {
@@ -268,13 +276,6 @@ static int target(jctx *t, jobj g, tgt *o) {
     return x1 > x0 && y1 > y0;
 }
 
-#if defined(__aarch64__)
-#include <arm_neon.h>
-#define ROW_NEON 1
-#elif defined(__SSE2__)
-#include <emmintrin.h>
-#define ROW_SSE2 1
-#endif
 
 static inline uint32_t blend(uint32_t s, uint32_t d) {
     uint32_t a = s >> 24;
@@ -506,10 +507,22 @@ static int rr_span(int ly, int w, int h, int rx, int ry, int *L, int *R) {
     return 1;
 }
 
+static void hd_ui(tgt *o, int X, int Y, int Wd, int Hd, int R, int kieu, uint32_t color);
+
 static void round_rect(jctx *t, jobj self, int x, int y, int w, int h, int aw, int ah, int fill) {
     if (w <= 0 || h <= 0) return;
     tgt o;
     if (!target(t, self, &o)) return;
+    if (fill && G(self)->f_hdKieu_I) {
+        /* May HD: HdUi dat kieu ve giao dien 3D cho lan fillRoundRect nay (bong do / lop bong sang / nut kinh) */
+        int kieu = G(self)->f_hdKieu_I;
+        G(self)->f_hdKieu_I = 0;
+        if (gfx_hdk > 1 && o.k == gfx_hdk) {
+            int k = phys(&o);
+            hd_ui(&o, (x + o.tx / k) * k, (y + o.ty / k) * k, w * k, h * k, aw * k / 2, kieu, o.color);
+        }
+        return;
+    }
     int th = 1;   /* do day vien (diem anh dich) */
     if (o.hdp) {
         int k = phys(&o);

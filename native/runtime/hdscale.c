@@ -410,6 +410,61 @@ static void norm_alpha(uint32_t *p, size_t n) {
         if (!(p[i] >> 24)) p[i] = 0;
 }
 
+/* phong to noi suy 2 chieu (alpha nhan truoc) - anh min, ti le khong nguyen (vd x3 -> x4) */
+void hd_lin(const uint32_t *src, int sw, int sh, uint32_t *dst, int dw, int dh) {
+    if (sw <= 0 || sh <= 0 || dw <= 0 || dh <= 0) return;
+    int *ix = (int *)malloc((size_t)dw * 2 * sizeof(int));
+    if (!ix) {
+        hd_area(src, sw, sh, dst, dw, dh);
+        return;
+    }
+    for (int x = 0; x < dw; x++) {
+        double u = (x + 0.5) * sw / dw - 0.5;
+        if (u < 0) u = 0;
+        if (u > sw - 1) u = sw - 1;
+        int x0 = (int)u;
+        ix[x * 2] = x0;
+        ix[x * 2 + 1] = x0 + 1 < sw ? (int)((u - x0) * 256.0 + 0.5) : 0;
+    }
+    for (int y = 0; y < dh; y++) {
+        double v = (y + 0.5) * sh / dh - 0.5;
+        if (v < 0) v = 0;
+        if (v > sh - 1) v = sh - 1;
+        int y0 = (int)v;
+        int ty = y0 + 1 < sh ? (int)((v - y0) * 256.0 + 0.5) : 0;
+        const uint32_t *r0 = src + (size_t)y0 * sw, *r1 = ty ? r0 + sw : r0;
+        uint32_t *d = dst + (size_t)y * dw;
+        for (int x = 0; x < dw; x++) {
+            int x0 = ix[x * 2], tx = ix[x * 2 + 1];
+            int x1 = tx ? x0 + 1 : x0;
+            uint32_t c00 = r0[x0], c10 = r0[x1], c01 = r1[x0], c11 = r1[x1];
+            uint32_t w00 = (uint32_t)(256 - tx) * (256 - ty), w10 = (uint32_t)tx * (256 - ty), w01 = (uint32_t)(256 - tx) * ty,
+                     w11 = (uint32_t)tx * ty;
+            uint32_t a00 = c00 >> 24, a10 = c10 >> 24, a01 = c01 >> 24, a11 = c11 >> 24;
+            if ((a00 & a10 & a01 & a11) == 255) {
+                uint32_t r = (((c00 >> 16) & 255) * w00 + ((c10 >> 16) & 255) * w10 + ((c01 >> 16) & 255) * w01 + ((c11 >> 16) & 255) * w11 + 32768) >> 16;
+                uint32_t g = (((c00 >> 8) & 255) * w00 + ((c10 >> 8) & 255) * w10 + ((c01 >> 8) & 255) * w01 + ((c11 >> 8) & 255) * w11 + 32768) >> 16;
+                uint32_t b = ((c00 & 255) * w00 + (c10 & 255) * w10 + (c01 & 255) * w01 + (c11 & 255) * w11 + 32768) >> 16;
+                d[x] = 0xFF000000u | (r << 16) | (g << 8) | b;
+                continue;
+            }
+            uint64_t A = (uint64_t)a00 * w00 + (uint64_t)a10 * w10 + (uint64_t)a01 * w01 + (uint64_t)a11 * w11;
+            if (A < 32768) {
+                d[x] = 0;
+                continue;
+            }
+            uint64_t q00 = (uint64_t)a00 * w00, q10 = (uint64_t)a10 * w10, q01 = (uint64_t)a01 * w01, q11 = (uint64_t)a11 * w11;
+            uint32_t r = (uint32_t)((((c00 >> 16) & 255) * q00 + ((c10 >> 16) & 255) * q10 + ((c01 >> 16) & 255) * q01 + ((c11 >> 16) & 255) * q11 + A / 2) / A);
+            uint32_t g = (uint32_t)((((c00 >> 8) & 255) * q00 + ((c10 >> 8) & 255) * q10 + ((c01 >> 8) & 255) * q01 + ((c11 >> 8) & 255) * q11 + A / 2) / A);
+            uint32_t b = (uint32_t)(((c00 & 255) * q00 + (c10 & 255) * q10 + (c01 & 255) * q01 + (c11 & 255) * q11 + A / 2) / A);
+            uint32_t al = (uint32_t)((A + 32768) >> 16);
+            if (al > 255) al = 255;
+            d[x] = (al << 24) | (r << 16) | (g << 8) | b;
+        }
+    }
+    free(ix);
+}
+
 uint32_t *hd_make(const uint32_t *src, int w, int h, int s, int K, int smooth, int *ow, int *oh) {
     if (s < 1) s = 1;
     if (K < 1) K = 1;
@@ -433,6 +488,17 @@ uint32_t *hd_make(const uint32_t *src, int w, int h, int s, int K, int smooth, i
             cw = lw;
             ch = lh;
             cs = 1;
+        }
+    }
+    if (smooth && cs < K && K % cs != 0) {
+        /* anh min, ti le khong nguyen (anh dau truong x3 len man x4...): noi suy thang ve dung co */
+        uint32_t *t = (uint32_t *)malloc((size_t)lw * K * lh * K * 4);
+        if (t) {
+            hd_lin(cur, cw, ch, t, lw * K, lh * K);
+            free(cur);
+            *ow = lw * K;
+            *oh = lh * K;
+            return t;
         }
     }
     /* phong to len he so >= K bang cac buoc nguyen */

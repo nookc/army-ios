@@ -304,10 +304,9 @@ public final class Ui {
         if (s < 1) {
             s = 1;
         }
-        int k = (K + s - 1) / s;
-        if (k < 1) {
-            k = 1;
-        }
+        // Canvas phong to s lan (ban ban ca: anh ve 3D lam san cho co do) ve dung co cua no (k = 1) nhu ban thuong - khong
+        // phong to anh lan nua (ton bo nho, khong net hon); nen tang keo khung ra man hinh
+        int k = s > 1 ? 1 : K;
         int lw = Disp.width() * s, lh = Disp.height() * s;
         int pw = lw * k, ph = lh * k;
         if (manImg == null || Display.rawWidth(manImg) != pw || Display.rawHeight(manImg) != ph) {

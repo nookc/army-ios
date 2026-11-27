@@ -24,6 +24,8 @@ public class Graphics {
     /* Avatar: ve hinh (cung, chu nhat bo goc, duong thang) o diem anh that tren man net cao -> min, khong rang cua.
      * Lop phu dau truong bat bang setStrokeStyle(0x4844) / tat 0x4845 (may J2ME that nem loi -> lop phu bo qua). */
     boolean hdp;
+    /** May HD: kieu ve giao dien 3D cho lan fillRoundRect ke tiep (C doc roi xoa) */
+    int hdKieu;
 
     Graphics(Image target) {
         img = target;
@@ -113,6 +115,11 @@ public class Graphics {
     public void setStrokeStyle(int s) {
         if (s == 0x4844 || s == 0x4845) {
             hdp = s == 0x4844 || j2n.Disp.hdK() > 1;
+            return;
+        }
+        if (s >= 0x4861 && s <= 0x4863) {
+            // May HD: lan fillRoundRect ke tiep ve theo kieu giao dien 3D (1 bong do khung, 2 lop bong sang, 3 nut kinh)
+            hdKieu = s - 0x4860;
             return;
         }
         if (s == 0x4850 || s == 0x4851) {
