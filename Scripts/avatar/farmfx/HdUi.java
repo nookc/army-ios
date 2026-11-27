@@ -177,13 +177,98 @@ public final class HdUi {
      * do, ve xong thi lam hau ky canh (loa sang, tia nang, toi goc, bui sang) truoc khi ve ten / HUD.
      * PatchFarmFx doi moi cho goi ir.b / ir.d sang 2 ham nay.
      */
+    /**
+     * Chu de quan tri chon (may chu gui lenh 119 / 9 - xem DauTruong.tin): 0 khong, 1 Giang sinh, 2 Tinh nhan, 3 Vui nhon,
+     * 4 Halloween. Ban HD ve hieu ung + vat trang tri theo chu de; ban thuong bo qua.
+     */
+    public static int chuDe;
+
     public static void nenTg(ir o, Graphics g) {
-        o.b(g);         // nen (o gach mat dat): giu phang, khong do bong
-        if (hd()) {
+        boolean hd = hd();
+        if (hd) {
+            try {
+                g.setStrokeStyle(0x4870 + (chuDe >= 0 && chuDe <= 7 ? chuDe : 0));     // bao chu de cho may ve
+                g.setStrokeStyle(0x4852);                                              // sap ve nen
+            } catch (Throwable e) {
+            }
+        }
+        o.b(g);         // nen (o gach mat dat): giu phang, khong do bong (chi nhuom mau theo chu de)
+        if (hd) {
             try {
                 g.setStrokeStyle(0x4850);
             } catch (Throwable e) {
             }
+            if (ir.a != mapCu) {
+                mapCu = ir.a;
+                try {
+                    System.out.println("[hd] ban do " + ir.a + ": " + ir.e + " x " + (ir.e > 0 && ir.g != null ? ir.g.length / ir.e : 0) + " o");
+                } catch (Throwable e) {
+                }
+            }
+            HdTrangTri.capNhat();   // vat trang tri / cho chup anh cua ban HD (chen vao danh sach vat the cua ban do)
+        }
+    }
+
+    private static int mapCu = -999;
+
+    /**
+     * ir.d(g) ve 1 vat the TINH cua ban do (cay, ghe, nha... - danh sach ir.l): bao may ve HD de xu ly theo chu de (tuyet
+     * dong tren dinh, tan cay doi mau la thu) roi tra ve che do vat the dong. PatchFarmFx doi cho goi W.a(g) sang day.
+     */
+    public static void veVat(js o, Graphics g) {
+        if (!hd()) {
+            o.a(g);
+            return;
+        }
+        try {
+            g.setStrokeStyle(0x4853);
+        } catch (Throwable e) {
+        }
+        o.a(g);
+        try {
+            g.setStrokeStyle(0x4850);
+        } catch (Throwable e) {
+        }
+    }
+
+    /*
+     * "Chuyen dong song" cho do KHONG co khung hoat hinh (lop ld thuong, khong phai fa): canh / duoi / do deo lung (lop 5)
+     * vay nhe, hao quang (lop 3) phap phong, thu cung (db ve, lop -1) nhun. May ve HD lam bien dang luc ve; ban thuong
+     * goi thang ham goc. PatchFarmFx doi cho goi ld.a o hn.a(Graphics) va db.a(Graphics) sang 2 ham nay.
+     */
+    public static void vePhan(ld p, Graphics g, int a, int x, int y, int d) {
+        int kieu = 0;
+        if (hd() && !(p instanceof fa)) {
+            kieu = p.j == 5 ? 1 : p.j == 3 ? 3 : 0;
+        }
+        if (kieu == 0) {
+            p.a(g, a, x, y, d);
+            return;
+        }
+        try {
+            g.setStrokeStyle(0x4880 + kieu);
+        } catch (Throwable e) {
+        }
+        p.a(g, a, x, y, d);
+        try {
+            g.setStrokeStyle(0x4880);
+        } catch (Throwable e) {
+        }
+    }
+
+    public static void veThu(ld p, Graphics g, int a, int b, int c) {
+        if (!hd() || p instanceof fa) {
+            p.a(g, a, b, c);
+            return;
+        }
+        try {
+            g.setStrokeStyle(0x4882);
+        } catch (Throwable e) {
+        }
+        p.a(g, a, b, c);
+        try {
+            g.setStrokeStyle(0x4880);
+        } catch (Throwable e) {
         }
     }
 
@@ -216,6 +301,13 @@ public final class HdUi {
 
     public static void chamNuoc() {
         cauCho = false;
+        try {
+            if (hd() && ir.u != null) {
+                // nhat ky (dat vat trang tri, tim loi): diem vua cham tren ban do
+                System.out.println("[hd] cham ban do " + ir.a + " tai " + ir.u.a / (js.ay <= 0 ? 1 : js.ay) + "," + ir.u.b / (js.ay <= 0 ? 1 : js.ay));
+            }
+        } catch (Throwable e) {
+        }
         try {
             if (!hd() || (ir.a != 14 && ir.a != 15 && ir.a != 16) || main.GameMidlet.i == null || ir.u == null || ir.i <= 0) {
                 return;

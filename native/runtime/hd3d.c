@@ -12,6 +12,13 @@
 
 int gfx_world;                      /* dang ve the gioi (giua hdCanh(1) va hdCanh(2)) */
 
+/* chu de (hdtheme.c, gop sau tep nay) */
+extern int gfx_theme;
+static void th_ground(uint32_t *px, int w, int h, int th);
+static void th_snowcap(uint32_t *px, int w, int h, int k);
+static void th_autumn(uint32_t *px, int w, int h);
+static void th_draw(uint32_t *fb, int W, int H, int x0, int y0, int x1, int y1, int k, int dem);
+
 /* ------------------------------------------------------------ 1) khoi noi */
 static void hd_relief(uint32_t *px, int w, int h, int k) {
     size_t n = (size_t)w * h;
@@ -115,8 +122,18 @@ static int hd_is_sprite(const uint32_t *px, int w, int h) {
     return 1;
 }
 
+/* mode: bit 0 khoi noi, bit 1 bong do, bit 2-4 chu de, bit 5 = anh nen (o gach / phong nen: chi nhuom mau theo chu de) */
 static void hd_post(uint32_t *px, int w, int h, int k, int mode) {
-    if ((mode & 1) && hd_is_sprite(px, w, h)) hd_relief(px, w, h, k);
+    int th = (mode >> 2) & 7;
+    if (mode & 32) {
+        if (th) th_ground(px, w, h, th);
+        return;
+    }
+    if ((mode & 64) && th == 4) th_autumn(px, w, h);           /* vat the ban do: tan cay xanh -> la thu vang cam */
+    if ((mode & 1) && hd_is_sprite(px, w, h)) {
+        hd_relief(px, w, h, k);
+        if (th == 1 && (mode & 64)) th_snowcap(px, w, h, k);    /* tuyet dong chi tren vat the ban do (khong len dau nguoi) */
+    }
 }
 
 /* ------------------------------------------------------------ 2) bong do
@@ -347,6 +364,22 @@ static void fx_dot_mau(uint32_t *fb, int W, int H, int x0, int y0, int x1, int y
     }
 }
 
+/* ngay hay dem? (game doi nen troi theo gio): do sang trung binh cua dai tren cung. 0 ngay, 1 dem (khong tia nang, bui
+ * sang thanh dom dom), 2 den kit = trong nha (phong nho giua man den: khong tia nang, khong hat) */
+static int fx_dem(const uint32_t *fb, int W, int x0, int y0, int x1, int y1, int k) {
+    long tong = 0;
+    int n = 0;
+    int yh = y0 + (y1 - y0) / 7;
+    for (int y = y0 + 2 * k; y < yh; y += 6 * k)
+        for (int x = x0 + 3 * k; x < x1; x += 9 * k) {
+            uint32_t c = fb[(size_t)y * W + x];
+            tong += (((c >> 16) & 255) * 77 + ((c >> 8) & 255) * 150 + (c & 255) * 29) >> 8;
+            n++;
+        }
+    if (n <= 0) return 0;
+    return tong / n < 14 ? 2 : tong / n < 96 ? 1 : 0;
+}
+
 /* fb: bo dem W x H (diem anh that), vung [x0,x1) x [y0,y1), k = diem anh that / diem logic */
 static void gfx_hd_scene(uint32_t *fb, int W, int H, int x0, int y0, int x1, int y1, int k) {
     if (x0 < 0) x0 = 0;
@@ -383,22 +416,7 @@ static void gfx_hd_scene(uint32_t *fb, int W, int H, int x0, int y0, int x1, int
                 }
     }
     int64_t now = fx_ms();
-    /* --- ngay hay dem? (game doi nen troi theo gio): do sang trung binh cua dai tren cung. Dem: khong co tia nang,
-     * bui sang thanh dom dom */
-    int dem = 0;
-    {
-        long tong = 0;
-        int n = 0;
-        int yh = y0 + rh / 7;
-        for (int y = y0 + 2 * k; y < yh; y += 6 * k)
-            for (int x = x0 + 3 * k; x < x1; x += 9 * k) {
-                uint32_t c = fb[(size_t)y * W + x];
-                tong += (((c >> 16) & 255) * 77 + ((c >> 8) & 255) * 150 + (c & 255) * 29) >> 8;
-                n++;
-            }
-        if (n > 0 && tong / n < 96) dem = 1;
-        if (n > 0 && tong / n < 14) dem = 2;       /* den kit: trong nha (phong nho giua man den) - khong tia nang, khong bui */
-    }
+    int dem = fx_dem(fb, W, x0, y0, x1, y1, k);
     /* --- lay mau vung sang (moi o 4 diem), nguong mem */
     int do_bloom = gfx_fx_bloom > 0, co_sang = 0;
     if (do_bloom) {
@@ -543,7 +561,7 @@ static void gfx_hd_scene(uint32_t *fb, int W, int H, int x0, int y0, int x1, int
         }
     }
     /* --- bui sang bay (vi tri tinh theo thoi gian, khong can trang thai) */
-    if (gfx_fx_bui > 0 && dem != 2) {
+    if (gfx_fx_bui > 0 && dem != 2 && gfx_theme == 0) {
         int np = 26;
         double t = (double)(now % 3600000) / 1000.0;
         for (int i = 0; i < np; i++) {
@@ -571,6 +589,7 @@ static void gfx_hd_scene(uint32_t *fb, int W, int H, int x0, int y0, int x1, int
             }
         }
     }
+    th_draw(fb, W, H, x0, y0, x1, y1, k, dem);
 }
 
 /* ------------------------------------------------------------ 4) giao dien 3D (HdUi qua Graphics.setStrokeStyle 0x486x

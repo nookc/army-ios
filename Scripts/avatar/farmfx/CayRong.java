@@ -75,6 +75,14 @@ public final class CayRong {
     /** kc.a: thay lenh gb.a(g, anhCay, x, y, neo). */
     public static void veCay(Graphics g, int id, int x, int y, int neo, kc k) {
         int b = k == null ? -1 : bac(k.a);
+        if (HdUi.hd()) {
+            // ban HD: cay khe ve lai net cao (5 dang theo cap), cung diem neo voi anh goc
+            Image hdIm = HdTrangTri.khe(b + 1);
+            if (hdIm != null) {
+                g.drawImage(hdIm, x, y, neo);
+                return;
+            }
+        }
         if (b >= 0) {
             f a = gb.a((short) id);
             if (a != null && a.a != null) {

@@ -26,6 +26,8 @@ public class Graphics {
     boolean hdp;
     /** May HD: kieu ve giao dien 3D cho lan fillRoundRect ke tiep (C doc roi xoa) */
     int hdKieu;
+    /** May HD: kieu chuyen dong song cho cac lan ve anh ke tiep (C doc) */
+    int hdLac;
 
     Graphics(Image target) {
         img = target;
@@ -54,6 +56,8 @@ public class Graphics {
         color = 0;
         stroke = SOLID;
         hdp = j2n.Disp.hdK() > 1;       // May HD: hinh ve luon min o diem anh that
+        hdLac = 0;
+        hdKieu = 0;
         font = Font.getDefaultFont();
     }
 
@@ -117,14 +121,25 @@ public class Graphics {
             hdp = s == 0x4844 || j2n.Disp.hdK() > 1;
             return;
         }
+        if (s >= 0x4880 && s <= 0x4883) {
+            // May HD: cac lan ve anh ke tiep co "chuyen dong song" (1 vay canh, 2 thu cung nhun, 3 hao quang), 0x4880 = thoi
+            hdLac = s - 0x4880;
+            return;
+        }
         if (s >= 0x4861 && s <= 0x4863) {
             // May HD: lan fillRoundRect ke tiep ve theo kieu giao dien 3D (1 bong do khung, 2 lop bong sang, 3 nut kinh)
             hdKieu = s - 0x4860;
             return;
         }
-        if (s == 0x4850 || s == 0x4851) {
-            // May HD: client bao bat dau / ket thuc ve the gioi (HdUi) -> khoi noi, bong do, hau ky canh
-            hdCanh(s == 0x4850 ? 1 : 2);
+        if (s >= 0x4850 && s <= 0x4853) {
+            // May HD: client bao ve nen (0x4852) / vat the dong cua the gioi (0x4850) / vat the tinh cua ban do (0x4853) /
+            // ket thuc the gioi (0x4851) - HdUi
+            hdCanh(s == 0x4850 ? 1 : s == 0x4851 ? 2 : s == 0x4852 ? 3 : 4);
+            return;
+        }
+        if (s >= 0x4870 && s <= 0x4877) {
+            // May HD: chu de may chu bao (0 khong, 1 Giang sinh, 2 Tinh nhan, 3 Vui nhon, 4 Halloween)
+            hdCanh(16 + (s - 0x4870));
             return;
         }
         if (s == 0x4846) {

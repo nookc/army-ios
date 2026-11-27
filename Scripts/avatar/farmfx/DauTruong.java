@@ -465,6 +465,8 @@ public final class DauTruong {
                         hat(me.aw * js.ay, me.ax * js.ay - 20, rnd(-40, 41), rnd(-70, -30), 900, 2, rnd(1, 3), 0);
                     }
                 }
+            } else if (sub == 9) {
+                HdUi.chuDe = d.readByte();           // chu de quan tri chon (ban HD ve hieu ung)
             } else if (sub == 5) {
                 int loai = d.readByte();
                 String txt = d.readUTF();

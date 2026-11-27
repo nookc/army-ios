@@ -64,6 +64,7 @@ void j2n_set_hd_k(int k) { gfx_hdk = (k >= 2 && k <= 4) ? k : 0; }   /* truoc kh
 /* anh lon hon muc nay (diem anh that sau phong to) thi phong to it hon / giu nguyen: tranh ngon bo nho */
 #include "hdkho.c"
 #include "hd3d.c"
+#include "hdtheme.c"
 
 /* lay (va ghim) ban he so rq cua anh bat bien; NULL = chua co (dang lam / khong lam duoc) -> ve tam bang diem anh goc */
 static hd_ent *hd_get(struct O_javax_microedition_lcdui_Image *im, int rq) {
@@ -156,7 +157,8 @@ static hd_ent *hd_get(struct O_javax_microedition_lcdui_Image *im, int rq) {
         e->sh = im->f_h_I;
         e->s = s;
         e->smooth = im->f_smooth_I;
-        e->mode = md;
+        e->mode = want_mode;        /* che do DA YEU CAU (de so khop lan sau); che do xu ly that la md (anh min: 0) */
+        e->pmode = md;
         e->est = est;
         e->next = -1;
         hd_pin[slot] = im->f_argb__5b;
@@ -166,7 +168,7 @@ static hd_ent *hd_get(struct O_javax_microedition_lcdui_Image *im, int rq) {
             /* anh nho: lam ngay (net tu khung dau), co han muc thoi gian moi khung */
             e->state = HD_BUILD;
             const uint32_t *src = e->src;
-            int mode = e->mode, smooth = e->smooth, sw = e->sw, sh = e->sh;
+            int mode = e->pmode, smooth = e->smooth, sw = e->sw, sh = e->sh;
             pthread_mutex_unlock(&hd_mu);
             int64_t t0 = hd_now_us();
             int ow = 0, oh = 0, kind = 0, shm = 0;
@@ -725,6 +727,9 @@ void N_javax_microedition_lcdui_Graphics_fillTriangle(jctx *t, jobj self, int32_
 static void draw_img(tgt *o, const uint32_t *src, int sstride, int s, int xs, int ys, int w, int h, int tr, int px, int py,
                      int kind);
 
+static int draw_img_lac(tgt *o, const uint32_t *src, int sstride, int k, int xs, int ys, int w, int h, int tr, int px, int py,
+                        int kind, int lac);
+
 /* ---- ve 1 hang diem anh (nhanh, 4 diem / buoc bang NEON / SSE2). Ket qua giong het cong thuc blend() tung diem.
  * May HD ve o do net x4 nen so diem anh gap 16 lan: phan lon thoi gian ve khung nam o day. Nhom 4 diem trong suot het
  * thi bo qua, dac het thi chep thang - anh nhan vat (trong dac, ngoai trong suot, vien mong) gan nhu chi con chep. */
@@ -851,19 +856,44 @@ static void blit(tgt *o, const uint32_t *src, int sstride, int sx, int sy, int d
  * pha 2 = ve xong the gioi: tat che do + hau ky canh (loa sang, tia nang, toi goc, bui sang) len dich hien tai */
 void N_javax_microedition_lcdui_Graphics_hdCanh(jctx *t, jobj self, int32_t pha) {
     if (gfx_hdk <= 1) return;
-    if (pha == 1) {
+    if (pha >= 16) {
+        /* chu de may chu bao (0..4); Linux thu nghiem: bien J2N_THEME de len */
+        static int ep = -2;
+        if (ep == -2) ep = getenv("J2N_THEME") ? atoi(getenv("J2N_THEME")) : -1;
+        gfx_hd_set_theme(ep >= 0 ? ep : pha - 16);
+        return;
+    }
+    int th = gfx_hd_fx >= 1 ? gfx_theme : 0;
+    if (pha == 3) {
+        /* sap ve nen (o gach, phong nen): chi nhuom mau theo chu de */
+        gfx_world = 0;
+        gfx_hd_mode = (th == 1 || th == 2 || th == 4) ? ((th << 2) | 32) : 0;
+        return;
+    }
+    if (pha == 1 || pha == 4) {
+        /* 1 = vat the dong (nhan vat, thu), 4 = vat the tinh cua ban do (cay, ghe, nha...: them xu ly theo chu de) */
         gfx_world = gfx_hd_fx >= 1;
-        gfx_hd_mode = gfx_hd_fx >= 1 ? 3 : 0;
+        gfx_hd_mode = gfx_hd_fx >= 1 ? (3 | (th << 2) | (pha == 4 ? 64 : 0)) : 0;
         return;
     }
     int dang = gfx_world;
     gfx_world = 0;
     gfx_hd_mode = 0;
-    if (!dang || gfx_hd_fx < 2) return;
+    if (!dang) return;
     tgt o;
     if (!target(t, self, &o)) return;
     if (o.k != gfx_hdk) return;
-    gfx_hd_scene(o.px, o.w, o.h, o.x0 * o.k, o.y0 * o.k, o.x1 * o.k, o.y1 * o.k, o.k);
+    if (gfx_hd_fx >= 2) {
+        gfx_hd_scene(o.px, o.w, o.h, o.x0 * o.k, o.y0 * o.k, o.x1 * o.k, o.y1 * o.k, o.k);
+    } else if (th) {
+        /* may yeu da tat hau ky canh: van ve hat cua chu de (nhe) */
+        int X0 = o.x0 * o.k, Y0 = o.y0 * o.k, X1 = o.x1 * o.k, Y1 = o.y1 * o.k;
+        if (X0 < 0) X0 = 0;
+        if (Y0 < 0) Y0 = 0;
+        if (X1 > o.w) X1 = o.w;
+        if (Y1 > o.h) Y1 = o.h;
+        if (X1 - X0 >= 160 * o.k && Y1 - Y0 >= 120 * o.k) th_draw(o.px, o.w, o.h, X0, Y0, X1, Y1, o.k, fx_dem(o.px, o.w, X0, Y0, X1, Y1, o.k));
+    }
 }
 
 void N_javax_microedition_lcdui_Graphics_drawImage0(jctx *t, jobj self, jobj img, int32_t x, int32_t y, int32_t anchor) {
@@ -889,6 +919,11 @@ void N_javax_microedition_lcdui_Graphics_drawImage0(jctx *t, jobj self, jobj img
     int stride, kind;
     hd_ent *pin;
     src = img_px(t, im, o.k, &stride, &sc, &kind, &pin);
+    int lac = G(self)->f_hdLac_I;
+    if (lac && pin && sc == o.k && gfx_hd_fx >= 1 && draw_img_lac(&o, src, stride, sc, 0, 0, lw, lh, 0, px, py, kind, lac)) {
+        hd_put(pin);
+        return;
+    }
     if (gfx_world && pin && pin->shd && sc == o.k) sh_draw(&o, pin, 0, 0, lw, lh, 0, px, py);
     draw_img(&o, src, stride, sc, 0, 0, lw, lh, 0, px, py, kind);
     if (pin) hd_put(pin);
@@ -1020,6 +1055,61 @@ static void draw_img(tgt *o, const uint32_t *src, int sstride, int s, int xs, in
     }
 }
 
+/* May HD - "chuyen dong song": ve vung anh (da o do net cua dich: s == k) co co gian quanh diem neo + nhun doc.
+ * lac 1 = canh / duoi / do deo lung (khep mo ngang quanh tam + nhap nho), 2 = thu cung (nhun, bep - gian theo chan),
+ * 3 = hao quang (phap phong quanh tam). Pha lech theo vi tri ve de moi nhan vat khong dong deu nhau. Chi ho tro
+ * tr = 0 / 2 (khong lat / lat ngang); tra ve 0 neu khong ve duoc (nguoi goi ve binh thuong). */
+static int draw_img_lac(tgt *o, const uint32_t *src, int sstride, int k, int xs, int ys, int w, int h, int tr, int px, int py,
+                        int kind, int lac) {
+    if ((tr != 0 && tr != 2) || w <= 0 || h <= 0 || w > 512 || h > 512) return 0;
+    double tg = (double)(fx_ms() % 3600000) / 1000.0 + px * 0.037 + py * 0.011;
+    float sx = 1.0f, sy = 1.0f, dy = 0.0f;
+    int neo_day = 0;
+    if (lac == 1) {
+        float f = 0.5f - 0.5f * cosf((float)(tg * 5.2));            /* 0..1 */
+        sx = 1.0f - 0.13f * f;
+        sy = 1.0f + 0.03f * f;
+        dy = -0.9f * k * sinf((float)(tg * 5.2));
+    } else if (lac == 2) {
+        float f = sinf((float)(tg * 4.0));
+        dy = -1.4f * k * (f > 0 ? f : 0);                           /* nhay nhe len roi roi xuong */
+        sy = 1.0f + 0.045f * (f > 0 ? f : f * 0.6f);
+        sx = 1.0f - 0.03f * (f > 0 ? f : f * 0.6f);
+        neo_day = 1;
+    } else {
+        float f = sinf((float)(tg * 2.6));
+        sx = sy = 1.0f + 0.05f * f;
+    }
+    int W0 = w * k, H0 = h * k;
+    float W1 = W0 * sx, H1 = H0 * sy;
+    float X1 = px * k + (W0 - W1) * 0.5f;
+    float Y1 = neo_day ? py * k + (H0 - H1) + dy : py * k + (H0 - H1) * 0.5f + dy;
+    int cx0 = o->x0 * k, cy0 = o->y0 * k, cx1 = o->x1 * k, cy1 = o->y1 * k;
+    int xa = (int)floorf(X1), xb = (int)ceilf(X1 + W1), ya = (int)floorf(Y1), yb = (int)ceilf(Y1 + H1);
+    if (xa < cx0) xa = cx0;
+    if (ya < cy0) ya = cy0;
+    if (xb > cx1) xb = cx1;
+    if (yb > cy1) yb = cy1;
+    if (xb <= xa || yb <= ya) return 1;
+    float ix = 1.0f / sx, iy = 1.0f / sy;
+    const uint32_t *base = src + (size_t)ys * k * sstride + (size_t)xs * k;
+    for (int Y = ya; Y < yb; Y++) {
+        int v = (int)((Y + 0.5f - Y1) * iy);
+        if (v < 0 || v >= H0) continue;
+        const uint32_t *row = base + (size_t)v * sstride;
+        uint32_t *d = o->px + (size_t)Y * o->w;
+        for (int X = xa; X < xb; X++) {
+            int u = (int)((X + 0.5f - X1) * ix);
+            if (u < 0 || u >= W0) continue;
+            uint32_t c = row[tr == 2 ? W0 - 1 - u : u];
+            if (kind == 0) d[X] = c | 0xFF000000u;
+            else if ((c >> 24) == 255) d[X] = c;
+            else if (c >> 24) d[X] = blend(c, d[X]);
+        }
+    }
+    return 1;
+}
+
 void N_javax_microedition_lcdui_Graphics_drawRegion0(jctx *t, jobj self, jobj img, int32_t xs, int32_t ys, int32_t w,
                                                      int32_t h, int32_t tr, int32_t xd, int32_t yd, int32_t anchor) {
     struct O_javax_microedition_lcdui_Image *im = IMG(img);
@@ -1043,6 +1133,11 @@ void N_javax_microedition_lcdui_Graphics_drawRegion0(jctx *t, jobj self, jobj im
     int stride, kind;
     hd_ent *pin;
     src = img_px(t, im, o.k, &stride, &sc, &kind, &pin);
+    int lac = G(self)->f_hdLac_I;
+    if (lac && pin && sc == o.k && gfx_hd_fx >= 1 && draw_img_lac(&o, src, stride, sc, xs, ys, w, h, tr, px, py, kind, lac)) {
+        hd_put(pin);
+        return;
+    }
     if (gfx_world && pin && pin->shd && sc == o.k) sh_draw(&o, pin, xs, ys, w, h, tr, px, py);
     draw_img(&o, src, stride, sc, xs, ys, w, h, tr, px, py, kind);
     if (pin) hd_put(pin);
@@ -1202,6 +1297,33 @@ jobj N_javax_microedition_lcdui_Image_decode0(jctx *t, jobj data, int32_t off, i
     int w, h, comp;
     unsigned char *px = stbi_load_from_memory(AD(data, unsigned char) + off, len, &w, &h, &comp, 4);
     if (!px) return 0;
+#if defined(__linux__) && !defined(__ANDROID__)
+    {
+        /* thu nghiem (J2N_HDDUMP=thu muc): ghi moi anh game nap ra tep <crc32>_<rong>x<cao>.png - de tim anh can ve lai
+         * (bo thay the hdx/ tra theo crc32 cua byte anh goc) */
+        static const char *dir;
+        static int hoi;
+        if (!hoi) {
+            hoi = 1;
+            dir = getenv("J2N_HDDUMP");
+        }
+        if (dir && len > 24) {
+            uint32_t c = 0xFFFFFFFFu;
+            const unsigned char *q = AD(data, unsigned char) + off;
+            for (int i = 0; i < len; i++) {
+                c ^= q[i];
+                for (int k = 0; k < 8; k++) c = (c >> 1) ^ (0xEDB88320u & (0u - (c & 1)));
+            }
+            char f[1200];
+            snprintf(f, sizeof f, "%s/%08x_%dx%d.png", dir, ~c, w, h);
+            FILE *fo = fopen(f, "wb");
+            if (fo) {
+                fwrite(q, 1, (size_t)len, fo);
+                fclose(fo);
+            }
+        }
+    }
+#endif
     jobj arr = rt_newarr(t, &rt_arr_I, w * h);
     if (!arr) {
         stbi_image_free(px);

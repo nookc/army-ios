@@ -29,7 +29,7 @@ typedef struct hd_ent {
     uint32_t last;              /* khung dung gan nhat */
     int state, pins, rq;        /* rq = he so duoc yeu cau */
     const uint32_t *src;        /* viec: nguon (mang GC duoc giu song boi hd_pin) */
-    int sw, sh, s, smooth, mode;
+    int sw, sh, s, smooth, mode, pmode;     /* mode = che do da yeu cau, pmode = che do xu ly that */
     size_t est;
     int next;
 } hd_ent;
@@ -106,7 +106,7 @@ static void *hd_worker(void *arg) {
         hd_qn--;
         e->state = HD_BUILD;
         const uint32_t *src = e->src;
-        int sw = e->sw, sh = e->sh, s = e->s, k = e->k, smooth = e->smooth, mode = e->mode;
+        int sw = e->sw, sh = e->sh, s = e->s, k = e->k, smooth = e->smooth, mode = e->pmode;
         pthread_mutex_unlock(&hd_mu);
         int ow = 0, oh = 0, kind = 0, shm = 0;
         uint8_t *shp = 0;
@@ -214,7 +214,10 @@ static hd_ent *hd_get(struct O_javax_microedition_lcdui_Image *im, int rq);
 static void hd_put(hd_ent *e) { __atomic_sub_fetch(&e->pins, 1, __ATOMIC_SEQ_CST); }
 
 /* moi khung 1 lan (luong ve) */
+extern int gfx_world;
 void gfx_hd_frame(void) {
+    gfx_hd_mode = 0;                /* moi khung bat dau o che do giao dien (phong khi man nao do khong bao ket thuc the gioi) */
+    gfx_world = 0;
     pthread_mutex_lock(&hd_mu);
     hd_frame_no++;
     hd_sync_left = HD_SYNC_US;
@@ -230,6 +233,16 @@ int gfx_hd_info(int what) {
     case 3: return (int)(hd_budget >> 20);
     default: return 0;
     }
+}
+
+/* doi chu de: anh da xu ly theo chu de cu (nhuom nen, tuyet dong) phai lam lai -> bo het ban cu */
+extern int gfx_theme;
+void gfx_hd_set_theme(int th) {
+    if (th < 0 || th > 7 || th == gfx_theme) return;
+    pthread_mutex_lock(&hd_mu);
+    gfx_theme = th;
+    for (int i = 0; i < HD_SLOTS; i++) hd_drop_try(i);
+    pthread_mutex_unlock(&hd_mu);
 }
 
 /* doi he so K luc dang chay (tu ha do net khi may yeu): bo het ban cu khong con dung */
