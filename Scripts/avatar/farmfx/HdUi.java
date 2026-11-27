@@ -198,18 +198,9 @@ public final class HdUi {
                 g.setStrokeStyle(0x4850);
             } catch (Throwable e) {
             }
-            if (ir.a != mapCu) {
-                mapCu = ir.a;
-                try {
-                    System.out.println("[hd] ban do " + ir.a + ": " + ir.e + " x " + (ir.e > 0 && ir.g != null ? ir.g.length / ir.e : 0) + " o");
-                } catch (Throwable e) {
-                }
-            }
             HdTrangTri.capNhat();   // vat trang tri / cho chup anh cua ban HD (chen vao danh sach vat the cua ban do)
         }
     }
-
-    private static int mapCu = -999;
 
     /**
      * ir.d(g) ve 1 vat the TINH cua ban do (cay, ghe, nha... - danh sach ir.l): bao may ve HD de xu ly theo chu de (tuyet
@@ -301,13 +292,6 @@ public final class HdUi {
 
     public static void chamNuoc() {
         cauCho = false;
-        try {
-            if (hd() && ir.u != null) {
-                // nhat ky (dat vat trang tri, tim loi): diem vua cham tren ban do
-                System.out.println("[hd] cham ban do " + ir.a + " tai " + ir.u.a / (js.ay <= 0 ? 1 : js.ay) + "," + ir.u.b / (js.ay <= 0 ? 1 : js.ay));
-            }
-        } catch (Throwable e) {
-        }
         try {
             if (!hd() || (ir.a != 14 && ir.a != 15 && ir.a != 16) || main.GameMidlet.i == null || ir.u == null || ir.i <= 0) {
                 return;

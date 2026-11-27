@@ -48,7 +48,7 @@ dat(GT, 4, 'la_thu', 420, 120, 480, 160, 600, 110, 660, 160, 380, 150, 700, 130)
 
 # ================= Nong trai chung (25): 648 x 168; cong FARM cu o (207, 20), duong dat y 68..148
 NT = 25
-dat(NT, -1, 'cong_trai', 207, 21); dat(NT, -1, 'huong_duong', 148, 60, 266, 62); dat(NT, -1, 'rom_bi', 400, 64); dat(NT, -1, 'bu_nhin', 62, 66)
+dat(NT, -1, 'cong_trai', 207, 21); dat(NT, -1, 'huong_duong', 148, 60, 266, 62); dat(NT, -1, 'rom_bi', 400, 64); dat(NT, -1, 'bu_nhin', 575, 72)
 dat(NT, 1, 'nguoi_tuyet', 306, 66); dat(NT, 1, 'cay_den', 120, 64, 345, 64); dat(NT, 1, 'gau_trang', 452, 68); dat(NT, 1, 'hop_qua', 500, 68)
 dat(NT, 2, 'bo_hoa', 306, 66, 120, 66); dat(NT, 2, 'bong_tim', 452, 70)
 dat(NT, 3, 'sao_vui', 306, 68); dat(NT, 3, 'banh_kem', 452, 68)
