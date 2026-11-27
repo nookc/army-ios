@@ -50,6 +50,15 @@ final class Native {
     /** Canvas ve phong to (ten lop cach nhau dau phay, so lan) - goi truoc start */
     static native void setHd(String names, int scale);
 
+    /** Avatar 250 HD: may ve net cao, k = 2..4 diem anh that cho 1 diem game (0 = tat) - goi truoc start */
+    static native void setHdK(int k);
+
+    /** Avatar 250 HD: xin bo anh x2 cua may chu - goi truoc start */
+    static native void setHdAnh(boolean on);
+
+    /** Avatar 250 HD: chep khung nguyen byte (kenh R / B dao, ve bang bo loc mau) - nhanh cho khung net cao */
+    static native int copyFrameRaw(Bitmap bmp, int last);
+
     /** activity dang hien (cap nhat o onCreate) */
     static volatile MainActivity act;
 

@@ -112,6 +112,50 @@ adb shell input keyevent 66; sleep 6; cap a7_ket_noi
 adb shell input tap "$AX" "$AY"; sleep 3; cap a8_ban_phim_aa
 adb shell input tap "$AX" "$AY"; sleep 2
 
+# ---- ban "Avatar 250 HD" (ngang + net cao): cai song song, mo, chup vai man, do toc do ve
+HDAPK=native/build/avatar-android/AvatarHD-test.apk
+if [ -f "$HDAPK" ]; then
+  HPKG=vn.avatar.diemky.hd
+  adb shell am force-stop $PKG
+  if adb install -r "$HDAPK" > "$O/hd_cai_apk.txt" 2>&1; then
+    adb logcat -c
+    adb shell am start -W -n $HPKG/vn.avatar.diemky.MainActivity --es server 10.0.2.2:19129
+    HB=""
+    for i in $(seq 1 30); do
+      HB=$(alog | grep -o "\[bocuc\].*" | tail -1)
+      [ -n "$HB" ] && break
+      sleep 1
+    done
+    say "HD: $HB"
+    sleep 10
+    cap hd1_mo_dau
+    adb shell dumpsys gfxinfo $HPKG reset > /dev/null
+    if [ -n "$HB" ]; then
+      set -- $HB
+      HL=$3; HT=$4; HR=$5; HBT=$6; HW=${11}; HH=${12}
+      htap() { adb shell input tap $((HL + $1 * (HR - HL) / HW)) $((HT + $2 * (HBT - HT) / HH)); }
+      # "Choi moi" (giua hop) -> thanh pho -> vao game voi may chu gia (khong tra loi): chi can thay giao dien ngang ve dung
+      htap $((HW / 2)) $((HH / 2 + 4)); sleep 3; cap hd2_sau_cham
+      adb shell input keyevent 66; sleep 3; cap hd3_enter
+    fi
+    sleep 4
+    adb shell dumpsys gfxinfo $HPKG > "$O/hd_gfxinfo.txt"
+    adb shell dumpsys meminfo $HPKG > "$O/hd_meminfo.txt"
+    alog > "$O/hd_log_app.txt"
+    adb logcat -d | grep -E "FATAL|AndroidRuntime|libavatar|tombstone" | head -40 > "$O/hd_loi.txt"
+    HP=$(adb shell pidof $HPKG 2>/dev/null | tr -d '\r')
+    if [ -n "$HP" ]; then echo "app HD con chay (pid $HP)" > "$O/hd_trang_thai.txt"; else echo "APP HD DA SAP / THOAT" > "$O/hd_trang_thai.txt"; fi
+    cat "$O/hd_trang_thai.txt"
+    grep -E "vao game HD|bocuc" "$O/hd_log_app.txt" | tail -3
+    grep -E "Janky|Total frames|50th|90th" "$O/hd_gfxinfo.txt" | head -6
+    adb shell am force-stop $HPKG
+  else
+    echo "CAI APK HD LOI: $(tail -2 "$O/hd_cai_apk.txt")" > "$O/hd_trang_thai.txt"
+  fi
+  adb shell am start -W -n $PKG/.MainActivity --es server 10.0.2.2:19129 > /dev/null 2>&1
+  sleep 3
+fi
+
 # ---- ket qua
 P2=$(pid_of)
 if [ -n "$P2" ]; then echo "app con chay (pid $P2)" > "$O/trang_thai_app.txt"; else echo "APP DA SAP / THOAT" > "$O/trang_thai_app.txt"; fi

@@ -113,4 +113,25 @@ keytool -genkeypair -keystore "$B/thu.keystore" -storepass thuthu -keypass thuth
 "$BT/apksigner" sign --ks "$B/thu.keystore" --ks-pass pass:thuthu --key-pass pass:thuthu \
   --out "$B/Avatar-test.apk" "$B/Avatar-unsigned.apk"
 "$BT/apksigner" verify --print-certs "$B/Avatar-test.apk" | head -3
+
+# ---- bien the "Avatar 250 HD" (ngang + may ve net cao): CUNG ma may + dex, khac manifest (ten goi rieng de cai song song voi
+# ban thuong, man ngang), ten app va tep danh dau assets/hd.cfg (MainActivity thay tep nay thi bat che do HD)
+echo "== apk HD"
+rm -rf "$B/assets-hd" "$B/hd" && mkdir -p "$B/assets-hd" "$B/hd"
+cp -r "$B/assets/." "$B/assets-hd/"
+echo "hd=1" > "$B/assets-hd/hd.cfg"
+sed -e 's/android:screenOrientation="portrait"/android:screenOrientation="sensorLandscape"/' \
+    -e 's/android:name="\.MainActivity"/android:name="vn.avatar.diemky.MainActivity"/' \
+    "$A/AndroidManifest.xml" > "$B/hd/AndroidManifest.xml"
+grep -q 'sensorLandscape' "$B/hd/AndroidManifest.xml" && grep -q 'vn.avatar.diemky.MainActivity' "$B/hd/AndroidManifest.xml"
+"$BT/aapt2" compile --dir "$A/res-hd" -o "$B/res-hd.zip"
+"$BT/aapt2" link -o "$B/base-hd.apk" -I "$PLAT/android.jar" --manifest "$B/hd/AndroidManifest.xml" \
+  --rename-manifest-package vn.avatar.diemky.hd \
+  --min-sdk-version $API --target-sdk-version 34 --version-code "$VCODE" --version-name "2.5.8-hd" \
+  -A "$B/assets-hd" -0 jar --auto-add-overlay "$B/res.zip" -R "$B/res-hd.zip"
+(cd "$B/stage" && zip -q -r "$B/base-hd.apk" classes.dex lib)
+"$BT/zipalign" -f -p 4 "$B/base-hd.apk" "$B/AvatarHD-unsigned.apk"
+"$BT/apksigner" sign --ks "$B/thu.keystore" --ks-pass pass:thuthu --key-pass pass:thuthu \
+  --out "$B/AvatarHD-test.apk" "$B/AvatarHD-unsigned.apk"
+"$BT/aapt2" dump badging "$B/AvatarHD-unsigned.apk" | head -3
 ls -la "$B"/*.apk

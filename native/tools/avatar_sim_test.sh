@@ -93,6 +93,36 @@ for f in "$HOME"/Library/Logs/DiagnosticReports/Avatar*; do
 done
 kill $LP 2>/dev/null || true
 xcrun simctl terminate "$DEV" "$BID" 2>/dev/null || true
+
+# ---- ban "Avatar 250 HD" (ngang + net cao): cai song song, tu kiem thu, chup man
+HDAPP=$N/build/avatar-ios/sim-hd/Avatar.app
+HBID=vn.avatar.diemky.hd
+if [ -d "$HDAPP" ]; then
+  xcrun simctl install "$DEV" "$HDAPP"
+  xcrun simctl launch --console-pty "$DEV" "$HBID" -autotest -avatar.server 127.0.0.1:19129 > "$OUT/hd_console.log" 2>&1 &
+  HLP=$!
+  for i in $(seq 1 120); do
+    sleep 1
+    grep -q "khoi dong Avatar" "$OUT/hd_console.log" 2>/dev/null && break
+  done
+  for i in $(seq 1 240); do
+    sleep 1
+    grep -q "\[autotest\] xong" "$OUT/hd_console.log" 2>/dev/null && break
+  done
+  sleep 2
+  xcrun simctl io "$DEV" screenshot "$OUT/hd_man_hinh_simulator.png" || true
+  HC=$(xcrun simctl get_app_container "$DEV" "$HBID" data 2>/dev/null)
+  if [ -n "$HC" ]; then
+    for f in "$HC"/Documents/rms/*.png; do [ -f "$f" ] && cp "$f" "$OUT/hd_$(basename "$f")"; done
+    cp "$HC"/Documents/rms/autotest.txt "$OUT/hd_autotest.txt" 2>/dev/null || true
+    cp "$HC"/Documents/log.txt "$OUT/hd_log_app.txt" 2>/dev/null || true
+    cp "$HC"/Documents/crash.txt "$OUT/hd_crash_app.txt" 2>/dev/null || true
+  fi
+  kill $HLP 2>/dev/null || true
+  xcrun simctl terminate "$DEV" "$HBID" 2>/dev/null || true
+  echo "== HD:"; cat "$OUT/hd_autotest.txt" 2>/dev/null || echo "khong co hd_autotest.txt"
+  grep -a "vao game HD\|SAP\|NGOAI LE" "$OUT/hd_log_app.txt" 2>/dev/null | tail -5
+fi
 kill $FAKE 2>/dev/null || true
 ls -la "$OUT"
 cat "$OUT/trang_thai_app.txt"

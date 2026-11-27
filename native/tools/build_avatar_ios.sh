@@ -116,6 +116,20 @@ CC1
   ls -la "$APP"
 }
 
+# Bien the "Avatar 250 HD" (ngang + may ve net cao): CUNG ma may, khac Info.plist (bundle id rieng de cai song song voi ban
+# thuong, ten app, chi cho xoay ngang) + tep danh dau hd.cfg (App.m thay tep nay thi bat che do HD). $1 = Avatar.app da chep
+lam_hd() {
+  local APP=$1 PB=/usr/libexec/PlistBuddy
+  echo "hd=1" > "$APP/hd.cfg"
+  $PB -c "Set :CFBundleIdentifier vn.avatar.diemky.hd" "$APP/Info.plist"
+  $PB -c "Set :CFBundleDisplayName Avatar 250 HD" "$APP/Info.plist"
+  $PB -c "Delete :UISupportedInterfaceOrientations" "$APP/Info.plist" >/dev/null 2>&1 || true
+  $PB -c "Add :UISupportedInterfaceOrientations array" \
+      -c "Add :UISupportedInterfaceOrientations:0 string UIInterfaceOrientationLandscapeRight" \
+      -c "Add :UISupportedInterfaceOrientations:1 string UIInterfaceOrientationLandscapeLeft" "$APP/Info.plist"
+  $PB -c "Print :CFBundleIdentifier" -c "Print :CFBundleDisplayName" -c "Print :UISupportedInterfaceOrientations" "$APP/Info.plist"
+}
+
 if [ "$MODE" = device ] || [ "$MODE" = ca-hai ]; then
   build_one iphoneos "$O/dev"
   rm -rf "$O/ipa" "$O/Avatar-Thuan.ipa" && mkdir -p "$O/ipa/Payload"
@@ -124,8 +138,17 @@ if [ "$MODE" = device ] || [ "$MODE" = ca-hai ]; then
   ls -la "$O/Avatar-Thuan.ipa"
   # kiem tra: ma may arm64 that, khong co bo thong dich/gia lap
   lipo -info "$O/dev/Avatar.app/Avatar"
+  rm -rf "$O/ipa-hd" "$O/AvatarHD-Thuan.ipa" && mkdir -p "$O/ipa-hd/Payload"
+  cp -R "$O/dev/Avatar.app" "$O/ipa-hd/Payload/"
+  lam_hd "$O/ipa-hd/Payload/Avatar.app"
+  (cd "$O/ipa-hd" && zip -qry ../AvatarHD-Thuan.ipa Payload)
+  ls -la "$O/AvatarHD-Thuan.ipa"
 fi
 if [ "$MODE" = sim ] || [ "$MODE" = ca-hai ]; then
   build_one iphonesimulator "$O/sim"
   codesign -s - --force "$O/sim/Avatar.app" || true
+  rm -rf "$O/sim-hd" && mkdir -p "$O/sim-hd"
+  cp -R "$O/sim/Avatar.app" "$O/sim-hd/"
+  lam_hd "$O/sim-hd/Avatar.app"
+  codesign -s - --force "$O/sim-hd/Avatar.app" || true
 fi

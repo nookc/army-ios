@@ -6,9 +6,11 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.RectF;
@@ -58,6 +60,13 @@ public final class MainActivity extends Activity {
     /** game (runtime C) da chay: song qua viec Android tao lai activity */
     static boolean started;
     static int gW = 240, gH = 426;
+    /**
+     * Ban "Avatar 250 HD" (goi co assets/hd.cfg): man NGANG, may ve net cao (moi diem game = K diem anh that, anh phong to
+     * thong minh, chu / khung net), dieu khien cham thang tren man hinh. Ban thuong (khong co tep) giu nguyen nhu cu.
+     */
+    static boolean banHd;
+    /** ban HD: so diem anh that / diem game cua khung trinh bay (2..4) */
+    static int hdK;
 
     SharedPreferences prefs;
     GameView view;
@@ -77,6 +86,16 @@ public final class MainActivity extends Activity {
                 WindowManager.LayoutParams.FLAG_FULLSCREEN | WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
         prefs = getSharedPreferences("avatar", MODE_PRIVATE);
+        if (!started) {
+            banHd = coTep("hd.cfg");
+        }
+        if (banHd) {
+            // ban HD: luon ngang (xoay 2 chieu theo may). Manifest cua ban HD cung dat sensorLandscape nen mo len la ngang ngay
+            try {
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
+            } catch (Throwable t) {
+            }
+        }
         Intent it = getIntent();
         String extra = it != null ? it.getStringExtra("server") : null;   // CI / loi tat: am start --es server host:cong
         if (extra != null && normalizeServer(extra).length() > 0) {
@@ -316,9 +335,93 @@ public final class MainActivity extends Activity {
         }
     }
 
+    boolean coTep(String ten) {
+        try {
+            InputStream in = getAssets().open(ten);
+            in.close();
+            return true;
+        } catch (Throwable t) {
+            return false;
+        }
+    }
+
+    long hdChoTu;
+
+    /** Ban HD: Canvas ngang - cao ~220..300 diem game (hoac theo "Co giao dien"), rong theo ti le man; khung ve net K lan */
+    void onViewSizedHd(final int w, final int h) {
+        if (w < h) {
+            // man chua xoay ngang xong: doi lan bo tri sau. May khong xoay duoc (cua so chia doi...) thi sau 1,5 giay chay luon
+            if (hdChoTu == 0) {
+                hdChoTu = System.currentTimeMillis();
+            }
+            if (System.currentTimeMillis() - hdChoTu < 1500) {
+                if (view != null) {
+                    view.postDelayed(new Runnable() {
+                        public void run() {
+                            if (!started && view != null && view.getWidth() > 0) {
+                                onViewSized(view.getWidth(), view.getHeight());
+                            }
+                        }
+                    }, 300);
+                }
+                return;
+            }
+        }
+        int vw, vh, n;
+        if (prefs.getBoolean("vwSet", false)) {
+            int c = savedWidth();
+            vh = c <= 240 ? 240 : c <= 320 ? 300 : 360;      // To / Vua / Nho
+            vw = Math.round(vh * (float) w / Math.max(1, h));
+            n = Math.round(h / (float) vh);
+            pxScale = 0;
+        } else {
+            n = Math.max(2, Math.min(w, h) / 220);
+            vw = w / n;
+            vh = h / n;
+            pxScale = n;
+        }
+        if (w >= h) {
+            vw = Math.max(vh * 4 / 3, Math.min(vw, vh * 12 / 5));
+            vw -= vw % 2;
+        } else {
+            vh = Math.max(vw * 4 / 3, Math.min(vh, vw * 12 / 5));
+            vh -= vh % 2;
+        }
+        gW = vw;
+        gH = vh;
+        hdK = Math.max(2, Math.min(4, n));
+        File data = new File(getFilesDir(), "rms");
+        data.mkdirs();
+        if (!encOk) {
+            Native.setServer(server());
+        }
+        Native.setHd("FishGame", 2);
+        Native.setHdK(hdK);
+        Native.setHdAnh(true);
+        if (!Native.start(getAssets(), data.getAbsolutePath(), gW, gH)) {
+            Log.e(TAG, "khong khoi dong duoc runtime");
+            new AlertDialog.Builder(this).setTitle("Lỗi").setMessage("Không khởi động được game (thiếu dữ liệu trong APK).")
+                    .setPositiveButton("Thoát", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface d, int which) {
+                            exitApp();
+                        }
+                    }).show();
+            return;
+        }
+        started = true;
+        Log.i(TAG, "[app] vao game HD: man " + gW + "x" + gH + " net x" + hdK + " (view " + w + "x" + h + ")");
+        if (view != null) {
+            view.relayout();
+        }
+    }
+
     /** View co kich thuoc: dung Canvas (rong theo cai dat, cao theo ti le man) roi chay game */
     void onViewSized(int w, int h) {
         if (started) {
+            return;
+        }
+        if (banHd) {
+            onViewSizedHd(w, h);
             return;
         }
         int vw, vh;
@@ -598,6 +701,8 @@ public final class MainActivity extends Activity {
         final MainActivity act;
         /** man thuong (anh diem anh) phong to sac net; man phong to (ban ban ca) hoac phong it phong min */
         final Paint sharp = new Paint(), smooth = new Paint(Paint.FILTER_BITMAP_FLAG);
+        /** ban HD: khung chep nguyen byte (0xAARRGGBB) -> ve voi bo loc doi kenh R <-> B (GPU lam, khong ton CPU) */
+        final Paint hdPaint = new Paint(Paint.FILTER_BITMAP_FLAG);
         final Paint tab = new Paint(Paint.ANTI_ALIAS_FLAG), tabLine = new Paint(Paint.ANTI_ALIAS_FLAG),
                 tabText = new Paint(Paint.ANTI_ALIAS_FLAG);
         final Rect src = new Rect(), dst = new Rect(), vis = new Rect();
@@ -621,6 +726,12 @@ public final class MainActivity extends Activity {
             sharp.setFilterBitmap(false);
             sharp.setAntiAlias(false);
             sharp.setDither(false);
+            hdPaint.setDither(false);
+            hdPaint.setColorFilter(new ColorMatrixColorFilter(new float[]{
+                    0, 0, 1, 0, 0,
+                    0, 1, 0, 0, 0,
+                    1, 0, 0, 0, 0,
+                    0, 0, 0, 1, 0}));
             tab.setColor(0x6B000000);
             tabLine.setColor(0x59FFFFFF);
             tabLine.setStyle(Paint.Style.STROKE);
@@ -660,7 +771,7 @@ public final class MainActivity extends Activity {
                     lastFrame = -1;
                 }
                 if (frame != null) {
-                    int f = Native.copyFrame(frame, lastFrame);
+                    int f = banHd ? Native.copyFrameRaw(frame, lastFrame) : Native.copyFrame(frame, lastFrame);
                     if (f != lastFrame) {
                         lastFrame = f;
                         invalidate(dst);
@@ -734,7 +845,7 @@ public final class MainActivity extends Activity {
             Bitmap f = frame;
             if (f != null && dst.width() > 0) {
                 src.set(0, 0, f.getWidth(), f.getHeight());
-                c.drawBitmap(f, src, dst, f.getWidth() > gW || k < 2f ? smooth : sharp);
+                c.drawBitmap(f, src, dst, banHd ? hdPaint : f.getWidth() > gW || k < 2f ? smooth : sharp);
             }
             if (started) {
                 float r = 9 * getResources().getDisplayMetrics().density;

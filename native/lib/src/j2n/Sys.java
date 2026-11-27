@@ -26,6 +26,10 @@ public final class Sys {
         if (key.equals("j2n.hd")) {
             return Disp.hdAnh() ? "1" : null;       // Avatar HD: client (HdAnh) xin bo anh HD cua may chu
         }
+        if (key.equals("j2n.hdk")) {
+            int k = Disp.hdK();                     // Avatar 250 HD: may ve net cao dang bat (client: HdUi)
+            return k > 1 ? String.valueOf(k) : null;
+        }
         return property0(key);
     }
 

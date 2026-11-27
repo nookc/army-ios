@@ -556,6 +556,47 @@ JNIEXPORT jboolean JNICALL JNIFN(setServerEnc)(JNIEnv *e, jclass cls, jbyteArray
     return ok ? JNI_TRUE : JNI_FALSE;
 }
 
+/* Avatar 250 HD: may ve net cao (k = 2..4, 0 tat) + xin bo anh x2 cua may chu - goi truoc start */
+JNIEXPORT void JNICALL JNIFN(setHdK)(JNIEnv *e, jclass cls, jint k) {
+    (void)e;
+    (void)cls;
+    j2n_set_hd_k(k);
+}
+
+JNIEXPORT void JNICALL JNIFN(setHdAnh)(JNIEnv *e, jclass cls, jboolean on) {
+    (void)e;
+    (void)cls;
+    j2n_set_hd_anh(on ? 1 : 0);
+}
+
+/* Avatar 250 HD: chep khung moi nhat NGUYEN byte (0xAARRGGBB, khong dao kenh - Java ve bang bo loc mau doi R <-> B tren GPU).
+ * Khung net cao 2-3 trieu diem: bo vong lap doi kenh tung diem cua copyFrame */
+JNIEXPORT jint JNICALL JNIFN(copyFrameRaw)(JNIEnv *e, jclass cls, jobject bmp, jint last) {
+    (void)cls;
+    int f = __atomic_load_n(&gFrameNo, __ATOMIC_ACQUIRE);
+    if (f == last || !gFront) return f;
+    AndroidBitmapInfo bi;
+    if (AndroidBitmap_getInfo(e, bmp, &bi) != 0) return last;
+    void *px = 0;
+    if (AndroidBitmap_lockPixels(e, bmp, &px) != 0 || !px) return last;
+    pthread_mutex_lock(&gFrontMu);
+    if ((int)bi.width != gFrontW || (int)bi.height != gFrontH) {
+        pthread_mutex_unlock(&gFrontMu);
+        AndroidBitmap_unlockPixels(e, bmp);
+        return last;
+    }
+    f = gFrameNo;
+    int fw = gFrontW, fh = gFrontH;
+    if ((int)bi.stride == fw * 4) {
+        memcpy(px, gFront, (size_t)fw * fh * 4);
+    } else {
+        for (int y = 0; y < fh; y++) memcpy((uint8_t *)px + (size_t)y * bi.stride, gFront + (size_t)y * fw, (size_t)fw * 4);
+    }
+    pthread_mutex_unlock(&gFrontMu);
+    AndroidBitmap_unlockPixels(e, bmp);
+    return f;
+}
+
 /* Avatar: Canvas ve phong to (vd "FishGame", 2) - goi truoc start */
 JNIEXPORT void JNICALL JNIFN(setHd)(JNIEnv *e, jclass cls, jstring names, jint scale) {
     (void)cls;

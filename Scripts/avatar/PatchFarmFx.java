@@ -94,6 +94,8 @@ public class PatchFarmFx {
                 case "kd.class":
                 case "kg.class": data = va(data, PatchFarmFx::keoBai, can, name); break;
                 case "ja.class": data = va(data, PatchFarmFx::bauCua, can, name); break;
+                case "gw.class": data = va(data, PatchFarmFx::hdGw, can, name); break;
+                case "gy.class": data = va(data, PatchFarmFx::hdGy, can, name); break;
                 default: break;
             }
             zo.putNextEntry(new ZipEntry(name));
@@ -121,6 +123,8 @@ public class PatchFarmFx {
                 && can.getOrDefault("hd_tat", 0) == 2 && can.getOrDefault("hd_hoi", 0) == 1
                 && can.getOrDefault("gia_luong", 0) == 1 && can.getOrDefault("phien_ban", 0) == 1
                 && can.getOrDefault("loai_anh", 0) == 1
+                && can.getOrDefault("hd_phim_ve", 0) == 1 && can.getOrDefault("hd_chat_ve", 0) == 1
+                && can.getOrDefault("hd_map", 0) == 1 && can.getOrDefault("hd_vung", 0) == 2
                 && can.getOrDefault("trom_cay", 0) == 1 && can.getOrDefault("o_kho", 0) == 2
                 && can.getOrDefault("cham_vat", 0) == 1 && can.getOrDefault("nhan_chon", 0) == 1
                 && can.getOrDefault("cuoi_cho", 0) == 1 && can.getOrDefault("cuoi_kiem", 0) == 1
@@ -482,6 +486,60 @@ public class PatchFarmFx {
                     mn.instructions.set(n, m);
                     n = m;
                     dem(can, "bc_bay_ve");
+                }
+            }
+        }
+    }
+
+    /**
+     * Ban HD (HdUi): gw.a(Graphics) ve nut ban phim ao hj.ap va bong chat hj.aq -> qua HdUi.vePhimAo / veChat;
+     * gw.a(int map) tu bat ban phim ao o khu cau ca -> doi tham so qua HdUi.mapPhim (khong them nhanh moi).
+     */
+    static void hdGw(ClassNode cn, Map<String, Integer> can) {
+        for (MethodNode mn : cn.methods) {
+            if (mn.name.equals("a") && mn.desc.equals("(Ljavax/microedition/lcdui/Graphics;)V")) {
+                String dang = null;
+                for (AbstractInsnNode n : mn.instructions.toArray()) {
+                    if (n instanceof FieldInsnNode && n.getOpcode() == Opcodes.GETSTATIC && ((FieldInsnNode) n).owner.equals("hj")) {
+                        String f = ((FieldInsnNode) n).name;
+                        dang = f.equals("ap") ? "vePhimAo" : f.equals("aq") ? "veChat" : dang;
+                    }
+                    if (dang != null && n instanceof MethodInsnNode && ((MethodInsnNode) n).name.equals("drawImage")
+                            && ((MethodInsnNode) n).desc.equals("(Ljavax/microedition/lcdui/Image;III)V")) {
+                        mn.instructions.set(n, new MethodInsnNode(Opcodes.INVOKESTATIC, "HdUi", dang,
+                                "(Ljavax/microedition/lcdui/Graphics;Ljavax/microedition/lcdui/Image;III)V", false));
+                        dem(can, dang.equals("vePhimAo") ? "hd_phim_ve" : "hd_chat_ve");
+                        dang = null;
+                    }
+                }
+            }
+            if (mn.name.equals("a") && mn.desc.equals("(I)V")) {
+                InsnList il = new InsnList();
+                il.add(new VarInsnNode(Opcodes.ILOAD, 1));
+                il.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "HdUi", "mapPhim", "(I)I", false));
+                il.add(new VarInsnNode(Opcodes.ISTORE, 1));
+                mn.instructions.insert(il);
+                dem(can, "hd_map");
+            }
+        }
+    }
+
+    /** Ban HD (HdUi): gy.l() - vung cham bat / tat ban phim ao (lan 1) va bong chat (lan 2) cua main.a.a(IIII)Z */
+    static void hdGy(ClassNode cn, Map<String, Integer> can) {
+        for (MethodNode mn : cn.methods) {
+            if (!mn.name.equals("l") || !mn.desc.equals("()V")) {
+                continue;
+            }
+            int lan = 0;
+            for (AbstractInsnNode n : mn.instructions.toArray()) {
+                if (n instanceof MethodInsnNode && n.getOpcode() == Opcodes.INVOKESTATIC && ((MethodInsnNode) n).owner.equals("main/a")
+                        && ((MethodInsnNode) n).name.equals("a") && ((MethodInsnNode) n).desc.equals("(IIII)Z")) {
+                    lan++;
+                    if (lan <= 2) {
+                        mn.instructions.set(n, new MethodInsnNode(Opcodes.INVOKESTATIC, "HdUi", lan == 1 ? "vungPhimAo" : "vungChat",
+                                "(IIII)Z", false));
+                        dem(can, "hd_vung");
+                    }
                 }
             }
         }

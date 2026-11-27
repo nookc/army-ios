@@ -6,7 +6,7 @@ name: Build Avatar iOS + Android (thuan)
 on:
   workflow_dispatch:
   push:
-    branches: [avatar-ios]
+    branches: [avatar-ios, avatar-hd]
     paths:
       - 'native/**'
       - 'Bundled/Avatar258.jar'
@@ -17,7 +17,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: avatar-thuan
+  group: avatar-thuan-${{ github.ref_name }}
   cancel-in-progress: true
 
 jobs:
@@ -56,6 +56,7 @@ jobs:
         run: |
           mkdir -p out/ios/test
           [ -f native/build/avatar-ios/Avatar-Thuan.ipa ] && cp native/build/avatar-ios/Avatar-Thuan.ipa out/ios/
+          [ -f native/build/avatar-ios/AvatarHD-Thuan.ipa ] && cp native/build/avatar-ios/AvatarHD-Thuan.ipa out/ios/
           cp native/build/avatar-ios/test/* out/ios/test/ 2>/dev/null || true
           for f in build-ios.log sim-test.log; do [ -f "$f" ] && tail -600 "$f" > "out/ios/$f"; done
           [ -f native/build/gen-avatar/stats.txt ] && cp native/build/gen-avatar/stats.txt out/ios/
@@ -108,6 +109,7 @@ jobs:
         run: |
           mkdir -p out/android/test
           cp native/build/avatar-android/Avatar-unsigned.apk native/build/avatar-android/Avatar-test.apk out/android/ 2>/dev/null || true
+          cp native/build/avatar-android/AvatarHD-unsigned.apk out/android/ 2>/dev/null || true
           cp native/build/avatar-android/libavatar-*-debug.so out/android/ 2>/dev/null || true
           cp -r native/build/avatar-android/test/* out/android/test/ 2>/dev/null || true
           [ -f build-android.log ] && tail -400 build-android.log > out/android/build-android.log
@@ -139,15 +141,19 @@ jobs:
           [ -d dl/avatar-thuan-android ] && cp -r dl/avatar-thuan-android /tmp/pub/android
           echo "run ${GITHUB_RUN_NUMBER} sha ${GITHUB_SHA} ios ${{ needs.ios.result }} android ${{ needs.android.result }}" > /tmp/pub/KET_QUA.txt
           cd /tmp/pub
-          git init -q -b avatar-thuan-build
+          # nhanh avatar-ios (ban phat hanh) -> avatar-thuan-build nhu cu; nhanh khac (vd avatar-hd dang lam) -> <nhanh>-build,
+          # KHONG ghi de ket qua cua ban phat hanh
+          DICH=avatar-thuan-build
+          [ "${GITHUB_REF_NAME}" = "avatar-ios" ] || DICH="${GITHUB_REF_NAME}-build"
+          git init -q -b "$DICH"
           git config user.name "github-actions"
           git config user.email "github-actions@users.noreply.github.com"
           git add -A
           git commit -q -m "Avatar thuan ${GITHUB_RUN_NUMBER} (${GITHUB_SHA::7}) ios ${{ needs.ios.result }} android ${{ needs.android.result }}"
-          git push -q -f "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" avatar-thuan-build
+          git push -q -f "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "$DICH"
 
       - name: Release (IPA) de tai tren dien thoai
-        if: needs.ios.result == 'success'
+        if: needs.ios.result == 'success' && github.ref_name == 'avatar-ios'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |

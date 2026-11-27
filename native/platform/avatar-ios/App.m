@@ -35,6 +35,10 @@ static NSString *gDataDir;
 static NSString *gJar;
 static BOOL gStarted, gAutotest;
 static NSString *gArgServer;
+/* Ban "Avatar 250 HD" (trong goi app co tep hd.cfg): man NGANG + may ve net cao (moi diem game = gHdK diem anh that, anh
+   phong to thong minh, chu / khung net), dieu khien cham thang tren man hinh. Ban thuong (khong co tep) giu nguyen nhu cu. */
+static BOOL gBanHd;
+static int gHdK;
 
 @class GameVC;
 static void log_roots(const char *when);
@@ -423,7 +427,9 @@ static void ios_kb_hook(int show, int area);
 - (KeyView *)keyView { return _keys; }
 - (BOOL)prefersStatusBarHidden { return YES; }
 - (BOOL)prefersHomeIndicatorAutoHidden { return YES; }
-- (UIInterfaceOrientationMask)supportedInterfaceOrientations { return UIInterfaceOrientationMaskPortrait; }
+- (UIInterfaceOrientationMask)supportedInterfaceOrientations {
+    return gBanHd ? UIInterfaceOrientationMaskLandscape : UIInterfaceOrientationMaskPortrait;
+}
 - (UIRectEdge)preferredScreenEdgesDeferringSystemGestures { return UIRectEdgeBottom; }
 
 - (void)viewDidLoad {
@@ -503,6 +509,10 @@ static void ios_kb_hook(int show, int area);
     UIEdgeInsets in = self.view.safeAreaInsets;
     CGSize s = self.view.bounds.size;
     CGFloat sw = MAX(1, s.width - in.left - in.right), sh = MAX(1, s.height - in.top - in.bottom);
+    if (gBanHd) {
+        [self startGameHd:sw cao:sh];
+        return;
+    }
     int h;
     if ([prefs() boolForKey:@"vwSet"]) {
         gW = savedWidth();
@@ -524,6 +534,58 @@ static void ios_kb_hook(int show, int area);
     j2n_set_hd(HD_CANVAS, 2);
     plat_log([[NSString stringWithFormat:@"[app] vao game: man %dx%d (vung an toan %.0fx%.0f diem)",
                gW, gH, sw, sh] UTF8String]);
+    gStarted = YES;
+    j2n_start(MIDLET, gW, gH);
+    log_roots("khoi dong");
+    _aa.hidden = NO;
+    [self.view setNeedsLayout];
+    if (gAutotest) autotest();
+}
+
+/* Ban HD: Canvas ngang - cao ~240..319 diem game (hoac theo "Co giao dien"), rong theo ti le vung an toan; khung ve net
+   gHdK lan. Man chua xoay ngang xong (rong < cao) thi doi them toi da ~1,5 giay roi moi chay. */
+- (void)startGameHd:(CGFloat)sw cao:(CGFloat)sh {
+    static int doi = 0;
+    if (sw < sh && doi < 5) {
+        doi++;
+        __weak GameVC *ws = self;
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.3 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+            GameVC *me = ws;
+            if (me && !gStarted) [me startGame];
+        });
+        return;
+    }
+    CGFloat sc = screen_scale();
+    int pw = (int)floor(sw * sc), ph = (int)floor(sh * sc);
+    int n;
+    if ([prefs() boolForKey:@"vwSet"]) {
+        int c = savedWidth();
+        int vh = c <= 240 ? 240 : c <= 320 ? 300 : 360;      /* To / Vua / Nho */
+        gH = vh;
+        gW = (int)lround(vh * sw / sh);
+        n = (int)lround(ph / (double)vh);
+        _px = 0;
+    } else {
+        n = MAX(2, MIN(pw, ph) / 240);
+        gW = pw / n;
+        gH = ph / n;
+        _px = n;
+    }
+    if (pw >= ph) {
+        gW = MAX(gH * 4 / 3, MIN(gW, gH * 12 / 5));
+        gW -= gW % 2;
+    } else {
+        gH = MAX(gW * 4 / 3, MIN(gH, gW * 12 / 5));
+        gH -= gH % 2;
+    }
+    gHdK = MAX(2, MIN(4, n));
+    j2n_set_keyboard_hook(ios_kb_hook);
+    if (!gEncOk) j2n_set_server(savedServer().UTF8String);
+    j2n_set_hd(HD_CANVAS, 2);
+    j2n_set_hd_k(gHdK);
+    j2n_set_hd_anh(1);
+    plat_log([[NSString stringWithFormat:@"[app] vao game HD: man %dx%d net x%d (vung an toan %.0fx%.0f diem)",
+               gW, gH, gHdK, sw, sh] UTF8String]);
     gStarted = YES;
     j2n_start(MIDLET, gW, gH);
     log_roots("khoi dong");
@@ -1042,6 +1104,7 @@ static void autotest(void) {
 
     NSArray<NSString *> *args = NSProcessInfo.processInfo.arguments;
     gAutotest = [args containsObject:@"-autotest"];
+    gBanHd = [NSBundle.mainBundle pathForResource:@"hd" ofType:@"cfg"] != nil;
     NSUInteger i = [args indexOfObject:@"-avatar.server"];
     if (i != NSNotFound && i + 1 < args.count) gArgServer = normalizeServer(args[i + 1]);
 
