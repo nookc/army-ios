@@ -131,7 +131,8 @@ public class PatchFarmFx {
                 && can.getOrDefault("dau_shop", 0) == 1 && can.getOrDefault("ve_o", 0) == 2
                 && can.getOrDefault("ve_preview", 0) == 1 && can.getOrDefault("ve_noi", 0) == 1
                 && can.getOrDefault("keo_bai", 0) == 2
-                && can.getOrDefault("bc_chip", 0) == 2 && can.getOrDefault("bc_bay", 0) == 1 && can.getOrDefault("bc_bay_ve", 0) == 1;
+                && can.getOrDefault("bc_chip", 0) == 2 && can.getOrDefault("bc_bay", 0) == 1 && can.getOrDefault("bc_bay_ve", 0) == 1
+                && can.getOrDefault("bc_gui_ta", 0) == 1 && can.getOrDefault("bc_cung_o", 0) == 2;
         if (!ok) {
             System.out.println("PatchFarmFx: SO CHO SUA KHONG KHOP -> dung");
             new File(a[1]).delete();
@@ -396,6 +397,52 @@ public class PatchFarmFx {
     //     ja.a(Graphics): GETFIELD dn.o S; StringBuffer.append(I) -> KeyTap.tienBay(dn) + append(String)
     static void bauCua(ClassNode cn, Map<String, Integer> can) {
         for (MethodNode mn : cn.methods) {
+            // 12b) "lag khong ta duoc" (lan 36): ja.x() (gui lenh ta khi bam o thu 2) bo qua neu hoat canh ta cua nguoi truoc
+            //      con chay (ja.aF) - mang lag / may cham thi luot minh toi cung luc hoat canh -> bam nhanh 2 o la mat luot
+            //      (U da gan, khong chon lai duoc, het gio tu bo luot). Bo dieu kien aF: luon gui (may chu quyet).
+            if (mn.name.equals("x") && mn.desc.equals("()V")) {
+                for (AbstractInsnNode n = mn.instructions.getFirst(); n != null; n = n.getNext()) {
+                    if (n.getOpcode() == Opcodes.GETFIELD && ((FieldInsnNode) n).owner.equals("ja") && ((FieldInsnNode) n).name.equals("aF")
+                            && n.getPrevious() != null && n.getPrevious().getOpcode() == Opcodes.ALOAD
+                            && n.getNext() != null && n.getNext().getOpcode() == Opcodes.IFNE) {
+                        AbstractInsnNode truoc = n.getPrevious(), nhay = n.getNext();
+                        mn.instructions.remove(truoc);
+                        mn.instructions.remove(nhay);
+                        mn.instructions.remove(n);
+                        dem(can, "bc_gui_ta");
+                        break;
+                    }
+                }
+                continue;
+            }
+            // 12c) bam o thu 2 trung o thu 1 (cham dup / tay rung) truoc day gui ta o X -> X: may chu bo luot. Nay bo qua lan
+            //      bam do, cho bam o khac. Mau (l, j): ALOAD r; ALOAD r; GETFIELD V; PUTFIELD U; ALOAD r; INVOKESPECIAL x
+            //      -> chen truoc: ALOAD r; GETFIELD V; ALOAD r; GETFIELD T; IF_ICMPEQ sau_x
+            if ((mn.name.equals("l") || mn.name.equals("j")) && mn.desc.equals("()V")) {
+                for (AbstractInsnNode n = mn.instructions.getFirst(); n != null; n = n.getNext()) {
+                    if (n.getOpcode() == Opcodes.INVOKESPECIAL && ((MethodInsnNode) n).owner.equals("ja") && ((MethodInsnNode) n).name.equals("x")) {
+                        AbstractInsnNode a5 = n.getPrevious(), u = a5 == null ? null : a5.getPrevious(),
+                                v = u == null ? null : u.getPrevious(), a2 = v == null ? null : v.getPrevious(),
+                                a1 = a2 == null ? null : a2.getPrevious();
+                        if (a5 instanceof VarInsnNode && u instanceof FieldInsnNode && ((FieldInsnNode) u).name.equals("U")
+                                && u.getOpcode() == Opcodes.PUTFIELD && v instanceof FieldInsnNode && ((FieldInsnNode) v).name.equals("V")
+                                && a2 instanceof VarInsnNode && a1 instanceof VarInsnNode) {
+                            int r = ((VarInsnNode) a1).var;
+                            LabelNode bo = new LabelNode();
+                            InsnList chen = new InsnList();
+                            chen.add(new VarInsnNode(Opcodes.ALOAD, r));
+                            chen.add(new FieldInsnNode(Opcodes.GETFIELD, "ja", "V", "B"));
+                            chen.add(new VarInsnNode(Opcodes.ALOAD, r));
+                            chen.add(new FieldInsnNode(Opcodes.GETFIELD, "ja", "T", "B"));
+                            chen.add(new JumpInsnNode(Opcodes.IF_ICMPEQ, bo));
+                            mn.instructions.insertBefore(a1, chen);
+                            mn.instructions.insert(n, bo);
+                            dem(can, "bc_cung_o");
+                            break;
+                        }
+                    }
+                }
+            }
             for (AbstractInsnNode n = mn.instructions.getFirst(); n != null; n = n.getNext()) {
                 if (n.getOpcode() == Opcodes.GETFIELD && ((FieldInsnNode) n).owner.equals("ja") && ((FieldInsnNode) n).name.equals("az")) {
                     AbstractInsnNode truoc = n.getPrevious(), sau = n.getNext(), nhay = sau == null ? null : sau.getNext();
