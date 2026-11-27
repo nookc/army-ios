@@ -11,10 +11,9 @@ public class Image {
     int akind;       /* 0 dac, 1 chi trong suot hoan toan, 2 ban trong suot (C chon cach ve nhanh) */
     /* Avatar: anh net cao - w, h, argb la diem anh that, kich thuoc logic = w / hd (anh dt3/ ve tren man net cao) */
     int hd = 1;
-    /* May HD (j2n.Disp.hdK() > 1): ban da phong to len he so cua dich ve - C tao lan dau anh duoc ve (gfx.c hd_build).
-     * bq = he so da yeu cau, bk = he so that cua big (0 = chua co / khong lam duoc), bkind = kieu alpha cua big */
-    int[] big;
-    int bk, bq, bkind;
+    /* May HD (j2n.Disp.hdK() > 1): ban da phong to len he so cua dich ve nam trong kho cua C (runtime/hdkho.c);
+     * bslot = o + 1 (0 = chua co), bgen = the he cua o luc cap (o bi thu hoi thi the he doi -> lam lai) */
+    int bslot, bgen;
     /* May HD: 1 = anh "min" (ve 3D, chuyen mau lien tuc) -> phong to bicubic; 0 = pixel art -> xBRZ; -1 = tu nhan dang */
     int smooth = -1;
     /** Graphics.setStrokeStyle(0x4846) dat: anh createRGBImage ke tiep co he so nay (dung 1 lan) */
@@ -205,6 +204,24 @@ public class Image {
         int d = heSoHd(data, off, len);
         if (d > 1 && i.w % d == 0 && i.h % d == 0) {
             i.hd = d;           // anh HD cua may chu (x2): kich thuoc logic = diem anh / d, ve net o man net cao
+        }
+        if (j2n.Disp.hdK() > 1) {
+            // May HD: anh nay co ban ve lai trong bo thay the (hdx/) -> dung ban do. Rong logic phai khop anh goc (cao duoc
+            // phep hon: dai font thieu hang o ban goc); khong khop thi giu anh goc
+            try {
+                byte[] t = j2n.HdGoi.tim(data, off, len);
+                if (t != null) {
+                    Image r = decode0(t, 0, t.length);
+                    int dr = heSoHd(t, 0, t.length);
+                    if (r != null && dr > 1 && r.w % dr == 0 && r.h % dr == 0 && r.w / dr == i.getWidth()
+                            && r.h / dr >= i.getHeight()) {
+                        r.hd = dr;
+                        r.smooth = 1;       // ban ve lai da min san: doi co bang loc min
+                        return r;
+                    }
+                }
+            } catch (Throwable e) {
+            }
         }
         return i;
     }

@@ -126,22 +126,44 @@ void N_j2n_Disp_postEvent(jctx *t, int32_t type, int32_t a, int32_t b) {
     push(type, a, b);
 }
 
+extern int gfx_hdk;
+/* May HD: khung 2-3 trieu diem anh (10 MB) - khong chep vao 'front' moi khung (nen tang da co ban sao rieng trong
+ * plat_present). Chi chep khi co nguoi xin anh chup (j2n_snapshot*): front_can = so khung can chep tiep. */
+static volatile int front_can;
+static volatile int front_moi;      /* 1 = 'front' dang la khung moi nhat */
+
 static void present_px(const uint32_t *px, int w, int h) {
     size_t n = (size_t)w * (size_t)h;
     pthread_mutex_lock(&fmu);
-    if (!front || n > front_cap) {
-        free(front);
-        front = (uint32_t *)malloc(n * 4);
-        front_cap = front ? n : 0;
-    }
-    if (front) {
-        memcpy(front, px, n * 4);
-        front_w = w;
-        front_h = h;
+    if (gfx_hdk > 1 && front_can <= 0) {
+        front_moi = 0;
+    } else {
+        if (front_can > 0) front_can--;
+        if (!front || n > front_cap) {
+            free(front);
+            front = (uint32_t *)malloc(n * 4);
+            front_cap = front ? n : 0;
+        }
+        if (front) {
+            memcpy(front, px, n * 4);
+            front_w = w;
+            front_h = h;
+            front_moi = 1;
+        }
     }
     frames++;
     pthread_mutex_unlock(&fmu);
     plat_present(px, w, h);
+}
+
+/* May HD: xin khung moi roi doi (toi da ~0,6 giay) den khi 'front' la khung moi nhat */
+static void front_doi(void) {
+    if (gfx_hdk <= 1) return;
+    front_can = 4;
+    for (int i = 0; i < 60 && !front_moi; i++) {
+        struct timespec ts = {0, 10 * 1000000L};
+        nanosleep(&ts, 0);
+    }
 }
 
 void N_j2n_Disp_present(jctx *t) {
@@ -197,6 +219,87 @@ int32_t N_j2n_Disp_hdK(jctx *t) {
     return gfx_hdk;
 }
 
+/* May HD: moc thoi gian ve khung (tu ha do net neu may ve cham) + nhip kho anh.
+ * pha 0 = bat dau ve khung, 1 = ve + day khung xong. hdTin: 0 = so viec phong to con cho, 1 = MB kho, 2 = so anh,
+ * 3 = han muc MB, 4 = thoi gian ve trung binh (micro giay) cua cua so vua xong (0 = chua du), 5 = so khung da do */
+extern int gfx_hd_fx;
+void j2n_set_hd_fx(int muc);
+void gfx_hd_frame(void);
+int gfx_hd_info(int what);
+void gfx_hd_set_k(int k);
+static int64_t hdm_t0, hdm_sum;
+static int hdm_n, hdm_avg, hdm_tot;
+static int hdm_d[90];
+
+static int hdm_cmp(const void *a, const void *b) { return *(const int *)a - *(const int *)b; }
+
+static int64_t hdm_now(void) {
+    struct timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    return (int64_t)ts.tv_sec * 1000000 + ts.tv_nsec / 1000;
+}
+
+void N_j2n_Disp_hdMoc(jctx *t, int32_t pha) {
+    (void)t;
+    static int64_t ve_sum;
+    if (pha == 0) {
+        gfx_hd_frame();
+        hdm_t0 = hdm_now();
+    } else if (pha == 2) {
+        if (hdm_t0) ve_sum += hdm_now() - hdm_t0;      /* rieng phan game ve (chua tinh day khung) */
+    } else if (hdm_t0) {
+        int64_t d = hdm_now() - hdm_t0;
+        hdm_t0 = 0;
+        if (gfx_hd_info(0) == 0) {          /* khong tinh khung dang ban phong to anh (luong phu tranh CPU) */
+            hdm_sum += d;
+            hdm_d[hdm_n++] = d > 1000000 ? 1000000 : (int)d;
+            hdm_tot++;
+            if (hdm_n >= 90) {
+                /* lay muc 60%: vai khung khung lai (GC, may bi dung, app ra nen) khong lam ha do net oan */
+                qsort(hdm_d, 90, sizeof hdm_d[0], hdm_cmp);
+                hdm_avg = hdm_d[54] > 0 ? hdm_d[54] : 1;
+                hdm_sum = 0;
+                hdm_n = 0;
+                if (getenv("J2N_HDLOG")) {
+                    extern int64_t gfx_dem[4];
+                    fprintf(stderr, "[hd] khung %d us (game ve %d us), kho %d MB / %d MB, %d anh; nghin diem / khung: dac %d, khoa %d, tron %d, to %d\n",
+                            hdm_avg, (int)(ve_sum / 90), gfx_hd_info(1), gfx_hd_info(3), gfx_hd_info(2), (int)(gfx_dem[0] / 90000),
+                            (int)(gfx_dem[1] / 90000), (int)(gfx_dem[2] / 90000), (int)(gfx_dem[3] / 90000));
+                    gfx_dem[0] = gfx_dem[1] = gfx_dem[2] = gfx_dem[3] = 0;
+                }
+                ve_sum = 0;
+            }
+        } else {
+            ve_sum = 0;
+            hdm_sum = 0;
+            hdm_n = 0;
+        }
+    }
+}
+
+int32_t N_j2n_Disp_hdTin(jctx *t, int32_t what) {
+    (void)t;
+    if (what == 4) {
+        int v = hdm_avg;
+        hdm_avg = 0;
+        return v;
+    }
+    if (what == 5) return hdm_tot;
+    if (what == 7) return gfx_hd_fx;
+    if (what == 6) {
+        const char *e = getenv("J2N_HDNGUONG");     /* thu nghiem: nguong tu ha do net (micro giay) */
+        return e ? atoi(e) : 0;
+    }
+    return gfx_hd_info(what);
+}
+
+/* k = 2..4: doi he so net; 100 + muc: dat muc hieu ung 3D (0..2) */
+void N_j2n_Disp_hdDat(jctx *t, int32_t k) {
+    (void)t;
+    if (k >= 100) j2n_set_hd_fx(k - 100);
+    else gfx_hd_set_k(k);
+}
+
 int32_t N_j2n_Disp_hdAnh(jctx *t) {
     (void)t;
     return hd_anh;
@@ -212,6 +315,7 @@ void N_j2n_Disp_presentImage(jctx *t, jobj argb, int32_t w, int32_t h) {
 }
 
 int j2n_snapshot(uint32_t *out, int w, int h) {
+    front_doi();
     pthread_mutex_lock(&fmu);
     int f = frames;
     if (front && w == front_w && h == front_h) memcpy(out, front, (size_t)w * h * 4);
@@ -221,6 +325,7 @@ int j2n_snapshot(uint32_t *out, int w, int h) {
 
 uint32_t *j2n_snapshot_any(int *w, int *h, int *frame_no) {
     uint32_t *r = 0;
+    front_doi();
     pthread_mutex_lock(&fmu);
     if (frame_no) *frame_no = frames;
     if (front && front_w > 0 && front_h > 0) {

@@ -30,9 +30,10 @@ $(OBJ)/gc.o: third_party/bdwgc/extra/gc.c
 	@mkdir -p $(OBJ)
 	$(CC) $(GCFLAGS) -c $< -o $@
 
-$(OBJ)/rt_%.o: runtime/%.c $(GEN)/.stamp runtime/rt.h runtime/platform.h
+# runtime bien dich -O2 nhu ban Android / iOS (do toc do ve cho dung); cac tep gop vao gfx.c cung la phu thuoc
+$(OBJ)/rt_%.o: runtime/%.c $(GEN)/.stamp runtime/rt.h runtime/platform.h runtime/hdscale.c runtime/hdkho.c runtime/hd3d.c
 	@mkdir -p $(OBJ)
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) -O2 -c $< -o $@
 
 $(OBJ)/harness.o: platform/linux/main.c runtime/platform.h
 	@mkdir -p $(OBJ)

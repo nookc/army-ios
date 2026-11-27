@@ -98,6 +98,10 @@ public class PatchFarmFx {
                 case "gy.class": data = va(data, PatchFarmFx::hdGy, can, name); break;
                 default: break;
             }
+            if (name.equals("ae.class") || name.equals("cz.class") || name.equals("ei.class") || name.equals("es.class")
+                    || name.equals("ez.class") || name.equals("go.class") || name.equals("ic.class")) {
+                data = va(data, PatchFarmFx::hdTheGioi, can, name);     // cac man khu ve the gioi qua ir.b / ir.d
+            }
             zo.putNextEntry(new ZipEntry(name));
             zo.write(data);
             zo.closeEntry();
@@ -125,6 +129,7 @@ public class PatchFarmFx {
                 && can.getOrDefault("loai_anh", 0) == 1
                 && can.getOrDefault("hd_phim_ve", 0) == 1 && can.getOrDefault("hd_chat_ve", 0) == 1
                 && can.getOrDefault("hd_map", 0) == 1 && can.getOrDefault("hd_vung", 0) == 2
+                && can.getOrDefault("hd_tg_nen", 0) == 7 && can.getOrDefault("hd_tg_tren", 0) == 7
                 && can.getOrDefault("trom_cay", 0) == 1 && can.getOrDefault("o_kho", 0) == 2
                 && can.getOrDefault("cham_vat", 0) == 1 && can.getOrDefault("nhan_chon", 0) == 1
                 && can.getOrDefault("cuoi_cho", 0) == 1 && can.getOrDefault("cuoi_kiem", 0) == 1
@@ -520,6 +525,29 @@ public class PatchFarmFx {
                 il.add(new VarInsnNode(Opcodes.ISTORE, 1));
                 mn.instructions.insert(il);
                 dem(can, "hd_map");
+            }
+        }
+    }
+
+    /**
+     * Ban HD (HdUi): moi man khu ve the gioi bang ir.b(g) (nen) ... ir.d(g) (lop tren). Doi 2 cho goi do sang
+     * HdUi.nenTg / HdUi.trenTg (cung tham so tren ngan xep: doi tuong ir + Graphics) de may ve biet doan ve the gioi.
+     */
+    static void hdTheGioi(ClassNode cn, Map<String, Integer> can) {
+        for (MethodNode mn : cn.methods) {
+            if (mn.instructions == null) {
+                continue;
+            }
+            for (AbstractInsnNode n : mn.instructions.toArray()) {
+                if (n instanceof MethodInsnNode && n.getOpcode() == Opcodes.INVOKEVIRTUAL && ((MethodInsnNode) n).owner.equals("ir")
+                        && ((MethodInsnNode) n).desc.equals("(Ljavax/microedition/lcdui/Graphics;)V")) {
+                    String ten = ((MethodInsnNode) n).name;
+                    if (ten.equals("b") || ten.equals("d")) {
+                        mn.instructions.set(n, new MethodInsnNode(Opcodes.INVOKESTATIC, "HdUi", ten.equals("b") ? "nenTg" : "trenTg",
+                                "(Lir;Ljavax/microedition/lcdui/Graphics;)V", false));
+                        dem(can, ten.equals("b") ? "hd_tg_nen" : "hd_tg_tren");
+                    }
+                }
             }
         }
     }

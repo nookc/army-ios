@@ -56,6 +56,9 @@ final class Native {
     /** Avatar 250 HD: xin bo anh x2 cua may chu - goi truoc start */
     static native void setHdAnh(boolean on);
 
+    /** Avatar 250 HD: han muc bo nho kho anh net cao (MB) - goi truoc start */
+    static native void setHdKho(int mb);
+
     /** Avatar 250 HD: chep khung nguyen byte (kenh R / B dao, ve bang bo loc mau) - nhanh cho khung net cao */
     static native int copyFrameRaw(Bitmap bmp, int last);
 

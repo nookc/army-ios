@@ -375,7 +375,7 @@ public final class MainActivity extends Activity {
             n = Math.round(h / (float) vh);
             pxScale = 0;
         } else {
-            n = Math.max(2, Math.min(w, h) / 220);
+            n = Math.max(2, Math.min(w, h) / 240);
             vw = w / n;
             vh = h / n;
             pxScale = n;
@@ -398,6 +398,15 @@ public final class MainActivity extends Activity {
         Native.setHd("FishGame", 2);
         Native.setHdK(hdK);
         Native.setHdAnh(true);
+        // han muc bo nho kho anh net cao theo RAM may: 1/16 RAM, 96..320 MB
+        int kho = 192;
+        try {
+            android.app.ActivityManager.MemoryInfo mi = new android.app.ActivityManager.MemoryInfo();
+            ((android.app.ActivityManager) getSystemService(ACTIVITY_SERVICE)).getMemoryInfo(mi);
+            kho = (int) Math.max(96, Math.min(320, mi.totalMem / 16 / (1024 * 1024)));
+        } catch (Throwable e) {
+        }
+        Native.setHdKho(kho);
         if (!Native.start(getAssets(), data.getAbsolutePath(), gW, gH)) {
             Log.e(TAG, "khong khoi dong duoc runtime");
             new AlertDialog.Builder(this).setTitle("Lỗi").setMessage("Không khởi động được game (thiếu dữ liệu trong APK).")
@@ -409,7 +418,7 @@ public final class MainActivity extends Activity {
             return;
         }
         started = true;
-        Log.i(TAG, "[app] vao game HD: man " + gW + "x" + gH + " net x" + hdK + " (view " + w + "x" + h + ")");
+        Log.i(TAG, "[app] vao game HD: man " + gW + "x" + gH + " net x" + hdK + " (view " + w + "x" + h + "), kho anh " + kho + " MB");
         if (view != null) {
             view.relayout();
         }

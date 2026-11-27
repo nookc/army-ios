@@ -1,3 +1,4 @@
+#define _GNU_SOURCE 1
 /* Bo chay thu tren Linux: kich ban lenh (giong pmdrive), chup khung hinh ra PPM.
  *   army2n <jar> <lop MIDlet> <rong> <cao> <tep lenh> <thu muc ra>
  * Lenh: key N | down N | up N | type:abc | sleep MS | shot TEN | tap X Y | drag X1 Y1 X2 Y2 |
@@ -15,6 +16,54 @@
 #include <time.h>
 #include <unistd.h>
 #include "platform.h"
+
+/* ------------------------------------------------------------ do nong (thu nghiem): lenh "prof TEP" trong tep lenh
+ * J2N_PROF=1: hen gio SIGPROF 1 ms theo thoi gian CPU cua ca tien trinh, ghi dia chi lenh dang chay; "prof TEP" ghi ra
+ * tep (dia chi tuong doi so voi dau chuong trinh) roi xoa bo dem -> tools ngoai doi ra ten ham bang addr2line. */
+#include <signal.h>
+#include <sys/time.h>
+#include <ucontext.h>
+#define PROF_MAX 400000
+static uintptr_t *prof_pc;
+static volatile int prof_n;
+extern char __executable_start;
+
+static void prof_tick(int sig, siginfo_t *si, void *uc) {
+    (void)sig; (void)si;
+    int i = __atomic_fetch_add(&prof_n, 1, __ATOMIC_RELAXED);
+    if (i < PROF_MAX) {
+#if defined(__x86_64__)
+        prof_pc[i] = (uintptr_t)((ucontext_t *)uc)->uc_mcontext.gregs[16];     /* REG_RIP */
+#elif defined(__aarch64__)
+        prof_pc[i] = (uintptr_t)((ucontext_t *)uc)->uc_mcontext.pc;
+#else
+        prof_pc[i] = 0;
+#endif
+    }
+}
+
+static void prof_start(void) {
+    prof_pc = (uintptr_t *)calloc(PROF_MAX, sizeof(uintptr_t));
+    struct sigaction sa;
+    memset(&sa, 0, sizeof sa);
+    sa.sa_sigaction = prof_tick;
+    sa.sa_flags = SA_SIGINFO | SA_RESTART;
+    sigaction(SIGPROF, &sa, 0);
+    struct itimerval it = {{0, 1000}, {0, 1000}};
+    setitimer(ITIMER_PROF, &it, 0);
+}
+
+static void prof_dump(const char *file) {
+    if (!prof_pc) return;
+    FILE *f = fopen(file, "w");
+    int n = prof_n < PROF_MAX ? prof_n : PROF_MAX;
+    if (f) {
+        for (int i = 0; i < n; i++) fprintf(f, "%lx\n", (unsigned long)(prof_pc[i] - (uintptr_t)&__executable_start));
+        fclose(f);
+    }
+    fprintf(stderr, "[harness] prof %s %d mau\n", file, n);
+    prof_n = 0;
+}
 
 static char g_jar[1024], g_out[1024], g_data[1100];
 static int W, H;
@@ -202,6 +251,10 @@ static void run_cmd(char *line) {
     char op[32];
     int a = 0, b = 0, c = 0, d = 0;
     char name[256];
+    if (sscanf(line, "prof %255s", name) == 1) {
+        prof_dump(name);
+        return;
+    }
     if (sscanf(line, "shot %255s", name) == 1) {
         shot(name);
         return;
@@ -285,6 +338,7 @@ static void kb_hook_log(int show, int area_bottom) {
 
 int main(int argc, char **argv) {
     const char *vhz = getenv("J2N_VSYNC_HZ");
+    if (getenv("J2N_PROF")) prof_start();
     if (getenv("J2N_VSYNC_MODE")) {
         j2n_vsync_mode = atoi(getenv("J2N_VSYNC_MODE"));
     }
@@ -320,6 +374,12 @@ int main(int argc, char **argv) {
     if (ha && ha[0] == '1') j2n_set_hd_anh(1);
     const char *hk = getenv("J2N_HDK");
     if (hk && hk[0]) j2n_set_hd_k(atoi(hk));
+    if (getenv("J2N_HDFX")) j2n_set_hd_fx(atoi(getenv("J2N_HDFX")));
+    if (getenv("J2N_FX")) {
+        /* thu nghiem: cuong do tung hieu ung (%) "loa,toi_goc,tia_nang,bui" */
+        extern int gfx_fx_bloom, gfx_fx_vig, gfx_fx_ray, gfx_fx_bui;
+        sscanf(getenv("J2N_FX"), "%d,%d,%d,%d", &gfx_fx_bloom, &gfx_fx_vig, &gfx_fx_ray, &gfx_fx_bui);
+    }
     const char *hd = getenv("J2N_HD");
     if (hd && hd[0]) {
         char hb[256];

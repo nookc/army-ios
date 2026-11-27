@@ -584,6 +584,11 @@ static void ios_kb_hook(int show, int area);
     j2n_set_hd(HD_CANVAS, 2);
     j2n_set_hd_k(gHdK);
     j2n_set_hd_anh(1);
+    {
+        /* han muc bo nho kho anh net cao theo RAM may: 1/16 RAM, 96..320 MB */
+        long long mb = (long long)(NSProcessInfo.processInfo.physicalMemory / 16 / (1024 * 1024));
+        j2n_set_hd_budget((int)MAX(96, MIN(320, mb)));
+    }
     plat_log([[NSString stringWithFormat:@"[app] vao game HD: man %dx%d net x%d (vung an toan %.0fx%.0f diem)",
                gW, gH, gHdK, sw, sh] UTF8String]);
     gStarted = YES;

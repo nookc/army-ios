@@ -236,7 +236,70 @@ public final class Ui {
 
     /* May HD: moi Canvas ve vao 1 bo dem net cao (K diem anh that / diem logic cua man). Canvas phong to s lan (ban ban
      * ca: kich thuoc logic gap s) ve voi he so K / s -> cung ra bo dem do net do. */
+    /* May HD - tu ha do net: C do thoi gian ve trung binh (cua so 90 khung, bo khung dang ban phong to anh). 2 cua so lien
+     * tiep cham hon nguong -> giam K 1 bac (4 -> 3 -> 2) va nho lai (RMS "avhdk") de lan sau vao la muot ngay. Cu 8 lan
+     * mo app thi thu lai muc cua may 1 lan (may nong / ban tam thoi khong bi phat mai). */
+    private static final int HD_NGUONG_US = 30000;
+    private static boolean hdDoc;
+    private static int hdChamLt;
+    /** muc da nho: he so K (0 = theo may), hieu ung canh da tat (1) hay chua (0) */
+    private static int hdNhoK, hdNhoFx;
+
+    private static void hdGhi(int lan) {
+        try {
+            javax.microedition.rms.RecordStore rs = javax.microedition.rms.RecordStore.openRecordStore("avhdk", true);
+            byte[] n = new byte[] {(byte) hdNhoK, (byte) lan, (byte) hdNhoFx};
+            if (rs.getNumRecords() > 0) {
+                rs.setRecord(1, n, 0, 3);
+            } else {
+                rs.addRecord(n, 0, 3);
+            }
+            rs.closeRecordStore();
+        } catch (Throwable e) {
+        }
+    }
+
+    private static int hdLan;
+
+    private static void hdKhoiDau(int K) {
+        hdDoc = true;
+        int kNho = 0, lan = 0;
+        try {
+            javax.microedition.rms.RecordStore rs = javax.microedition.rms.RecordStore.openRecordStore("avhdk", true);
+            byte[] b = rs.getNumRecords() > 0 ? rs.getRecord(1) : null;
+            rs.closeRecordStore();
+            if (b != null && b.length >= 2) {
+                kNho = b[0];
+                lan = b[1] & 0xFF;
+                hdNhoFx = b.length >= 3 ? b[2] : 0;
+            }
+        } catch (Throwable e) {
+        }
+        lan = (lan + 1) & 0x7F;
+        if (lan % 8 == 0) {
+            kNho = 0;           // thu lai muc cao nhat cua may
+            hdNhoFx = 0;
+        }
+        if (hdNhoFx == 1 && Disp.hdTin(7) > 1) {
+            Disp.hdDat(100 + 1);
+        }
+        if (kNho >= 2 && kNho < K) {
+            Disp.hdDat(kNho);
+            System.err.println("[hd] dung do net da nho x" + kNho + " (may: x" + K + ")");
+        } else {
+            kNho = 0;
+        }
+        hdNhoK = kNho;
+        hdLan = lan;
+        hdGhi(lan);
+    }
+
     private static void paintHd(Displayable d, int K) {
+        if (!hdDoc) {
+            hdKhoiDau(K);
+            K = Disp.hdK();
+        }
+        Disp.hdMoc(0);
         int s = Display.scaleOf(d);
         if (s < 1) {
             s = 1;
@@ -257,7 +320,33 @@ public final class Ui {
         } catch (Throwable e) {
             System.err.println("[Ui] loi paint: " + e);
         }
+        Disp.hdMoc(2);
         Display.presentImage(manImg);
+        Disp.hdMoc(1);
+        int tb = Disp.hdTin(4);
+        if (tb > 0) {
+            int ng = Disp.hdTin(6);
+            if (ng <= 0) {
+                ng = HD_NGUONG_US;
+            }
+            if (tb <= ng) {
+                hdChamLt = 0;
+            } else if (++hdChamLt >= 2) {
+                hdChamLt = 0;
+                if (Disp.hdTin(7) > 1) {
+                    // buoc 1: bo hau ky canh (loa sang, tia nang...) - giu do net
+                    Disp.hdDat(100 + 1);
+                    hdNhoFx = 1;
+                    hdGhi(hdLan);
+                    System.err.println("[hd] may ve cham (" + tb + " us/khung) -> tat hau ky canh");
+                } else if (K > 2) {
+                    Disp.hdDat(K - 1);
+                    hdNhoK = K - 1;
+                    hdGhi(hdLan);
+                    System.err.println("[hd] may ve cham (" + tb + " us/khung) -> giam do net xuong x" + (K - 1));
+                }
+            }
+        }
     }
 
     private static void notifyShown() {

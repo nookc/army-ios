@@ -65,4 +65,30 @@ public final class HdUi {
     public static int mapPhim(int map) {
         return hd() ? -1 : map;
     }
+
+    /*
+     * Ve the gioi (ban do + vat the + nhan vat) cua moi man khu: ir.b(g) = nen, ... cac vat the ..., ir.d(g) = lop tren.
+     * Ban HD bao cho may ve biet doan nay (Graphics.setStrokeStyle voi ma rieng): anh ve trong doan nay co khoi noi + bong
+     * do, ve xong thi lam hau ky canh (loa sang, tia nang, toi goc, bui sang) truoc khi ve ten / HUD.
+     * PatchFarmFx doi moi cho goi ir.b / ir.d sang 2 ham nay.
+     */
+    public static void nenTg(ir o, Graphics g) {
+        o.b(g);         // nen (o gach mat dat): giu phang, khong do bong
+        if (hd()) {
+            try {
+                g.setStrokeStyle(0x4850);
+            } catch (Throwable e) {
+            }
+        }
+    }
+
+    public static void trenTg(ir o, Graphics g) {
+        o.d(g);
+        if (hd()) {
+            try {
+                g.setStrokeStyle(0x4851);
+            } catch (Throwable e) {
+            }
+        }
+    }
 }

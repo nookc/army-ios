@@ -51,58 +51,177 @@ volatile int gfx_hd_seen;
  * that. 0 = tat (moi thu y nhu truoc). Nen tang dat truoc khi chay game: j2n_set_hd_k(). */
 int gfx_hdk;
 
-void j2n_set_hd_k(int k) { gfx_hdk = (k >= 2 && k <= 4) ? k : 0; }
+void j2n_set_hd_k(int k) { gfx_hdk = (k >= 2 && k <= 4) ? k : 0; }   /* truoc khi chay game; dang chay: gfx_hd_set_k */
 
 /* anh lon hon muc nay (diem anh that sau phong to) thi phong to it hon / giu nguyen: tranh ngon bo nho */
-#define HD_BIG_MAX 9000000
+#include "hdkho.c"
+#include "hd3d.c"
 
-/* tao Image.big = ban he so 'k' cua anh bat bien (nguon he so s). Khong lam duoc thi de trong (ve theo cach chung).
- * Image.bq = he so da yeu cau (de khong lam lai moi lan ve), Image.bk = he so that cua Image.big (0 = khong co). */
-static void hd_build(jctx *t, struct O_javax_microedition_lcdui_Image *im, int k) {
+/* lay (va ghim) ban he so rq cua anh bat bien; NULL = chua co (dang lam / khong lam duoc) -> ve tam bang diem anh goc */
+static hd_ent *hd_get(struct O_javax_microedition_lcdui_Image *im, int rq) {
     int s = im->f_hd_I > 1 ? im->f_hd_I : 1;
-    im->f_bq_I = k;
-    im->f_big__5b = 0;
-    im->f_bk_I = 0;
-    if (!im->f_argb__5b || im->f_w_I <= 0 || im->f_h_I <= 0 || im->f_w_I % s || im->f_h_I % s) return;
-    int lw = im->f_w_I / s, lh = im->f_h_I / s;
-    while (k > s && (int64_t)lw * k * lh * k > HD_BIG_MAX) k--;
-    if (k <= s) return;
-    int ow = 0, oh = 0;
-    uint32_t *px = hd_make(AD(im->f_argb__5b, uint32_t), im->f_w_I, im->f_h_I, s, k, im->f_smooth_I, &ow, &oh);
-    if (!px) return;
-    jobj arr = rt_newarr(t, &rt_arr_I, ow * oh);
-    if (!arr) {
-        free(px);
-        t->exc = 0;
-        return;
-    }
-    uint32_t *d = AD(arr, uint32_t);
-    int kind = 0;
-    size_t n = (size_t)ow * oh;
-    for (size_t i = 0; i < n; i++) {
-        uint32_t v = px[i], a = v >> 24;
-        d[i] = v;
-        if (a != 255) {
-            if (a != 0) kind = 2;
-            else if (kind == 0) kind = 1;
+    {
+        /* duong nhanh khong khoa (hau het lan ve): ghim truoc, kiem tra sau. Ben thu hoi (hd_drop_try) doi trang thai
+         * truoc roi moi xem so ghim -> it nhat 1 ben thay ben kia (thu tu toan cuc) nen khong bao gio ve ban da bi bo */
+        int sl = im->f_bslot_I - 1;
+        if (sl >= 0 && sl < HD_SLOTS) {
+            hd_ent *f = &hd_tab[sl];
+            __atomic_add_fetch(&f->pins, 1, __ATOMIC_SEQ_CST);
+            int st = __atomic_load_n(&f->state, __ATOMIC_SEQ_CST);
+            if ((st == HD_READY || st == HD_NONE) && f->gen == (uint32_t)im->f_bgen_I && f->rq == rq
+                && (f->mode | gfx_hd_mode) == f->mode) {
+                f->last = hd_frame_no;
+                if (st == HD_READY) return f;
+                __atomic_sub_fetch(&f->pins, 1, __ATOMIC_SEQ_CST);
+                return 0;               /* khong lam duoc ban net cao: ve ban goc */
+            }
+            __atomic_sub_fetch(&f->pins, 1, __ATOMIC_SEQ_CST);
         }
     }
-    free(px);
-    im->f_bkind_I = kind;
-    im->f_big__5b = arr;
-    im->f_bk_I = k;
+    int want_mode = gfx_hd_mode;
+    pthread_mutex_lock(&hd_mu);
+    if (hd_free_top == -2) {
+        hd_free_top = -1;
+        for (int i = HD_SLOTS - 1; i >= 0; i--) hd_free_stk[++hd_free_top] = i;
+    }
+    int slot = im->f_bslot_I - 1;
+    hd_ent *e = 0;
+    if (slot >= 0 && slot < HD_SLOTS) {
+        e = &hd_tab[slot];
+        if (e->gen != (uint32_t)im->f_bgen_I || e->state == HD_FREE) e = 0;
+        else if (e->rq != rq || ((e->mode | gfx_hd_mode) != e->mode && (e->state == HD_READY || e->state == HD_NONE))) {
+            /* doi he so (hiem: K vua doi) / anh tung ve o giao dien nay duoc ve trong the gioi (can khoi noi, bong):
+             * bo ban cu neu duoc roi lam lai */
+            want_mode = e->mode | gfx_hd_mode;
+            if (!hd_drop_try(slot)) {
+                pthread_mutex_unlock(&hd_mu);
+                return 0;
+            }
+            e = 0;
+        }
+    }
+    if (!e) {
+        if (!im->f_argb__5b || im->f_w_I <= 0 || im->f_h_I <= 0 || im->f_w_I % s || im->f_h_I % s) {
+            pthread_mutex_unlock(&hd_mu);
+            return 0;
+        }
+        int lw = im->f_w_I / s, lh = im->f_h_I / s, k = rq;
+        while (k > 1 && (int64_t)lw * k * lh * k > HD_BIG_MAX) k--;
+        size_t est = (size_t)lw * k * lh * k * 4;
+        int md = (gfx_hd_fx && im->f_smooth_I != 1) ? want_mode : 0;
+        int ok = k > 1 && (k != s || md != 0);        /* cung he so van lam neu can hieu ung (ban sao da xu ly) */
+        if (ok && !hd_room(est)) {
+            /* het han muc va moi thu dang duoc dung: ve tam ban goc, thu lai o khung sau */
+            pthread_mutex_unlock(&hd_mu);
+            return 0;
+        }
+        if (hd_free_top < 0) {
+            for (int thu = 0; thu < 8 && hd_free_top < 0; thu++) {
+                int v = hd_oldest(3, 0);
+                if (v < 0) break;
+                hd_drop_try(v);
+            }
+            if (hd_free_top < 0) {
+                pthread_mutex_unlock(&hd_mu);
+                return 0;
+            }
+        }
+        slot = hd_free_stk[hd_free_top--];
+        e = &hd_tab[slot];
+        im->f_bslot_I = slot + 1;
+        im->f_bgen_I = (int32_t)e->gen;
+        e->rq = rq;
+        e->k = k;
+        e->px = 0;
+        e->shd = 0;
+        e->shm = 0;
+        e->pins = 0;
+        e->last = hd_frame_no;
+        if (!ok) {
+            e->mode = want_mode;        /* khong lam duoc: nho che do de khong thu lai moi lan ve */
+            e->state = HD_NONE;
+            pthread_mutex_unlock(&hd_mu);
+            return 0;
+        }
+        e->src = AD(im->f_argb__5b, uint32_t);
+        e->sw = im->f_w_I;
+        e->sh = im->f_h_I;
+        e->s = s;
+        e->smooth = im->f_smooth_I;
+        e->mode = md;
+        e->est = est;
+        e->next = -1;
+        hd_pin[slot] = im->f_argb__5b;
+        hd_pend += est;
+        if (hd_nworker == 0) hd_start_workers();
+        if (hd_nworker < 0 || (lw * lh <= HD_SYNC_PX && hd_sync_left > 0)) {
+            /* anh nho: lam ngay (net tu khung dau), co han muc thoi gian moi khung */
+            e->state = HD_BUILD;
+            const uint32_t *src = e->src;
+            int mode = e->mode, smooth = e->smooth, sw = e->sw, sh = e->sh;
+            pthread_mutex_unlock(&hd_mu);
+            int64_t t0 = hd_now_us();
+            int ow = 0, oh = 0, kind = 0, shm = 0;
+            uint8_t *shp = 0;
+            uint32_t *px = hd_do(src, sw, sh, s, k, smooth, mode, &ow, &oh, &kind, &shp, &shm);
+            int64_t dt = hd_now_us() - t0;
+            pthread_mutex_lock(&hd_mu);
+            hd_sync_left -= (int)dt;
+            hd_pend -= est;
+            hd_pin[slot] = 0;
+            e->src = 0;
+            if (!px) {
+                e->state = HD_NONE;
+                pthread_mutex_unlock(&hd_mu);
+                return 0;
+            }
+            e->px = px;
+            e->w = ow;
+            e->h = oh;
+            e->kind = kind;
+            e->shd = shp;
+            e->shm = shm;
+            hd_bytes += (size_t)ow * oh * 4 + (shp ? (size_t)ow * (oh + shm) : 0);
+            hd_nready++;
+            __atomic_store_n(&e->state, HD_READY, __ATOMIC_SEQ_CST);
+        } else {
+            e->state = HD_WAIT;
+            if (hd_qt >= 0) hd_tab[hd_qt].next = slot;
+            else hd_qh = slot;
+            hd_qt = slot;
+            hd_qn++;
+            pthread_cond_signal(&hd_cv);
+            pthread_mutex_unlock(&hd_mu);
+            return 0;
+        }
+    }
+    e->last = hd_frame_no;
+    if (e->state != HD_READY) {
+        pthread_mutex_unlock(&hd_mu);
+        return 0;
+    }
+    __atomic_add_fetch(&e->pins, 1, __ATOMIC_SEQ_CST);
+    pthread_mutex_unlock(&hd_mu);
+    return e;
 }
 
-/* bo dem ve cua anh cho dich he so k: diem anh, be rong hang, he so, kieu alpha */
-static const uint32_t *img_px(jctx *t, struct O_javax_microedition_lcdui_Image *im, int k, int *stride, int *sc, int *kind) {
+/* bo dem ve cua anh cho dich he so k: diem anh, be rong hang, he so, kieu alpha. *pin != NULL: ve xong phai hd_put(*pin) */
+static const uint32_t *img_px(jctx *t, struct O_javax_microedition_lcdui_Image *im, int k, int *stride, int *sc, int *kind,
+                              hd_ent **pin) {
+    (void)t;
     int s = im->f_hd_I > 1 ? im->f_hd_I : 1;
-    if (gfx_hdk > 1 && k > 1 && s != k && !im->f_mutable_Z) {
-        if (im->f_bq_I != k) hd_build(t, im, k);
-        if (im->f_big__5b && im->f_bk_I > 1) {
-            *stride = im->f_w_I / s * im->f_bk_I;
-            *sc = im->f_bk_I;
-            *kind = im->f_bkind_I;
-            return AD(im->f_big__5b, uint32_t);
+    *pin = 0;
+    if (gfx_hdk > 1 && k > 1 && !im->f_mutable_Z) {
+        int rq = k > gfx_hdk ? gfx_hdk : k;
+        if (s != rq || (gfx_hd_mode && im->f_smooth_I != 1) || im->f_bslot_I) {
+            hd_ent *e = hd_get(im, rq);
+            if (e) {
+                *pin = e;
+                *stride = e->w;
+                *sc = e->k;
+                *kind = e->kind;
+                return e->px;
+            }
         }
     }
     *stride = im->f_w_I;
@@ -149,6 +268,14 @@ static int target(jctx *t, jobj g, tgt *o) {
     return x1 > x0 && y1 > y0;
 }
 
+#if defined(__aarch64__)
+#include <arm_neon.h>
+#define ROW_NEON 1
+#elif defined(__SSE2__)
+#include <emmintrin.h>
+#define ROW_SSE2 1
+#endif
+
 static inline uint32_t blend(uint32_t s, uint32_t d) {
     uint32_t a = s >> 24;
     if (a == 255) return s;
@@ -159,6 +286,33 @@ static inline uint32_t blend(uint32_t s, uint32_t d) {
     uint32_t gg = (s & 0x00FF00u) * a + (d & 0x00FF00u) * ia + 0x008000u;
     gg = ((gg + ((gg >> 8) & 0x00FF00u)) >> 8) & 0x00FF00u;
     return 0xFF000000u | rb | gg;
+}
+
+/* dem diem anh ve theo loai (thu nghiem, J2N_HDLOG): 0 dac, 1 khoa mau, 2 tron, 3 to mau */
+int64_t gfx_dem[4];
+
+/* to 1 hang cung mau (nhanh) */
+static inline void row_fill(uint32_t *d, uint32_t c, int n) {
+    int i = 0;
+#if defined(__aarch64__)
+    {
+        uint32_t v4[4] = {c, c, c, c};
+        uint32x4_t v = vld1q_u32(v4);
+        for (; i + 8 <= n; i += 8) {
+            vst1q_u32(d + i, v);
+            vst1q_u32(d + i + 4, v);
+        }
+    }
+#elif defined(__SSE2__)
+    {
+        __m128i v = _mm_set1_epi32((int)c);
+        for (; i + 8 <= n; i += 8) {
+            _mm_storeu_si128((__m128i *)(d + i), v);
+            _mm_storeu_si128((__m128i *)(d + i + 4), v);
+        }
+    }
+#endif
+    for (; i < n; i++) d[i] = c;
 }
 
 static inline void pset(tgt *o, int x, int y) {
@@ -297,10 +451,8 @@ static void fill_abs(tgt *o, int x, int y, int w, int h) {
     x1 *= k;
     y0 *= k;
     y1 *= k;
-    for (int yy = y0; yy < y1; yy++) {
-        uint32_t *p = o->px + (size_t)yy * o->w + x0;
-        for (int n = x1 - x0; n > 0; n--) *p++ = c;
-    }
+    gfx_dem[3] += (int64_t)(x1 - x0) * (y1 - y0);
+    for (int yy = y0; yy < y1; yy++) row_fill(o->px + (size_t)yy * o->w + x0, c, x1 - x0);
 }
 
 void N_javax_microedition_lcdui_Graphics_fillRect(jctx *t, jobj self, int32_t x, int32_t y, int32_t w, int32_t h) {
@@ -560,6 +712,114 @@ void N_javax_microedition_lcdui_Graphics_fillTriangle(jctx *t, jobj self, int32_
 static void draw_img(tgt *o, const uint32_t *src, int sstride, int s, int xs, int ys, int w, int h, int tr, int px, int py,
                      int kind);
 
+/* ---- ve 1 hang diem anh (nhanh, 4 diem / buoc bang NEON / SSE2). Ket qua giong het cong thuc blend() tung diem.
+ * May HD ve o do net x4 nen so diem anh gap 16 lan: phan lon thoi gian ve khung nam o day. Nhom 4 diem trong suot het
+ * thi bo qua, dac het thi chep thang - anh nhan vat (trong dac, ngoai trong suot, vien mong) gan nhu chi con chep. */
+
+/* kind 0: dac (dat alpha 255) */
+static inline void row_opaque(uint32_t *d, const uint32_t *s, int n) {
+    int i = 0;
+#if defined(ROW_NEON)
+    const uint32x4_t am = vdupq_n_u32(0xFF000000u);
+    for (; i + 4 <= n; i += 4) vst1q_u32(d + i, vorrq_u32(vld1q_u32(s + i), am));
+#elif defined(ROW_SSE2)
+    const __m128i am = _mm_set1_epi32((int)0xFF000000u);
+    for (; i + 4 <= n; i += 4)
+        _mm_storeu_si128((__m128i *)(d + i), _mm_or_si128(_mm_loadu_si128((const __m128i *)(s + i)), am));
+#endif
+    for (; i < n; i++) d[i] = s[i] | 0xFF000000u;
+}
+
+/* kind 1: alpha 0 = bo, con lai = dac */
+static inline void row_key(uint32_t *d, const uint32_t *s, int n) {
+    int i = 0;
+#if defined(ROW_NEON)
+    const uint32x4_t am = vdupq_n_u32(0xFF000000u);
+    for (; i + 4 <= n; i += 4) {
+        uint32x4_t sv = vld1q_u32(s + i);
+        uint32x4_t a = vshrq_n_u32(sv, 24);
+        if (vmaxvq_u32(a) == 0) continue;
+        uint32x4_t m = vtstq_u32(sv, am);            /* alpha != 0 */
+        vst1q_u32(d + i, vbslq_u32(m, vorrq_u32(sv, am), vld1q_u32(d + i)));
+    }
+#elif defined(ROW_SSE2)
+    const __m128i am = _mm_set1_epi32((int)0xFF000000u), zero = _mm_setzero_si128();
+    for (; i + 4 <= n; i += 4) {
+        __m128i sv = _mm_loadu_si128((const __m128i *)(s + i));
+        __m128i tr = _mm_cmpeq_epi32(_mm_and_si128(sv, am), zero);     /* alpha == 0 */
+        int mm = _mm_movemask_epi8(tr);
+        if (mm == 0xFFFF) continue;
+        __m128i v = _mm_or_si128(sv, am);
+        if (mm) {
+            __m128i dv = _mm_loadu_si128((const __m128i *)(d + i));
+            v = _mm_or_si128(_mm_and_si128(tr, dv), _mm_andnot_si128(tr, v));
+        }
+        _mm_storeu_si128((__m128i *)(d + i), v);
+    }
+#endif
+    for (; i < n; i++) {
+        uint32_t v = s[i];
+        if (v >> 24) d[i] = v | 0xFF000000u;
+    }
+}
+
+/* kind 2: ban trong suot */
+static inline void row_blend(uint32_t *d, const uint32_t *s, int n) {
+    int i = 0;
+#if defined(ROW_NEON)
+    const uint32x4_t am = vdupq_n_u32(0xFF000000u);
+    const uint16x8_t c128 = vdupq_n_u16(128);
+    for (; i + 4 <= n; i += 4) {
+        uint32x4_t sv = vld1q_u32(s + i);
+        uint32x4_t a = vshrq_n_u32(sv, 24);
+        if (vmaxvq_u32(a) == 0) continue;
+        if (vminvq_u32(a) == 255) {
+            vst1q_u32(d + i, sv);
+            continue;
+        }
+        uint8x16_t s8 = vreinterpretq_u8_u32(sv), d8 = vreinterpretq_u8_u32(vld1q_u32(d + i));
+        uint8x16_t a8 = vreinterpretq_u8_u32(vmulq_n_u32(a, 0x01010101u));
+        uint8x16_t i8 = vmvnq_u8(a8);
+        uint16x8_t lo = vaddq_u16(vaddq_u16(vmull_u8(vget_low_u8(s8), vget_low_u8(a8)), vmull_u8(vget_low_u8(d8), vget_low_u8(i8))), c128);
+        uint16x8_t hi = vaddq_u16(vaddq_u16(vmull_u8(vget_high_u8(s8), vget_high_u8(a8)), vmull_u8(vget_high_u8(d8), vget_high_u8(i8))), c128);
+        lo = vshrq_n_u16(vaddq_u16(lo, vshrq_n_u16(lo, 8)), 8);
+        hi = vshrq_n_u16(vaddq_u16(hi, vshrq_n_u16(hi, 8)), 8);
+        uint8x16_t r = vcombine_u8(vmovn_u16(lo), vmovn_u16(hi));
+        vst1q_u32(d + i, vorrq_u32(vreinterpretq_u32_u8(r), am));
+    }
+#elif defined(ROW_SSE2)
+    const __m128i am = _mm_set1_epi32((int)0xFF000000u), zero = _mm_setzero_si128();
+    const __m128i c255 = _mm_set1_epi16(255), c128 = _mm_set1_epi16(128);
+    for (; i + 4 <= n; i += 4) {
+        __m128i sv = _mm_loadu_si128((const __m128i *)(s + i));
+        __m128i a = _mm_and_si128(sv, am);
+        if (_mm_movemask_epi8(_mm_cmpeq_epi32(a, zero)) == 0xFFFF) continue;
+        if (_mm_movemask_epi8(_mm_cmpeq_epi32(a, am)) == 0xFFFF) {
+            _mm_storeu_si128((__m128i *)(d + i), sv);
+            continue;
+        }
+        __m128i dv = _mm_loadu_si128((const __m128i *)(d + i));
+        __m128i slo = _mm_unpacklo_epi8(sv, zero), shi = _mm_unpackhi_epi8(sv, zero);
+        __m128i dlo = _mm_unpacklo_epi8(dv, zero), dhi = _mm_unpackhi_epi8(dv, zero);
+        __m128i alo = _mm_shufflehi_epi16(_mm_shufflelo_epi16(slo, 0xFF), 0xFF);
+        __m128i ahi = _mm_shufflehi_epi16(_mm_shufflelo_epi16(shi, 0xFF), 0xFF);
+        __m128i tlo = _mm_add_epi16(_mm_add_epi16(_mm_mullo_epi16(slo, alo), _mm_mullo_epi16(dlo, _mm_sub_epi16(c255, alo))), c128);
+        __m128i thi = _mm_add_epi16(_mm_add_epi16(_mm_mullo_epi16(shi, ahi), _mm_mullo_epi16(dhi, _mm_sub_epi16(c255, ahi))), c128);
+        tlo = _mm_srli_epi16(_mm_add_epi16(tlo, _mm_srli_epi16(tlo, 8)), 8);
+        thi = _mm_srli_epi16(_mm_add_epi16(thi, _mm_srli_epi16(thi, 8)), 8);
+        _mm_storeu_si128((__m128i *)(d + i), _mm_or_si128(_mm_packus_epi16(tlo, thi), am));
+    }
+#endif
+    for (; i < n; i++) d[i] = blend(s[i], d[i]);
+}
+
+static inline void row_put(uint32_t *d, const uint32_t *s, int n, int kind) {
+    gfx_dem[kind & 3] += n;
+    if (kind == 0) row_opaque(d, s, n);
+    else if (kind == 1) row_key(d, s, n);
+    else row_blend(d, s, n);
+}
+
 static void blit(tgt *o, const uint32_t *src, int sstride, int sx, int sy, int dx, int dy, int w, int h, int kind) {
     /* cat theo vung cat */
     if (dx < o->x0) { sx += o->x0 - dx; w -= o->x0 - dx; dx = o->x0; }
@@ -570,17 +830,27 @@ static void blit(tgt *o, const uint32_t *src, int sstride, int sx, int sy, int d
     for (int r = 0; r < h; r++) {
         const uint32_t *s = src + (size_t)(sy + r) * sstride + sx;
         uint32_t *d = o->px + (size_t)(dy + r) * o->w + dx;
-        if (kind == 0) {
-            for (int i = 0; i < w; i++) d[i] = s[i] | 0xFF000000u;
-        } else if (kind == 1) {
-            for (int i = 0; i < w; i++) {
-                uint32_t v = s[i];
-                if (v >> 24) d[i] = v | 0xFF000000u;
-            }
-        } else {
-            for (int i = 0; i < w; i++) d[i] = blend(s[i], d[i]);
-        }
+        row_put(d, s, w, kind);
     }
+}
+
+/* May HD: moc ve the gioi. pha 1 = bat dau ve the gioi (anh duoc ve tu day co khoi noi + bong do);
+ * pha 2 = ve xong the gioi: tat che do + hau ky canh (loa sang, tia nang, toi goc, bui sang) len dich hien tai */
+void N_javax_microedition_lcdui_Graphics_hdCanh(jctx *t, jobj self, int32_t pha) {
+    if (gfx_hdk <= 1) return;
+    if (pha == 1) {
+        gfx_world = gfx_hd_fx >= 1;
+        gfx_hd_mode = gfx_hd_fx >= 1 ? 3 : 0;
+        return;
+    }
+    int dang = gfx_world;
+    gfx_world = 0;
+    gfx_hd_mode = 0;
+    if (!dang || gfx_hd_fx < 2) return;
+    tgt o;
+    if (!target(t, self, &o)) return;
+    if (o.k != gfx_hdk) return;
+    gfx_hd_scene(o.px, o.w, o.h, o.x0 * o.k, o.y0 * o.k, o.x1 * o.k, o.y1 * o.k, o.k);
 }
 
 void N_javax_microedition_lcdui_Graphics_drawImage0(jctx *t, jobj self, jobj img, int32_t x, int32_t y, int32_t anchor) {
@@ -604,8 +874,11 @@ void N_javax_microedition_lcdui_Graphics_drawImage0(jctx *t, jobj self, jobj img
         return;
     }
     int stride, kind;
-    src = img_px(t, im, o.k, &stride, &sc, &kind);
+    hd_ent *pin;
+    src = img_px(t, im, o.k, &stride, &sc, &kind, &pin);
+    if (gfx_world && pin && pin->shd && sc == o.k) sh_draw(&o, pin, 0, 0, lw, lh, 0, px, py);
     draw_img(&o, src, stride, sc, 0, 0, lw, lh, 0, px, py, kind);
+    if (pin) hd_put(pin);
 }
 
 /* bien doi: (lx, ly) dich -> (sx, sy) nguon = base + col*lx + row*ly (giong transform_steps cua bo chay cu) */
@@ -639,6 +912,28 @@ static void region_draw(tgt *o, const uint32_t *src, int sstride, int xs, int ys
     int64_t colstep = (int64_t)cy * sstride + cx, rowstep = (int64_t)ry * sstride + rx;
     int64_t lx0 = vx0 - px, ly0 = vy0 - py;
     int64_t first = ((int64_t)by + (int64_t)cy * lx0 + (int64_t)ry * ly0) * sstride + bx + (int64_t)cx * lx0 + (int64_t)rx * ly0;
+    if (tr == 2 || tr == 3) {
+        /* lat ngang (nhan vat quay mat) / quay 180: dao hang nguon ra bo dem tam roi ve hang nhanh */
+        uint32_t tam[1024];
+        int n = vx1 - vx0;
+        for (int yy = vy0; yy < vy1; yy++) {
+            const uint32_t *sp = base + first + rowstep * (yy - vy0);    /* diem nguon cua cot dau, di lui */
+            uint32_t *d = o->px + (size_t)yy * o->w + vx0;
+            for (int c = 0; c < n; c += 1024) {
+                int m = n - c < 1024 ? n - c : 1024;
+                const uint32_t *q = sp - c;
+                for (int i = 0; i < m; i++) tam[i] = q[-i];
+                row_put(d + c, tam, m, kind);
+            }
+        }
+        return;
+    }
+    if (tr == 1) {
+        /* lat doc: hang nguon di nguoc, cot xuoi */
+        for (int yy = vy0; yy < vy1; yy++)
+            row_put(o->px + (size_t)yy * o->w + vx0, base + first + rowstep * (yy - vy0), vx1 - vx0, kind);
+        return;
+    }
     for (int yy = vy0; yy < vy1; yy++) {
         int64_t si = first + rowstep * (yy - vy0);
         uint32_t *d = o->px + (size_t)yy * o->w + vx0;
@@ -733,8 +1028,11 @@ void N_javax_microedition_lcdui_Graphics_drawRegion0(jctx *t, jobj self, jobj im
         return;
     }
     int stride, kind;
-    src = img_px(t, im, o.k, &stride, &sc, &kind);
+    hd_ent *pin;
+    src = img_px(t, im, o.k, &stride, &sc, &kind, &pin);
+    if (gfx_world && pin && pin->shd && sc == o.k) sh_draw(&o, pin, xs, ys, w, h, tr, px, py);
     draw_img(&o, src, stride, sc, xs, ys, w, h, tr, px, py, kind);
+    if (pin) hd_put(pin);
 }
 
 void N_javax_microedition_lcdui_Graphics_drawRGB(jctx *t, jobj self, jobj rgb, int32_t off, int32_t scan, int32_t x,

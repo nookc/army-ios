@@ -69,6 +69,15 @@ public final class Disp {
     /** May HD: so diem anh that cho 1 diem logic o moi dich ve (2..4); 0 = tat (ban thuong) */
     public static native int hdK();
 
+    /** May HD: moc ve khung (0 = bat dau, 1 = xong) - do thoi gian ve + nhip kho anh net cao */
+    public static native void hdMoc(int pha);
+
+    /** May HD: thong tin (0 viec cho, 1 MB kho, 2 so anh, 3 han muc MB, 4 thoi gian ve trung binh micro giay, 5 so khung do) */
+    public static native int hdTin(int what);
+
+    /** May HD: doi he so K luc dang chay (2..4) */
+    public static native void hdDat(int k);
+
     /** Avatar: game vao / ra che do go chu -> nen tang bat / tat ban phim he thong.
      *  show 1/0; areaBottom = day vung game con dung duoc (diem anh Canvas, 0 = ca man) de dat ngay tren ban phim */
     public static native void wantKeyboard(int show, int areaBottom);

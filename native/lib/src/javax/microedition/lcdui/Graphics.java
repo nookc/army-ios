@@ -115,6 +115,11 @@ public class Graphics {
             hdp = s == 0x4844 || j2n.Disp.hdK() > 1;
             return;
         }
+        if (s == 0x4850 || s == 0x4851) {
+            // May HD: client bao bat dau / ket thuc ve the gioi (HdUi) -> khoi noi, bong do, hau ky canh
+            hdCanh(s == 0x4850 ? 1 : 2);
+            return;
+        }
         if (s == 0x4846) {
             // Avatar: anh createRGBImage ke tiep la anh net cao (w, h = diem anh that) - boss dau truong phong to luc chay
             Image.hdLan = j2n.Ui.HD_MAN;
@@ -125,6 +130,8 @@ public class Graphics {
         }
         stroke = s;
     }
+
+    private native void hdCanh(int pha);
 
     public int getStrokeStyle() {
         return stroke;

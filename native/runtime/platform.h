@@ -68,6 +68,10 @@ void j2n_set_hd_anh(int on);
 /* May HD (ban "Avatar 250 HD"): k = 2..4 diem anh that cho 1 diem logic o moi dich ve - anh duoc phong to thong minh, bo dem
    ngoai man hinh + hinh ve + chu deu net cao; khung trinh bay co (w*k) x (h*k). 0 = tat. Goi truoc j2n_start */
 void j2n_set_hd_k(int k);
+/* May HD: han muc bo nho kho anh net cao (MB, mac dinh 192) - dat theo RAM cua may truoc khi chay game */
+void j2n_set_hd_budget(int mb);
+/* May HD: muc hieu ung 3D (0 tat, 1 khoi noi + bong do, 2 them hau ky canh). Mac dinh 2 */
+void j2n_set_hd_fx(int muc);
 /* Avatar: ket noi toi 127.0.0.1 / localhost duoc chuyen sang may chu nay: "host" (giu cong cua game) hoac "host:cong";
    NULL / "" = khong chuyen. Goi luc nao cung duoc (ap dung tu lan ket noi sau) */
 void j2n_set_server(const char *spec);
