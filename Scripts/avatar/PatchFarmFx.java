@@ -66,7 +66,7 @@ public class PatchFarmFx {
                 continue;                      // ban cu cua lop moi (chay lai patcher tren jar da va)
             }
             switch (name) {
-                case "main/a.class": data = va(va(va(va(data, PatchFarmFx::keyTap, can, name), PatchFarmFx::tocDoVongLap, can, name), PatchFarmFx::veNoi, can, name), PatchFarmFx::hd12, can, name); data = va(data, PatchFarmFx::hdPhimAo, can, name); break;
+                case "main/a.class": data = va(va(va(va(data, PatchFarmFx::keyTap, can, name), PatchFarmFx::tocDoVongLap, can, name), PatchFarmFx::veNoi, can, name), PatchFarmFx::hd12, can, name); data = va(data, PatchFarmFx::hdPhimAo, can, name); data = va(data, PatchFarmFx::hdDai, can, name); break;
                 case "le.class": data = va(data, PatchFarmFx::hdLe, can, name); break;
                 case "im.class": data = va(data, PatchFarmFx::hdOChat, can, name); break;
                 case "hj.class": data = va(data, PatchFarmFx::hdGoc, can, name); break;
@@ -148,6 +148,7 @@ public class PatchFarmFx {
                 && can.getOrDefault("hd_le", 0) >= 1 && can.getOrDefault("hd_ve_dong", 0) == 1
                 && can.getOrDefault("hd_goc", 0) == 2 && can.getOrDefault("hd_tp", 0) == 1
                 && can.getOrDefault("hd_phim_ao", 0) == 1 && can.getOrDefault("hd_o_chat", 0) >= 1
+                && can.getOrDefault("hd_dai", 0) == 3
                 && can.getOrDefault("hd_k_hop", 0) == 1 && can.getOrDefault("hd_k_khung", 0) == 5
                 && can.getOrDefault("hd_k_menu", 0) == 4 && can.getOrDefault("hd_k_phim", 0) == 1
                 && can.getOrDefault("trom_cay", 0) == 1 && can.getOrDefault("o_kho", 0) == 2
@@ -689,6 +690,50 @@ public class PatchFarmFx {
                 l.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "HdUi", "oChat", "(Lim;)V", false));
                 mn.instructions.insertBefore(n, l);
                 dem(can, "hd_o_chat");
+            }
+        }
+    }
+
+    /**
+     * Ban HD (HdUi): main.a.paint ve DAI CHU CHAY thong bao o mep tren: lat anh nen main.a.aa (drawImage) + vach ke (fillRect)
+     * + dat vung cat cho dong chu (setClip) -> HdUi.veDai / vachDai / clipDai (ban HD: khong nen toi, chu chay trong khoang
+     * trong giua 2 cum nut tren)
+     */
+    static void hdDai(ClassNode cn, Map<String, Integer> can) {
+        for (MethodNode mn : cn.methods) {
+            if (!mn.name.equals("paint") || !mn.desc.equals("(Ljavax/microedition/lcdui/Graphics;)V")) {
+                continue;
+            }
+            int buoc = 0;
+            for (AbstractInsnNode n : mn.instructions.toArray()) {
+                if (buoc == 0) {
+                    if (n instanceof FieldInsnNode && n.getOpcode() == Opcodes.GETSTATIC && ((FieldInsnNode) n).owner.equals("main/a")
+                            && ((FieldInsnNode) n).name.equals("aa")) {
+                        buoc = 1;
+                    }
+                    continue;
+                }
+                if (!(n instanceof MethodInsnNode) || n.getOpcode() != Opcodes.INVOKEVIRTUAL
+                        || !((MethodInsnNode) n).owner.equals("javax/microedition/lcdui/Graphics")) {
+                    continue;
+                }
+                MethodInsnNode m = (MethodInsnNode) n;
+                if (buoc == 1 && m.name.equals("drawImage") && m.desc.equals("(Ljavax/microedition/lcdui/Image;III)V")) {
+                    mn.instructions.set(n, new MethodInsnNode(Opcodes.INVOKESTATIC, "HdUi", "veDai",
+                            "(Ljavax/microedition/lcdui/Graphics;Ljavax/microedition/lcdui/Image;III)V", false));
+                    buoc = 2;
+                    dem(can, "hd_dai");
+                } else if (buoc == 2 && m.name.equals("fillRect") && m.desc.equals("(IIII)V")) {
+                    mn.instructions.set(n, new MethodInsnNode(Opcodes.INVOKESTATIC, "HdUi", "vachDai",
+                            "(Ljavax/microedition/lcdui/Graphics;IIII)V", false));
+                    buoc = 3;
+                    dem(can, "hd_dai");
+                } else if (buoc == 3 && m.name.equals("setClip") && m.desc.equals("(IIII)V")) {
+                    mn.instructions.set(n, new MethodInsnNode(Opcodes.INVOKESTATIC, "HdUi", "clipDai",
+                            "(Ljavax/microedition/lcdui/Graphics;IIII)V", false));
+                    buoc = 4;
+                    dem(can, "hd_dai");
+                }
             }
         }
     }

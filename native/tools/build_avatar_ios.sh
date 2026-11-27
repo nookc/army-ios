@@ -118,8 +118,8 @@ CC1
 
 # Bien the "Avatar 250 HD" (ngang + may ve net cao): CUNG ma may, khac Info.plist (bundle id rieng de cai song song voi ban
 # thuong, ten app, chi cho xoay ngang) + tep danh dau hd.cfg (App.m thay tep nay thi bat che do HD). $1 = Avatar.app da chep
-lam_hd() {
-  local APP=$1 PB=/usr/libexec/PlistBuddy
+lam_hd() {   # $1 = Avatar.app (ban sao), $2 = sdk (iphoneos|iphonesimulator)
+  local APP=$1 SDK=$2 PB=/usr/libexec/PlistBuddy
   echo "hd=1" > "$APP/hd.cfg"
   $PB -c "Set :CFBundleIdentifier vn.avatar.diemky.hd" "$APP/Info.plist"
   $PB -c "Set :CFBundleDisplayName Avatar 250 HD" "$APP/Info.plist"
@@ -128,6 +128,21 @@ lam_hd() {
       -c "Add :UISupportedInterfaceOrientations:0 string UIInterfaceOrientationLandscapeRight" \
       -c "Add :UISupportedInterfaceOrientations:1 string UIInterfaceOrientationLandscapeLeft" "$APP/Info.plist"
   $PB -c "Print :CFBundleIdentifier" -c "Print :CFBundleDisplayName" -c "Print :UISupportedInterfaceOrientations" "$APP/Info.plist"
+  # bieu tuong rieng cua ban HD (platform/avatar-ios/res-hd, sinh boi tools/mkicon_hd.py): thay PNG roi + bien dich lai Assets.car
+  if [ -f "$P/res-hd/AppIcon-1024.png" ]; then
+    cp "$P/res-hd/AppIcon60x60@2x.png" "$P/res-hd/AppIcon60x60@3x.png" "$APP/"
+    local XA="$O/Assets-hd-$SDK.xcassets"
+    rm -rf "$XA" && mkdir -p "$XA/AppIcon.appiconset"
+    cp "$P/res-hd/AppIcon-1024.png" "$XA/AppIcon.appiconset/icon1024.png"
+    echo '{"info":{"version":1,"author":"xcode"}}' > "$XA/Contents.json"
+    echo '{"images":[{"filename":"icon1024.png","idiom":"universal","platform":"ios","size":"1024x1024"}],"info":{"version":1,"author":"xcode"}}' \
+      > "$XA/AppIcon.appiconset/Contents.json"
+    rm -f "$APP/Assets.car"
+    xcrun actool --compile "$APP" --platform "$SDK" --minimum-deployment-target 15.0 --target-device iphone \
+      --app-icon AppIcon --output-partial-info-plist "$O/icon-info-hd.plist" --output-format human-readable-text "$XA" \
+      | tail -3 || echo "actool HD loi: chi dung PNG"
+    [ -f "$APP/Assets.car" ] && echo "HD: co Assets.car (bieu tuong rieng)" || echo "HD: KHONG co Assets.car"
+  fi
 }
 
 if [ "$MODE" = device ] || [ "$MODE" = ca-hai ]; then
@@ -140,7 +155,7 @@ if [ "$MODE" = device ] || [ "$MODE" = ca-hai ]; then
   lipo -info "$O/dev/Avatar.app/Avatar"
   rm -rf "$O/ipa-hd" "$O/AvatarHD-Thuan.ipa" && mkdir -p "$O/ipa-hd/Payload"
   cp -R "$O/dev/Avatar.app" "$O/ipa-hd/Payload/"
-  lam_hd "$O/ipa-hd/Payload/Avatar.app"
+  lam_hd "$O/ipa-hd/Payload/Avatar.app" iphoneos
   (cd "$O/ipa-hd" && zip -qry ../AvatarHD-Thuan.ipa Payload)
   ls -la "$O/AvatarHD-Thuan.ipa"
 fi
@@ -149,6 +164,6 @@ if [ "$MODE" = sim ] || [ "$MODE" = ca-hai ]; then
   codesign -s - --force "$O/sim/Avatar.app" || true
   rm -rf "$O/sim-hd" && mkdir -p "$O/sim-hd"
   cp -R "$O/sim/Avatar.app" "$O/sim-hd/"
-  lam_hd "$O/sim-hd/Avatar.app"
+  lam_hd "$O/sim-hd/Avatar.app" iphonesimulator
   codesign -s - --force "$O/sim-hd/Avatar.app" || true
 fi

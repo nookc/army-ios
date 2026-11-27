@@ -163,25 +163,12 @@ public final class HdUi {
         g.drawImage(img, x, y, neo);
     }
 
-    /** gw.a(Graphics): bong chat - ban HD nam canh nut MENU o goc tren trai */
+    /** gw.a(Graphics): bong chat - ban HD ve nut chat kieu moi trong cum nut tren (phimMem), o day khong ve */
     public static void veChat(Graphics g, Image img, int x, int y, int neo) {
         if (hd()) {
-            x = chatX();
-            y = 14 + tren();
+            return;
         }
         g.drawImage(img, x, y, neo);
-    }
-
-    /** tam bong chat o ban HD: ngay sau nut MENU (neu nut dang o tren) */
-    static int chatX() {
-        docLe();
-        return menuKhung >= khung - 2 ? mnX + mnW + 20 : leT + 16;
-    }
-
-    /** do cao dai chu chay thong bao o mep tren (main.a.ab; 0 = khong co): nut MENU / bong chat tut xuong duoi dai */
-    static int tren() {
-        int t = main.a.ab;
-        return t > 0 ? (t > 30 ? 30 : t) : 0;
     }
 
     /** hj.a(Graphics): nhan o goc phai tren (phien ban / luu luong) - ban HD lui vao trong le man hinh (goc bo tron) */
@@ -194,21 +181,17 @@ public final class HdUi {
         f.a(g, s, x, y, can);
     }
 
-    /** gw.a(Graphics): hinh thu + so thu o goc phai tren - ban HD lui vao trong le man hinh */
+    /** gw.a(Graphics): hinh thu + so thu o goc phai tren - ban HD ve nut thu kieu moi (co cham do) trong phimMem */
     public static void veMail(Graphics g, Image img, int x, int y, int neo) {
         if (hd()) {
-            docLe();
-            x -= gocP;
-            y += 2;
+            return;
         }
         g.drawImage(img, x, y, neo);
     }
 
     public static void chuMail(cs f, Graphics g, String s, int x, int y, int can) {
         if (hd()) {
-            docLe();
-            x -= gocP;
-            y += 2;
+            return;
         }
         f.a(g, s, x, y, can);
     }
@@ -221,7 +204,7 @@ public final class HdUi {
         if (hd() && img != null) {
             docLe();
             x = gocT - 6;
-            y = main.a.n - img.getHeight() - (traiDuoi && menuKhung < khung - 2 ? 26 : 3) - nang();
+            y = main.a.n - img.getHeight() - (traiDuoi ? CAO + 7 : 3) - nang();
         }
         g.drawImage(img, x, y, neo);
     }
@@ -297,7 +280,7 @@ public final class HdUi {
     /** gy.l(): vung cham bong chat (50, 0, 50, 50) */
     public static boolean vungChat(int x, int y, int w, int h) {
         if (hd()) {
-            return main.a.a(chatX() - 20, tren(), 40, 34);
+            return nutTai(main.a.h, main.a.i) == N_CHAT && trong(N_CHAT, main.a.j, main.a.k, 9);
         }
         return main.a.a(x, y, w, h);
     }
@@ -355,80 +338,204 @@ public final class HdUi {
         }
     }
 
-    static int khung;               // dem khung co ve phim mem
-    static int menuKhung = -9;      // khung gan nhat ve nut MENU o goc tren trai
-    static int mnX, mnY, mnW, mnH;  // khung nut MENU
-    static boolean chamMenu;        // vua cham nut MENU (gy.l() -> phimNao tra ve phim trai)
-    static boolean traiDuoi;        // khung nay co phim mem trai o day man hinh
+    /*
+     * GIAO DIEN NUT KIEU MOI (ban HD, dot 3 - theo anh chu server dua):
+     *  - Goc tren trai: nut MENU hinh the mau xanh vien trang (phim mem trai ten "Menu"), nut thu / su kien (co cham do so tin
+     *    moi), nut chat.
+     *  - Goc tren phai (man choi): nut chuc nang (4 o mau = phim mem giua "Chon" cu), nut cam xuc, nut hanh dong.
+     *  - KHONG con nut nao o giua day man hinh: phim mem giua (khi khong phai "Chon") don sang goc phai duoi canh phim mem
+     *    phai; phim mem trai (khong phai Menu) o goc trai duoi. Nut chu = nut mau xanh vien trang (may ve kieu 4).
+     *  - Dai chu chay: khong con nen toi, chu chay trong khoang trong giua 2 cum nut tren.
+     * Anh nut tu ve (hd/mkprops.py -> hdx/p_nut_*.png, p_bao_*.png). vn[] giu khung cua tung nut trong khung hinh vua ve de
+     * do cham (vungPhimMem / phimNao / vungChat).
+     */
+    static int khung;               // dem lan ve phim mem
+    static boolean traiDuoi;        // lan ve vua roi co phim mem trai o goc trai duoi (nhan 12+ ne len tren)
+    static boolean menuTren;        // lan ve vua roi cua MAN HINH (khong phai bang noi) co nut MENU o goc tren
+    static final int CAO = 22;      // cao nut chu
+    static final int NUT = 24;      // canh nut bieu tuong
+    static final int MAU_NUT = 0x2C88E2;
+    static final int N_TRAI = 0, N_GIUA = 1, N_PHAI = 2, N_CHAT = 3, N_THU = 4, N_CAMXUC = 5, N_HDONG = 6, N_SO = 7;
+    private static final int[][] vn = new int[N_SO][4];     // x, y, rong, cao (rong = 0: khong co nut)
+    static long vnLuc;                                      // luc ve cac nut tren (ms)
+    private static int chamPhim = -1;                       // phim mem vua cham (vungPhimMem -> phimNao)
+    static int daiX0, daiX1;                                // khoang trong giua 2 cum nut tren (cho dai chu chay)
+    private static java.util.Hashtable anhNut = new java.util.Hashtable();
+
+    /** anh nut tu ve trong jar: /hdx/p_<ten>.png (null neu thieu) */
+    static Image nut(String ten) {
+        Object o = anhNut.get(ten);
+        if (o == null) {
+            try {
+                o = Image.createImage("/hdx/p_" + ten + ".png");
+            } catch (Throwable e) {
+                o = "";
+            }
+            anhNut.put(ten, o);
+        }
+        return o instanceof Image ? (Image) o : null;
+    }
+
+    private static void dat(int i, int x, int y, int w, int h) {
+        vn[i][0] = x;
+        vn[i][1] = y;
+        vn[i][2] = w;
+        vn[i][3] = h;
+    }
+
+    static boolean trong(int i, int x, int y, int no) {
+        int[] v = vn[i];
+        return v[2] > 0 && x >= v[0] - no && x < v[0] + v[2] + no && y >= v[1] - no && y < v[1] + v[3] + no;
+    }
+
+    /** nut (cua lan ve gan nhat) nam duoi diem (x, y), -1 neu khong co */
+    static int nutTai(int x, int y) {
+        if (System.currentTimeMillis() - vnLuc > 400) {
+            return -1;                  // lau roi khong ve phim mem (man hinh khong co nut): khung cu khong con dung
+        }
+        for (int i = 0; i < N_SO; i++) {
+            if (trong(i, x, y, 5)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    private static String nhan(by p) {
+        return p == null || p.a == null || p.a.length() == 0 ? null : p.a;
+    }
+
+    /** 1 nut bieu tuong (anh 26 x 28, tam nut 24 x 24 tai (1, 1)) */
+    private static void veNutAnh(Graphics g, String ten, int i, int x, int y) {
+        Image im = nut(ten);
+        if (im != null) {
+            g.drawImage(im, x - 1, y - 1, 0);
+        } else {
+            kieu(g, 4, x, y, NUT, NUT, 6, MAU_NUT);
+        }
+        dat(i, x, y, NUT, NUT);
+    }
+
+    /** 1 nut chu (nut mau xanh vien trang), tra ve be rong */
+    private static int rongNutChu(String s) {
+        int w = main.a.L.a(s) + 20;
+        return w < 44 ? 44 : w;
+    }
+
+    private static void veNutChu(Graphics g, int i, int x, int y, int w, String s) {
+        kieu(g, 4, x, y, w, CAO, 7, MAU_NUT);
+        main.a.L.a(g, s, x + w / 2, y + CAO / 2 - gy.ag / 2 - 1, 2);
+        dat(i, x, y, w, CAO);
+    }
 
     /**
-     * 3 phim mem (trai / giua / phai). Ban HD: ve nut kinh toi bo tron sau chu, lui vao trong le man hinh; phim trai ten
-     * "Menu" thanh nut MENU o GOC TREN TRAI (bam vao thi bang menu xo xuong ngay duoi - xem menuY).
+     * 3 phim mem (trai / giua / phai) - gy.a(Graphics) cua man hinh hoac cua bang noi dang mo. Ban HD ve giao dien nut kieu
+     * moi (xem chu thich o tren); ban thuong / J2ME: ve nhu goc.
      */
     public static void phimMem(ew o, Graphics g, by l, by c, by r) {
         if (!hd()) {
             o.a(g, l, c, r);
             return;
         }
+        try {
+            vePhimHd(g, l, c, r);
+        } catch (Throwable e) {
+        }
+    }
+
+    private static void vePhimHd(Graphics g, by l, by c, by r) {
         docLe();
         khung++;
+        for (int i = 0; i < N_SO; i++) {
+            vn[i][2] = 0;
+        }
+        vnLuc = System.currentTimeMillis();
+        traiDuoi = false;
         if (DUMP && main.a.r != manPhim) {
             manPhim = main.a.r;
             System.out.println("[hd] man (phim mem) " + (manPhim == null ? "null" : manPhim.getClass().getName()));
         }
-        boolean menu = l != null && l.a != null && (l.a.equals("Menu") || l.a.equals("MENU") || l.a.equals("menu"));
-        traiDuoi = !menu && l != null && l.a != null && l.a.length() > 0;
-        int x0 = 0, x2 = 0, nang = nang();
-        boolean doi = false;
-        try {
-            x0 = main.a.ae[0].a;
-            x2 = main.a.ae[2].a;
-            main.a.ae[0].a = x0 + gocT - 2;
-            main.a.ae[2].a = x2 - gocP + 2;
-            for (int i = 0; i < 3; i++) {
-                main.a.ae[i].b -= nang;
-            }
-            doi = true;
-            int cao = 19, T = main.a.T, dem = 7;
-            for (int i = menu ? 1 : 0; i < 3; i++) {
-                by p = i == 0 ? l : i == 1 ? c : r;
-                if (p == null || p.a == null || p.a.length() == 0 || main.a.ae[i] == null) {
-                    continue;
-                }
-                int tw = main.a.L.a(p.a);
-                int y = main.a.ae[i].b + T / 2 - cao / 2 - 1;
-                int x;
-                if (i == 0) {
-                    x = main.a.ae[0].a + 2 - dem;
-                } else if (i == 1) {
-                    x = main.a.ae[1].a + hj.au / 2 - tw / 2 - dem;
-                } else {
-                    x = main.a.ae[2].a + hj.au - 2 - tw - dem;
-                }
-                kieu(g, 3, x, y, tw + dem * 2, cao, cao / 2, 0x16324A);
-            }
-            if (menu) {
-                int tw = main.a.L.a(l.a);
-                mnW = tw + 18;
-                mnH = 20;
-                mnX = leT;
-                mnY = 4 + tren();
-                menuKhung = khung;
-                kieu(g, 3, mnX, mnY, mnW, mnH, mnH / 2, 0x1B4A78);
-                main.a.L.a(g, l.a, mnX + mnW / 2, mnY + mnH / 2 - gy.ag / 2, 2);
-            }
-        } catch (Throwable e) {
+        int W = main.a.m, H = main.a.n;
+        String sl = nhan(l), sc = nhan(c), sr = nhan(r);
+        // man hinh "tran": khong co bang / hop noi / o chat dang mo (luc do phim mem la cua bang noi)
+        boolean tran = main.a.t == null && main.a.v == null && main.a.A == null && !im.c;
+        Object man = main.a.r;
+        // man hinh ve the gioi tran man (khu, nong trai, ban do thanh pho, man chao, cau ca, nha...): nut MENU len goc tren.
+        // Man hinh dang bang (su kien, cua hang, danh sach...) co phim trai "Menu": de o goc trai duoi nhu nut chu thuong
+        boolean theGioi = man instanceof ae || man instanceof go || man instanceof ea || man instanceof es || man instanceof kv
+                || man instanceof cz || man instanceof ei || man instanceof ic;
+        boolean menu = tran && theGioi && sl != null && (sl.equals(kf.c) || sl.equals("Menu") || sl.equals("MENU"));
+        boolean khu = tran && man instanceof ae && main.a.Z == 0 && !ae.t;      // dang choi trong 1 khu
+        int yT = 3;
+        if (tran) {
+            menuTren = menu;
         }
-        try {
-            o.a(g, menu ? null : l, c, r);
-        } finally {
-            if (doi) {
-                main.a.ae[0].a = x0;
-                main.a.ae[2].a = x2;
-                for (int i = 0; i < 3; i++) {
-                    main.a.ae[i].b += nang;
+        // ---- cum tren trai: MENU, thu, chat
+        int xt = gocT;
+        if (menu) {
+            Image im = nut("nut_menu");
+            if (im != null) {
+                g.drawImage(im, xt - 1, yT, 0);
+            } else {
+                kieu(g, 4, xt, yT + 1, 50, CAO, 7, MAU_NUT);
+                main.a.L.a(g, sl, xt + 25, yT + 1 + CAO / 2 - gy.ag / 2 - 1, 2);
+            }
+            dat(N_TRAI, xt, yT + 1, 50, CAO);
+            xt += 50 + 6;
+        }
+        if (menu && (khu || (man instanceof ea && hj.as > 0))) {
+            veNutAnh(g, "nut_thu", N_THU, xt, yT);
+            if (hj.as > 0) {
+                Image b = nut(hj.as > 9 ? "bao_n" : "bao_" + hj.as);
+                if (b != null) {
+                    g.drawImage(b, xt + 13, yT + 13, 0);
                 }
             }
+            xt += NUT + 6;
+        }
+        if (tran && hj.ap != null && main.GameMidlet.e == 9 && main.a.m()) {
+            veNutAnh(g, "nut_chat", N_CHAT, xt, yT);
+            xt += NUT + 6;
+        }
+        // ---- cum tren phai: hanh dong, cam xuc, chuc nang (= phim mem giua "Chon")
+        int xp = W - gocP;
+        boolean chon = sc != null && sc.equals(kf.O);
+        if (khu && main.a.D == null) {
+            xp -= NUT;
+            veNutAnh(g, "nut_hanh_dong", N_HDONG, xp, yT);
+            xp -= 6 + NUT;
+            veNutAnh(g, "nut_cam_xuc", N_CAMXUC, xp, yT);
+            xp -= 6;
+        }
+        if (menu && chon) {
+            // man chao / ban do thanh pho: cham thang vao muc / bieu tuong khu la chon -> khong can nut
+            if (!(man instanceof es) && !(man instanceof ea)) {
+                xp -= NUT;
+                veNutAnh(g, "nut_them", N_GIUA, xp, yT);
+                xp -= 6;
+            }
+            sc = null;
+        }
+        daiX0 = xt + 4;
+        // man chao / chon thanh pho / ban do thanh pho co nhan phien ban hoac luu luong o goc phai tren: chua cho
+        daiX1 = xp - 4 - (man instanceof ea || man instanceof es || man instanceof ez ? 44 : 0);
+        // ---- hang day: phim trai (khong phai Menu) o goc trai; phim giua + phai don ve goc phai
+        int yD = H - CAO - 3 - nang();
+        if (!menu && sl != null) {
+            veNutChu(g, N_TRAI, gocT, yD, rongNutChu(sl), sl);
+            traiDuoi = true;
+        }
+        int x1 = W - gocP;
+        if (sr != null) {
+            int w = rongNutChu(sr);
+            x1 -= w;
+            veNutChu(g, N_PHAI, x1, yD, w, sr);
+            x1 -= 6;
+        }
+        if (sc != null) {
+            int w = rongNutChu(sc);
+            x1 -= w;
+            veNutChu(g, N_GIUA, x1, yD, w, sc);
         }
     }
 
@@ -440,28 +547,16 @@ public final class HdUi {
     }
 
     /**
-     * gy.l(): phim mem nao vua duoc cham (0 trai, 1 giua, 2 phai; -1 khong). Ban HD tu tinh theo vi tri cham (phim da lui
-     * vao trong le / nang len nen o goc cua game khong con dung): cham nut MENU o goc tren = phim trai.
+     * gy.l(): phim mem nao vua duoc cham (0 trai, 1 giua, 2 phai; -1 khong). Ban HD: nut vua cham (vungPhimMem da tim) -
+     * nut MENU = phim trai, nut chuc nang 4 o mau = phim giua.
      */
     public static int phimNao(ew o) {
         if (!hd()) {
             return o.d();
         }
-        if (chamMenu) {
-            chamMenu = false;
-            return 0;
-        }
-        int px = main.a.h, W = main.a.m;
-        if (px < gocT + 86) {
-            return 0;
-        }
-        if (px > W - gocP - 86) {
-            return 2;
-        }
-        if (px > W / 2 - 30 && px < W / 2 + 30) {
-            return 1;
-        }
-        return -1;
+        int n = chamPhim;
+        chamPhim = -1;
+        return n;
     }
 
     /**
@@ -480,38 +575,77 @@ public final class HdUi {
         if (!hd()) {
             return y;
         }
-        if (kieu != 0) {
-            return y - nang();          // bang ben phai / giua: nang theo phim mem
+        if (kieu != 0 || !menuTren) {
+            return y - nang() - 4;      // bang ben phai / giua, hoac phim trai dang o goc trai duoi: nam tren hang nut day
         }
-        int t = 27 + tren();
-        return y < t ? y : t;
+        return y < 30 ? y : 30;         // nut MENU o goc tren: bang xo xuong ngay duoi nut
     }
 
     /**
-     * gy.l(): dai phim mem duoi day man hinh (ca be ngang, chia 3). Ban HD (man ngang, ban do cao gan bang man): chi nhan
-     * cham quanh 3 nhan (goc trai, giua, goc phai) - phan con lai cua dai de cham vao ban do (o cua ra, vat the o hang
-     * duoi cung khong bi phim mem che).
+     * gy.l() (luc vua nha tay): co cham vao phim mem khong. Ban HD: do theo khung cac nut vua ve. Cham nut MENU / nut chuc
+     * nang / nut chu -> true (phimNao tra ve phim mem tuong ung). Cham nut thu / cam xuc / hanh dong -> lam ngay tai day (dang
+     * o luong game) roi nuot lan cham (ban do khong coi la cham de di). Phai la CHAM (nhan va nha cung trong 1 nut).
      */
     public static boolean vungPhimMem(int x, int y, int w, int h) {
         if (!hd()) {
             return main.a.b(x, y, w, h);
         }
-        docLe();
-        chamMenu = false;
-        boolean menuTren = menuKhung >= khung - 2;
-        if (menuTren && main.a.b(mnX - 6, 0, mnW + 12, mnY + mnH + 8)) {
-            chamMenu = true;            // nut MENU o goc tren trai
-            return true;
-        }
-        int nang = nang();
-        if (!main.a.b(x, y - nang, w, h + nang)) {
+        chamPhim = -1;
+        int n = nutTai(main.a.h, main.a.i);
+        if (n < 0 || n == N_CHAT || !trong(n, main.a.j, main.a.k, 9)) {
             return false;
         }
-        int px = main.a.h, W = main.a.m;
-        if (px < gocT + 86) {
-            return !menuTren;           // goc trai duoi chi la phim mem khi phim trai dang nam o duoi
+        if (n <= N_PHAI) {
+            chamPhim = n;
+            return true;
         }
-        return px > W - gocP - 86 || (px > W / 2 - 30 && px < W / 2 + 30);
+        main.a.g = false;
+        main.a.f = false;
+        try {
+            if (n == N_THU) {
+                hc.b().a(main.a.r);         // man su kien / thu (nhu muc "Su kien" trong bang bieu tuong)
+            } else if (main.a.r instanceof ae) {
+                hn me = main.GameMidlet.i;
+                // cung dieu kien voi bang bieu tuong cua game (cd.f())
+                if (me != null && (me.Q == 0 || me.Q == -5) && !ca.b && !ae.t) {
+                    cd.b().d(n == N_CAMXUC ? 2 : 1, 0);     // 2 = "Cam xuc", 1 = "Hanh dong"
+                }
+            }
+        } catch (Throwable e) {
+        }
+        return false;
+    }
+
+    // ---- dai chu chay thong bao (main.a.paint): ban HD khong ve nen toi, chu chay trong khoang trong giua 2 cum nut tren
+    /** o nen cua dai (anh main.a.aa lat ngang) */
+    public static void veDai(Graphics g, Image img, int x, int y, int neo) {
+        if (hd()) {
+            return;
+        }
+        g.drawImage(img, x, y, neo);
+    }
+
+    /** vach ke duoi dai */
+    public static void vachDai(Graphics g, int x, int y, int w, int h) {
+        if (hd()) {
+            return;
+        }
+        g.fillRect(x, y, w, h);
+    }
+
+    /** vung cat cua dong chu chay */
+    public static void clipDai(Graphics g, int x, int y, int w, int h) {
+        if (hd()) {
+            docLe();
+            int a = leT, b = main.a.m - leP;
+            if (System.currentTimeMillis() - vnLuc < 400 && daiX1 - daiX0 >= 60) {
+                a = daiX0;
+                b = daiX1;
+            }
+            g.setClip(a, y, b - a, h + 2);
+            return;
+        }
+        g.setClip(x, y, w, h);
     }
 
     /** gw.a(int map): ban goc tu bat ban phim ao o map 14 / 15 / 16 (khu cau ca). Ban HD: khong bao gio */
@@ -821,8 +955,8 @@ public final class HdUi {
             chamLuc = System.currentTimeMillis();       // cho formTick: cham vao o nhap chu -> xin ban phim
             chamFx = x;
             chamFy = y;
-            if (y > main.a.n - 24 || (y < 30 && x < 140)) {
-                return;
+            if (nutTai(x, y) >= 0) {
+                return;                                 // cham vao nut giao dien: khong ve gon song
             }
             gonX = x + Cam.x();
             gonY = y + Cam.y();

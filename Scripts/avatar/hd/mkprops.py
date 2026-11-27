@@ -933,7 +933,120 @@ def bui_3():
     return _bui(1.0, 58)
 
 
-VAT = [vong, bui_0, bui_1, bui_2, bui_3, cong_hoa, khung_anh, huong_duong, rom_bi, bu_nhin, co_day, cay_thong, nguoi_tuyet, ong_noel, hop_qua, cong_tim, chu_love, gau_tim,
+# ------------------------------------------------------------------ nut giao dien (ban HD dot 3): tu ve, kieu nut trang
+# bo goc co bieu tuong + nut MENU hinh the mau xanh vien trang
+def _bong_nut(c, x0, y0, x1, y1, r, lech=1.3, mo=0.9, duc=86):
+    """bong mo duoi 1 nut bo goc"""
+    m = c._mask()
+    ImageDraw.Draw(m).rounded_rectangle([x0 * U, (y0 + lech) * U, x1 * U, (y1 + lech) * U], radius=r * U, fill=duc)
+    m = m.filter(ImageFilter.GaussianBlur(mo * U))
+    c.im.paste(Image.new('RGBA', c.im.size, (8, 26, 54, 255)), (0, 0), m)
+
+
+def _tam_nut():
+    """tam nut trang bo goc 24 x 24 (anh 26 x 28: chua cho cho bong)"""
+    c = Cv(26, 28)
+    _bong_nut(c, 1.6, 1.6, 24.4, 24.6, 6)
+    c.rrect(1, 1, 25, 25, 6.2, (255, 255, 255), (222, 232, 245), vien=(104, 128, 160), dv=0.42)
+    c.rrect(2.3, 2.3, 23.7, 12.5, 4.6, (255, 255, 255), None, vien=None)           # mang sang nua tren
+    return c
+
+
+def nut_thu():
+    c = _tam_nut()
+    c.rrect(5.6, 8.0, 20.4, 18.6, 1.5, (255, 248, 222), (250, 224, 150), vien=(170, 112, 40), dv=0.5)
+    c.line([(6.2, 18.0), (11.4, 13.4)], 0.55, (214, 170, 96))
+    c.line([(19.8, 18.0), (14.6, 13.4)], 0.55, (214, 170, 96))
+    c.poly([(5.9, 8.4), (20.1, 8.4), (13.0, 14.6)], (255, 252, 236), (252, 236, 188), vien=(170, 112, 40), dv=0.42)
+    return c.xong()
+
+
+def nut_chat():
+    c = _tam_nut()
+    m = c._mask()
+    d = ImageDraw.Draw(m)
+    d.ellipse([(13 - 7.7) * U, (11.8 - 5.9) * U, (13 + 7.7) * U, (11.8 + 5.9) * U], fill=255)
+    d.polygon([(8.4 * U, 15.6 * U), (6.8 * U, 20.4 * U), (12.6 * U, 17.0 * U)], fill=255)
+    c._to(m, (104, 192, 252), (30, 124, 226), (20, 86, 172), 0.5, sang=(11.0, 8.9, 5.2, 1.9, 0.5))
+    for i in range(3):
+        c.ell(9.6 + i * 3.4, 12.0, 1.05, 1.05, (255, 255, 255), vien=None)
+    return c.xong()
+
+
+def nut_cam_xuc():
+    c = _tam_nut()
+    c.ell(13, 13, 7.8, 7.8, (255, 230, 96), (250, 182, 32), vien=(170, 106, 12), dv=0.5, sang=(10.6, 9.2, 3.6, 2.2, 0.6))
+    c.ell(10.2, 11.6, 1.05, 1.55, (86, 50, 18), vien=None)
+    c.ell(15.8, 11.6, 1.05, 1.55, (86, 50, 18), vien=None)
+    c.arc(13, 13.4, 4.3, 3.7, 22, 158, 1.05, (86, 50, 18))
+    c.ell(8.3, 14.4, 1.3, 0.9, (255, 150, 120), vien=None)
+    c.ell(17.7, 14.4, 1.3, 0.9, (255, 150, 120), vien=None)
+    return c.xong()
+
+
+def nut_hanh_dong():
+    c = _tam_nut()
+    mau, v = (246, 104, 52), (150, 46, 16)
+    # nguoi dang chay (hinh que net day): tay sau, chan sau, than, chan truoc, tay truoc, dau
+    c.line([(13.4, 10.4), (10.0, 10.6), (8.2, 13.0)], 1.7, mau, vien=v, dv=0.42)
+    c.line([(11.8, 15.0), (9.2, 17.4), (6.2, 17.8)], 2.0, mau, vien=v, dv=0.42)
+    c.line([(14.3, 9.6), (11.8, 15.0)], 2.9, mau, vien=v, dv=0.42)
+    c.line([(11.8, 15.0), (15.4, 16.6), (15.0, 20.8)], 2.0, mau, vien=v, dv=0.42)
+    c.line([(14.0, 10.6), (17.4, 12.6), (19.6, 10.8)], 1.7, mau, vien=v, dv=0.42)
+    c.ell(15.6, 6.6, 2.35, 2.35, (255, 132, 72), mau, vien=v, dv=0.42)
+    return c.xong()
+
+
+def nut_them():
+    c = _tam_nut()
+    mau = [((92, 180, 250), (36, 128, 226)), ((126, 212, 104), (58, 164, 60)), ((255, 196, 84), (242, 150, 26)), ((250, 136, 170), (228, 76, 122))]
+    for i, (a, b2) in enumerate(mau):
+        x = 7.0 + (i % 2) * 6.5
+        y = 7.0 + (i // 2) * 6.5
+        c.rrect(x, y, x + 5.5, y + 5.5, 1.5, a, b2, vien=toi(b2, 0.62), dv=0.38)
+    return c.xong()
+
+
+def nut_menu():
+    """nut MENU: the nhon dau ben trai, vien trang, than xanh chuyen mau, chu trang (anh 54 x 26, nut 50 x 22 tai (1, 1))"""
+    c = Cv(54, 26)
+
+    def hinh(x0, y0, x1, y1, r, mui):
+        m = c._mask()
+        d = ImageDraw.Draw(m)
+        d.rounded_rectangle([(mui + 6.5) * U, y0 * U, x1 * U, y1 * U], radius=r * U, fill=255)
+        d.polygon([(mui * U, (y0 + y1) / 2 * U), ((mui + 7.6) * U, y0 * U), ((mui + 9.5) * U, y0 * U), ((mui + 9.5) * U, y1 * U), ((mui + 7.6) * U, y1 * U)], fill=255)
+        return m
+    m = hinh(0, 1.4, 51, 23.4, 4, 2.2)
+    m2 = m.filter(ImageFilter.GaussianBlur(0.9 * U)).point(lambda v: v * 86 // 255)
+    c.im.paste(Image.new('RGBA', c.im.size, (8, 26, 54, 255)), (0, int(1.2 * U)), m2)
+    c._to(hinh(0, 1, 51, 23, 4.2, 1.0), (255, 255, 255), (232, 240, 250), (86, 116, 156), 0.4)
+    c._to(hinh(0, 2.7, 49.3, 21.3, 2.9, 3.6), (112, 196, 252), (26, 108, 208), (22, 84, 170), 0.36, sang=(30, 6.6, 20, 2.6, 0.34))
+    c.chu('MENU', 30.2, 11.4, 11.6, (255, 255, 255), vien=(20, 74, 156), dv=0.5)
+    return c.xong()
+
+
+def _bao(chu):
+    c = Cv(15, 15)
+    c.ell(7.5, 7.5, 5.6, 5.6, (255, 104, 88), (220, 36, 32), vien=(255, 255, 255), dv=1.05, sang=(6.2, 5.0, 2.8, 1.5, 0.45))
+    c.chu(chu, 7.5, 7.2, 9.6 if len(chu) == 1 else 8.0, (255, 255, 255), None)
+    return c.xong()
+
+
+def _bao_n(i):
+    def f():
+        return _bao(str(i))
+    f.__name__ = 'bao_%d' % i
+    return f
+
+
+def bao_n():
+    return _bao('!')
+
+
+NUT = [nut_menu, nut_thu, nut_chat, nut_cam_xuc, nut_hanh_dong, nut_them, bao_n] + [_bao_n(i) for i in range(1, 10)]
+
+VAT = NUT + [vong, bui_0, bui_1, bui_2, bui_3, cong_hoa, khung_anh, huong_duong, rom_bi, bu_nhin, co_day, cay_thong, nguoi_tuyet, ong_noel, hop_qua, cong_tim, chu_love, gau_tim,
        cong_bong, sao_vui, bi_ngo, cay_ma, bia_mo, canh_tt, dai_phun, khi_cau, xich_du, den_long, chau_hoa, cong_trai,
        bi_chong, nen, nen_2, vac_thuoc, bi_to, la_thu, mang_nhen, bu_nhin_bi, cay_den, gau_trang, xe_tuyet, qua_cau, bo_hoa, bong_tim, banh_kem, lap_lanh, khe_0, khe_1, khe_2, khe_3, khe_4]
 
