@@ -2,7 +2,7 @@
  *
  * 1) Khoi noi (hd_post, luong phu, luc phong to anh): moi vat the / nhan vat duoc danh sang theo hinh khoi - vien phia
  *    trai-tren sang len, phia phai-duoi toi di (do cao tinh tu khoang cach toi mep hinh) -> hinh phang thanh hinh co khoi.
- * 2) Bong do (hd_shadow_make + sh_draw): moi vat the co bong mem do xuong duoi / len vat phia sau (mat na 8 bit tinh
+ * 2) Bong do (hd_shadow_make + hdbong.c sh_cast): moi vat the do bong theo huong nang xuong mat dat (mat na 8 bit tinh
  *    san luc phong to, chi phan lo ra ngoai hinh) -> cac lop tach nhau co chieu sau.
  * 3) Hau ky canh (gfx_hd_scene, sau khi ve xong the gioi, truoc HUD): anh sang loa (bloom) quanh vung sang, tia nang
  *    chuyen dong, toi goc (vignette), bui sang bay.
@@ -17,13 +17,19 @@ extern int gfx_theme;
 static void th_ground(uint32_t *px, int w, int h, int th);
 static void th_snowcap(uint32_t *px, int w, int h, int k);
 static void th_autumn(uint32_t *px, int w, int h);
+static void hd_bump(uint32_t *px, int w, int h, int k, int manh, int luoi);
+static int fx_dem_cu;
 static void th_draw(uint32_t *fb, int W, int H, int x0, int y0, int x1, int y1, int k, int dem);
+static void th_life(uint32_t *fb, int W, int H, int x0, int y0, int x1, int y1, int k, int tx);
+/* co cua canh dang ve (client HdUi bao moi khung qua Graphics.setStrokeStyle(0x48A0 + co)): 1 = ngoai troi (co nang / trang:
+ * tia nang, quang sang, bong may, nuoc lap lanh), 2 = canh mat dat co su song (buom, la roi, suong xa), 4 = ban dem */
+int gfx_canh_co;
 
 /* ------------------------------------------------------------ 1) khoi noi */
 static void hd_relief(uint32_t *px, int w, int h, int k) {
     size_t n = (size_t)w * h;
     if (w < 5 * k || h < 5 * k || n > 5000000) return;
-    int R = 4 * k;                              /* be rong vung bo tron mep (diem anh that) */
+    int R = 5 * k;                              /* be rong vung bo tron mep (diem anh that) */
     int dmax = 3 * R;
     uint16_t *D = (uint16_t *)malloc(n * 2);
     uint8_t *Hg = (uint8_t *)malloc(n);
@@ -63,7 +69,7 @@ static void hd_relief(uint32_t *px, int w, int h, int k) {
         }
     }
     /* do cao: 1/4 hinh sin tu mep vao (mep doc, vao trong phang dan) */
-    uint8_t lut[3 * 4 * 4 + 1];
+    uint8_t lut[3 * 5 * 4 + 1];
     for (int d = 0; d <= dmax; d++) lut[d] = (uint8_t)(sin(1.5707963 * d / dmax) * 255.0 + 0.5);
     for (size_t i = 0; i < n; i++) Hg[i] = lut[D[i] > dmax ? dmax : D[i]];
     free(D);
@@ -87,14 +93,14 @@ static void hd_relief(uint32_t *px, int w, int h, int k) {
                 int lf = m <= 40 ? 0 : m >= 160 ? 256 : (m - 40) * 256 / 120;      /* net vien toi giu nguyen */
                 int t = e * 2;
                 if (t > 255) t = 255;
-                t = t * 80 / 255 * lf / 256;                /* toi da ~31% ve phia trang */
+                t = t * 108 / 255 * lf / 256;               /* toi da ~42% ve phia trang */
                 r += (255 - r) * t / 256;
                 g += (255 - g) * t / 256;
                 b += (255 - b) * t / 256;
             } else {
                 int t = -e * 2;
                 if (t > 255) t = 255;
-                t = 256 - t * 78 / 255;                     /* toi da ~-30% */
+                t = 256 - t * 100 / 255;                    /* toi da ~-39% */
                 r = r * t / 256;
                 g = g * t / 256;
                 b = b * t / 256;
@@ -122,172 +128,86 @@ static int hd_is_sprite(const uint32_t *px, int w, int h) {
     return 1;
 }
 
-/* mode: bit 0 khoi noi, bit 1 bong do, bit 2-4 chu de, bit 5 = anh nen (o gach / phong nen: chi nhuom mau theo chu de) */
+/* mode: bit 0 khoi noi, bit 2-4 chu de, bit 5 (32) = anh nen (o gach / phong nen), bit 6 (64) = vat the tinh cua ban do,
+ * bit 7 (128) = van noi */
 static void hd_post(uint32_t *px, int w, int h, int k, int mode) {
     int th = (mode >> 2) & 7;
     if (mode & 32) {
         if (th) th_ground(px, w, h, th);
+        /* bang o 24 x 24 (rong, cao chia het cho 24 diem logic): khong tinh van noi qua ranh o */
+        if (mode & 128) hd_bump(px, w, h, k, 64, (w % (24 * k) == 0 && h % (24 * k) == 0) ? 24 * k : 0);
         return;
     }
     if ((mode & 64) && th == 4) th_autumn(px, w, h);           /* vat the ban do: tan cay xanh -> la thu vang cam */
+    if ((mode & 128) && hd_is_sprite(px, w, h)) hd_bump(px, w, h, k, 78, 0);
     if ((mode & 1) && hd_is_sprite(px, w, h)) {
         hd_relief(px, w, h, k);
         if (th == 1 && (mode & 64)) th_snowcap(px, w, h, k);    /* tuyet dong chi tren vat the ban do (khong len dau nguoi) */
     }
 }
 
-/* ------------------------------------------------------------ 2) bong do
- * mat na 8 bit rong w, cao h + mg: do toi cua bong tai tung diem (chi phan nam ngoai than hinh). */
+/* ------------------------------------------------------------ 2) bong do theo huong nang: MAT NA tinh san cho moi anh
+ * (luong nen lam 1 lan). Bong cua vat tren mat dat = hinh dang cua vat ep det theo chieu doc con 1/3 (roi xo nghieng luc
+ * ve - hdbong.c sh_cast). Mat na: rong w, cao mh = ceil(h / 3) hang; hang r (0 = sat day anh) = do phu trung binh cua 3
+ * hang anh [h - 3(r+1), h - 3r), lam nhoe ngang (mep bong mem). Sau mh * w byte la bang mh cap uint16 (x dau, x cuoi + 1)
+ * cua doan co bong tren moi hang (hang trong: 0, 0) de luc ve bo qua nhanh phan trong suot.
+ * *omg = mh. Dung luong: SH_BYTES(w, mh). */
+#define SH_OFF(w, mh) ((((size_t)(w) * (size_t)(mh)) + 1) & ~(size_t)1)       /* bang doan bat dau o dia chi chan */
+#define SH_BYTES(w, mh) (SH_OFF(w, mh) + (size_t)(mh) * 4)
 static uint8_t *hd_shadow_make(const uint32_t *px, int w, int h, int k, int *omg) {
-    size_t n = (size_t)w * h;
-    if (w < 4 * k || h < 4 * k || n > 3000000 || !hd_is_sprite(px, w, h)) return 0;
-    int dy = 2 * k, r = k + k / 2;              /* do lech xuong, ban kinh lam mem */
-    int mg = dy + r;
-    int H2 = h + mg;
-    uint8_t *A = (uint8_t *)calloc((size_t)w * H2, 1), *T = (uint8_t *)malloc((size_t)w * H2);
-    if (!A || !T) {
-        free(A);
-        free(T);
+    *omg = 0;
+    if (w < 2 * k || h < 2 * k || w > 2400 || h > 2400) return 0;
+    int mh = (h + 2) / 3;
+    uint8_t *m = (uint8_t *)calloc(SH_BYTES(w, mh), 1);
+    uint16_t *acc = (uint16_t *)malloc((size_t)(w + 1) * sizeof(uint16_t));
+    uint8_t *tam = (uint8_t *)malloc((size_t)w);
+    if (!m || !acc || !tam) {
+        free(m);
+        free(acc);
+        free(tam);
         return 0;
     }
-    /* alpha lech xuong dy */
-    for (int y = 0; y < h; y++) {
-        const uint32_t *s = px + (size_t)y * w;
-        uint8_t *d = A + (size_t)(y + dy) * w;
-        for (int x = 0; x < w; x++) d[x] = (uint8_t)(s[x] >> 24);
-    }
-    /* lam mem: hop ngang roi hop doc (ban kinh r) */
-    int win = 2 * r + 1;
-    for (int y = 0; y < H2; y++) {
-        const uint8_t *s = A + (size_t)y * w;
-        uint8_t *d = T + (size_t)y * w;
-        int sum = 0;
-        for (int x = -r; x <= r; x++) sum += (x >= 0 && x < w) ? s[x] : 0;
-        for (int x = 0; x < w; x++) {
-            d[x] = (uint8_t)(sum / win);
-            int o = x - r, i = x + r + 1;
-            if (o >= 0) sum -= s[o];
-            if (i < w) sum += s[i];
+    uint16_t *sp = (uint16_t *)(void *)(m + SH_OFF(w, mh));
+    int R = k + 1;                          /* ban kinh nhoe ngang (2 luot hop -> mep mem ~2(k+1) diem anh) */
+    int co = 0;
+    for (int r = 0; r < mh; r++) {
+        uint8_t *row = m + (size_t)r * w;
+        int ya = h - 3 * (r + 1), yb = h - 3 * r;
+        if (ya < 0) ya = 0;
+        int any = 0;
+        for (int y = ya; y < yb; y++) {
+            const uint32_t *p = px + (size_t)y * w;
+            for (int x = 0; x < w; x++)
+                if ((p[x] >> 24) >= 128) {
+                    row[x] += 85;
+                    any = 1;
+                }
         }
-    }
-    int any = 0;
-    for (int x = 0; x < w; x++) {
-        int sum = 0;
-        for (int y = -r; y <= r; y++) sum += (y >= 0 && y < H2) ? T[(size_t)y * w + x] : 0;
-        for (int y = 0; y < H2; y++) {
-            int v = sum / win;
-            int o = y - r, i = y + r + 1;
-            if (o >= 0) sum -= T[(size_t)o * w + x];
-            if (i < H2) sum += T[(size_t)i * w + x];
-            /* chi phan lo ra ngoai than hinh; do toi toi da ~40%. Duoi day anh: coi nhu than hinh keo dai tiep (anh bi
-             * cat ngang than - dau, manh ghep, goc khung - khong do bong xuong phan ben duoi) */
-            int own = (int)(px[(size_t)(y < h ? y : h - 1) * w + x] >> 24);
-            v = v * (255 - own) / 255 * 104 / 255;
-            A[(size_t)y * w + x] = (uint8_t)v;
-            any |= v;
+        if (!any) continue;
+        co = 1;
+        for (int luot = 0; luot < 2; luot++) {
+            acc[0] = 0;
+            for (int x = 0; x < w; x++) acc[x + 1] = (uint16_t)(acc[x] + row[x]);       /* tong don (tran vong 16 bit: hieu van dung) */
+            for (int x = 0; x < w; x++) {
+                int a = x - R < 0 ? 0 : x - R, b = x + R + 1 > w ? w : x + R + 1;
+                tam[x] = (uint8_t)((uint16_t)(acc[b] - acc[a]) / (2 * R + 1));
+            }
+            memcpy(row, tam, (size_t)w);
         }
+        int xa = 0, xb = w;
+        while (xa < w && row[xa] < 6) xa++;
+        while (xb > xa && row[xb - 1] < 6) xb--;
+        sp[r * 2] = (uint16_t)xa;
+        sp[r * 2 + 1] = (uint16_t)xb;
     }
-    free(T);
-    if (!any) {
-        free(A);
+    free(acc);
+    free(tam);
+    if (!co) {
+        free(m);
         return 0;
     }
-    *omg = mg;
-    return A;
-}
-
-/* lam toi 1 hang theo mat na (thua: phan lon la 0): d = d * (256 - m) / 256, 4 diem / buoc bang lenh vector */
-static inline void row_shade(uint32_t *d, const uint8_t *m, int n) {
-    int i = 0;
-    while (i + 8 <= n) {
-        uint64_t q;
-        memcpy(&q, m + i, 8);
-        if (!q) {
-            i += 8;
-            continue;
-        }
-#if defined(__aarch64__)
-        {
-            static const uint8_t idx[16] = {0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3};
-            const uint8x16_t ix = vld1q_u8(idx);
-            const uint32x4_t am = vdupq_n_u32(0xFF000000u);
-            for (int j = 0; j < 8; j += 4) {
-                uint32_t m4;
-                memcpy(&m4, m + i + j, 4);
-                if (!m4) continue;
-                uint8x16_t f = vmvnq_u8(vqtbl1q_u8(vreinterpretq_u8_u32(vdupq_n_u32(m4)), ix));        /* 255 - m */
-                uint8x16_t v = vreinterpretq_u8_u32(vld1q_u32(d + i + j));
-                uint8x8_t lo = vshrn_n_u16(vmull_u8(vget_low_u8(v), vget_low_u8(f)), 8);
-                uint8x8_t hi = vshrn_n_u16(vmull_u8(vget_high_u8(v), vget_high_u8(f)), 8);
-                vst1q_u32(d + i + j, vorrq_u32(vreinterpretq_u32_u8(vcombine_u8(lo, hi)), am));
-            }
-        }
-#elif defined(__SSE2__)
-        {
-            const __m128i z = _mm_setzero_si128(), c255 = _mm_set1_epi16(255), am = _mm_set1_epi32((int)0xFF000000u);
-            for (int j = 0; j < 8; j += 4) {
-                int m4;
-                memcpy(&m4, m + i + j, 4);
-                if (!m4) continue;
-                __m128i mw = _mm_unpacklo_epi8(_mm_cvtsi32_si128(m4), z);       /* 4 tu: m0 m1 m2 m3 */
-                mw = _mm_unpacklo_epi16(mw, mw);                                /* m0 m0 m1 m1 m2 m2 m3 m3 */
-                __m128i flo = _mm_sub_epi16(c255, _mm_unpacklo_epi32(mw, mw));  /* m0 x4, m1 x4 */
-                __m128i fhi = _mm_sub_epi16(c255, _mm_unpackhi_epi32(mw, mw));
-                __m128i v = _mm_loadu_si128((const __m128i *)(d + i + j));
-                __m128i lo = _mm_srli_epi16(_mm_mullo_epi16(_mm_unpacklo_epi8(v, z), flo), 8);
-                __m128i hi = _mm_srli_epi16(_mm_mullo_epi16(_mm_unpackhi_epi8(v, z), fhi), 8);
-                _mm_storeu_si128((__m128i *)(d + i + j), _mm_or_si128(_mm_packus_epi16(lo, hi), am));
-            }
-        }
-#else
-        for (int j = 0; j < 8; j++) {
-            uint32_t a = m[i + j];
-            if (a) {
-                uint32_t v = d[i + j], f = 255 - a;
-                d[i + j] = 0xFF000000u | ((((v & 0xFF00FFu) * f) >> 8) & 0xFF00FFu) | ((((v & 0x00FF00u) * f) >> 8) & 0x00FF00u);
-            }
-        }
-#endif
-        i += 8;
-    }
-    for (; i < n; i++) {
-        uint32_t a = m[i];
-        if (a) {
-            uint32_t v = d[i], f = 255 - a;
-            d[i] = 0xFF000000u | ((((v & 0xFF00FFu) * f) >> 8) & 0xFF00FFu) | ((((v & 0x00FF00u) * f) >> 8) & 0x00FF00u);
-        }
-    }
-}
-
-/* ve bong cua vung anh (toa do logic xs, ys, w, h cua anh) truoc khi ve chinh no. e->k phai bang he so dich. */
-static void sh_draw(tgt *o, hd_ent *e, int xs, int ys, int w, int h, int tr, int px, int py) {
-    if (!e->shd || (tr != 0 && tr != 2)) return;
-    int k = e->k;
-    int X0 = xs * k, Y0 = ys * k, PW = w * k, PH = h * k;
-    if (X0 < 0 || Y0 < 0 || X0 + PW > e->w || Y0 + PH > e->h) return;
-    if (Y0 + PH == e->h) PH += e->shm;          /* vung cham day anh: bong do tiep xuong duoi */
-    int DX = px * k, DY = py * k;
-    int cx0 = o->x0 * k, cy0 = o->y0 * k, cx1 = o->x1 * k, cy1 = o->y1 * k;
-    int vx0 = DX > cx0 ? DX : cx0, vy0 = DY > cy0 ? DY : cy0;
-    int vx1 = DX + PW < cx1 ? DX + PW : cx1, vy1 = DY + PH < cy1 ? DY + PH : cy1;
-    if (vx1 <= vx0 || vy1 <= vy0) return;
-    int n = vx1 - vx0;
-    for (int yy = vy0; yy < vy1; yy++) {
-        const uint8_t *m = e->shd + (size_t)(Y0 + (yy - DY)) * e->w;
-        uint32_t *d = o->px + (size_t)yy * o->w + vx0;
-        if (tr == 0) {
-            row_shade(d, m + X0 + (vx0 - DX), n);
-        } else {
-            /* lat ngang: cot dich c <-> cot nguon X0 + PW - 1 - c */
-            const uint8_t *q = m + X0 + PW - 1 - (vx0 - DX);
-            uint8_t tam[512];
-            for (int c = 0; c < n; c += 512) {
-                int mm = n - c < 512 ? n - c : 512;
-                for (int i = 0; i < mm; i++) tam[i] = q[-(c + i)];
-                row_shade(d + c, tam, mm);
-            }
-        }
-    }
+    *omg = mh;
+    return m;
 }
 
 /* ------------------------------------------------------------ 3) hau ky canh */
@@ -380,13 +300,94 @@ static int fx_dem(const uint32_t *fb, int W, int x0, int y0, int x1, int y1, int
     return tong / n < 14 ? 2 : tong / n < 96 ? 1 : 0;
 }
 
-/* fb: bo dem W x H (diem anh that), vung [x0,x1) x [y0,y1), k = diem anh that / diem logic */
-static void gfx_hd_scene(uint32_t *fb, int W, int H, int x0, int y0, int x1, int y1, int k) {
+/* nhieu gia tri 2 chieu (0..1), noi suy tron */
+static float fx_vn(float x, float y) {
+    int xi = (int)floorf(x), yi = (int)floorf(y);
+    float fx = x - (float)xi, fy = y - (float)yi;
+    fx = fx * fx * (3.0f - 2.0f * fx);
+    fy = fy * fy * (3.0f - 2.0f * fy);
+    float v[4];
+    for (int i = 0; i < 4; i++) {
+        unsigned hh = (((unsigned)(xi + (i & 1)) * 73856093u) ^ ((unsigned)(yi + (i >> 1)) * 19349663u)) * 2654435761u;
+        v[i] = (float)((hh >> 16) & 1023u) / 1023.0f;
+    }
+    return v[0] + (v[1] - v[0]) * fx + (v[2] - v[0]) * fy + (v[0] - v[1] - v[2] + v[3]) * fx * fy;
+}
+
+/* le trong 2 ben cua ban do hep hon man hinh (diem logic; client bao moi khung qua setStrokeStyle 0x4Dxxxxxx): truoc khi
+ * hau ky, lat guong phan mep ban do ra le -> canh kin man hinh, khong con 2 dai den */
+int gfx_le_trai, gfx_le_phai;
+
+static void fx_lat_le(uint32_t *fb, int W, int H, int y0, int y1, int k) {
+    int L = gfx_le_trai * k, R = gfx_le_phai * k;
+    if (y0 < 0) y0 = 0;
+    if (y1 > H) y1 = H;
+    if (L > 0 && L * 2 <= W)
+        for (int y = y0; y < y1; y++) {
+            uint32_t *row = fb + (size_t)y * W;
+            for (int i = 0; i < L; i++) row[L - 1 - i] = row[L + i];
+        }
+    if (R > 0 && R * 2 <= W)
+        for (int y = y0; y < y1; y++) {
+            uint32_t *row = fb + (size_t)y * W;
+            for (int i = 0; i < R; i++) row[W - R + i] = row[W - R - 1 - i];
+        }
+}
+
+/* nguon sang ban dem cua khung dang ve: client (HdUi / HdVat) bao qua Graphics.setStrokeStyle(0x4Cxxxxxx) luc ve cot den,
+ * den long, nen...; hau ky canh ve quang sang am quanh den + vung sang tren mat dat. Toa do: diem logic tren man hinh
+ * (chan cua vat). kieu 1 = cot den cao (bong den cach chan ~38 diem), 2 = den nho / nen sat mat dat, 3 = den treo cao vua */
+#define DEN_MAX 64
+static struct {
+    short x, y;
+    uint8_t kieu;
+} fx_den[DEN_MAX];
+static int fx_den_n;
+
+/* cong 1 quang sang elip (tam cx, cy; ban kinh rx, ry - don vi O) vao bo dem loa: cuong do giam dan tu tam, mau (r, g, b) */
+static void fx_quang(uint16_t *bl, int bw, int bh, float cx, float cy, float rx, float ry, int r, int g, int b) {
+    int xa = (int)floorf(cx - rx), xb = (int)ceilf(cx + rx), ya = (int)floorf(cy - ry), yb = (int)ceilf(cy + ry);
+    if (xa < 0) xa = 0;
+    if (ya < 0) ya = 0;
+    if (xb > bw - 1) xb = bw - 1;
+    if (yb > bh - 1) yb = bh - 1;
+    for (int y = ya; y <= yb; y++) {
+        float dy = ((float)y - cy) / ry;
+        uint16_t *d = bl + ((size_t)y * bw + xa) * 3;
+        for (int x = xa; x <= xb; x++, d += 3) {
+            float dx = ((float)x - cx) / rx;
+            float q = 1.0f - (dx * dx + dy * dy);
+            if (q <= 0) continue;
+            q = q * q;
+            int v0 = d[0] + (int)(q * r), v1 = d[1] + (int)(q * g), v2 = d[2] + (int)(q * b);
+            d[0] = (uint16_t)(v0 > 600 ? 600 : v0);
+            d[1] = (uint16_t)(v1 > 600 ? 600 : v1);
+            d[2] = (uint16_t)(v2 > 600 ? 600 : v2);
+        }
+    }
+}
+
+#define FXC 8                       /* luoi tho cua bong may: moi nut 8 o (64 diem anh that) */
+static int32_t *fx_may;             /* do toi cua bong may tai nut luoi tho (0 .. 38 * 256) */
+static int fx_mw, fx_mh;
+static uint8_t *fx_nuoc;            /* o la mat nuoc (1) */
+static int fx_nn;
+
+/* fb: bo dem W x H (diem anh that), vung [x0,x1) x [y0,y1), k = diem anh that / diem logic; (tx, ty) = do doi cua the gioi
+ * tren man hinh (diem logic) de hieu ung bam theo ban do khi cuon */
+static void gfx_hd_scene(uint32_t *fb, int W, int H, int x0, int y0, int x1, int y1, int k, int tx, int ty) {
     if (x0 < 0) x0 = 0;
     if (y0 < 0) y0 = 0;
     if (x1 > W) x1 = W;
     if (y1 > H) y1 = H;
     int rw = x1 - x0, rh = y1 - y0;
+#if defined(__linux__) && !defined(__ANDROID__)
+    {
+        static int dem;
+        if (getenv("J2N_BONGLOG") && (dem++ % 90) == 0)
+            fprintf(stderr, "[canh] vung %d..%d x %d..%d (W %d H %d k %d) co %d tx %d ty %d\n", x0, x1, y0, y1, W, H, k, gfx_canh_co, tx, ty);
+    }
+#endif
     if (rw < 160 * k || rh < 120 * k) return;           /* vung nho (cua so con): bo qua */
     int bw = (rw + FXB - 1) / FXB, bh = (rh + FXB - 1) / FXB;
     if (bw != fx_bw || bh != fx_bh) {
@@ -416,7 +417,49 @@ static void gfx_hd_scene(uint32_t *fb, int W, int H, int x0, int y0, int x1, int
                 }
     }
     int64_t now = fx_ms();
-    int dem = fx_dem(fb, W, x0, y0, x1, y1, k);
+    int ngoai = gfx_canh_co & 1, song = gfx_canh_co & 2;
+    int dem = ngoai ? ((gfx_canh_co & 4) ? 1 : 0) : fx_dem(fb, W, x0, y0, x1, y1, k);
+    fx_dem_cu = dem;
+    int nguong = dem ? 226 : 218;               /* nguong sang de loa */
+    /* BAN DEM ngoai troi: ca canh toi di + nga xanh; den / cua so / vat trang van sang (loa manh) va cot den toa vung sang am */
+    int toi_dem = (ngoai && dem) ? (song ? 186 : 226) : 256;
+    double tt = (double)(now % 6000000) / 1000.0;
+    /* --- bong may troi tren mat dat (ngoai troi, ban ngay): nhieu tan so thap tinh o luoi tho roi noi suy theo o */
+    int co_may = ngoai && !dem && gfx_fx_ray > 0;
+    int mw = bw / FXC + 2, mh = bh / FXC + 2;
+    if (co_may) {
+        if (mw != fx_mw || mh != fx_mh) {
+            free(fx_may);
+            fx_may = (int32_t *)malloc((size_t)mw * mh * sizeof(int32_t));
+            fx_mw = mw;
+            fx_mh = mh;
+        }
+        if (!fx_may) co_may = 0;
+    }
+    if (co_may) {
+        float cu = (float)(tt * 0.016), cv = (float)(tt * 0.006);
+        for (int gy = 0; gy < mh; gy++)
+            for (int gx = 0; gx < mw; gx++) {
+                float wx = (float)(x0 + gx * FXC * FXB) / k - (float)tx, wy = (float)(y0 + gy * FXC * FXB) / k - (float)ty;
+                float u = wx / 170.0f + cu, v = wy / 105.0f + cv;
+                float n = 0.65f * fx_vn(u, v) + 0.35f * fx_vn(u * 2.3f + 7.0f, v * 2.3f + 3.0f);
+                float q = (n - 0.46f) / 0.28f;
+                q = q < 0 ? 0 : q > 1 ? 1 : q;
+                q = q * q * (3.0f - 2.0f * q);
+                fx_may[gy * mw + gx] = (int32_t)(q * 38.0f * 256.0f * gfx_fx_ray / 100);
+            }
+    }
+    /* --- mat nuoc (ngoai troi): danh dau o co mau nuoc de them anh lap lanh */
+    int co_nuoc = ngoai && gfx_fx_bloom > 0;
+    if (co_nuoc) {
+        if (fx_nn < bw * bh) {
+            free(fx_nuoc);
+            fx_nuoc = (uint8_t *)malloc((size_t)bw * bh);
+            fx_nn = fx_nuoc ? bw * bh : 0;
+        }
+        if (!fx_nuoc) co_nuoc = 0;
+    }
+    int thay_nuoc = 0;
     /* --- lay mau vung sang (moi o 4 diem), nguong mem */
     int do_bloom = gfx_fx_bloom > 0, co_sang = 0;
     if (do_bloom) {
@@ -432,13 +475,20 @@ static void gfx_hd_scene(uint32_t *fb, int W, int H, int x0, int y0, int x1, int
                 int r = (int)(((c0 >> 16) & 255) + ((c1 >> 16) & 255) + ((c2 >> 16) & 255) + ((c3 >> 16) & 255)) >> 2;
                 int g = (int)(((c0 >> 8) & 255) + ((c1 >> 8) & 255) + ((c2 >> 8) & 255) + ((c3 >> 8) & 255)) >> 2;
                 int b = (int)((c0 & 255) + (c1 & 255) + (c2 & 255) + (c3 & 255)) >> 2;
+                if (co_nuoc) {
+                    /* nuoc dam (bien, ho tren ban do thanh pho) / nuoc nhat (song o khu sinh thai); troi nhat hon nen khong dinh */
+                    int nc = (b > 185 && b - r > 95 && r < 140 && g < 195 && g > r)
+                             || (b > 215 && g > 200 && r > 130 && r < 190 && b - r > 52);
+                    fx_nuoc[(size_t)by * bw + bx] = (uint8_t)nc;
+                    thay_nuoc |= nc;
+                }
                 int key = (r * 77 + g * 150 + b * 29) >> 8;     /* do sang (troi xanh / co khong tinh, trang va vang moi loa) */
-                if (key <= 218) {
+                if (key <= nguong) {
                     d[0] = d[1] = d[2] = 0;
                 } else {
-                    int wgt = (key - 218) * 256 / 37;       /* 0..256 */
+                    int wgt = (key - nguong) * 256 / (255 - nguong);       /* 0..256 */
                     wgt = wgt * wgt >> 8;
-                    wgt = wgt * gfx_fx_bloom / 100 * 118 / 256;     /* cuong do loa (cong bao hoa) */
+                    wgt = wgt * gfx_fx_bloom / 100 * (dem ? 210 : 126) / 256;      /* cuong do loa (cong bao hoa) */
                     d[0] = (uint16_t)(r * wgt >> 8);
                     d[1] = (uint16_t)(g * wgt >> 8);
                     d[2] = (uint16_t)(b * wgt >> 8);
@@ -454,10 +504,62 @@ static void gfx_hd_scene(uint32_t *fb, int W, int H, int x0, int y0, int x1, int
         } else {
             do_bloom = 0;
         }
+        if (co_nuoc && thay_nuoc) {
+            /* NUOC LAP LANH: nhung vet sang nho nam ngang nhap nhay ngau nhien tren mat nuoc (moi o luoi 4 x 2 diem logic cua
+             * ban do co 10% la "diem lap lanh", sang / tat theo nhip rieng), tu lai thanh dai theo song cham. Chi o nam trong
+             * vung nuoc rong (4 o ke cung la nuoc). Cong vao bo dem loa SAU khi lam nhoe -> noi suy trong o, khong bi vuong. */
+            float tn = (float)fmod(tt, 3600.0);
+            int manh = dem ? 70 : 150, co = 0;
+            for (int by = 1; by < bh - 1; by++) {
+                const uint8_t *nr = fx_nuoc + (size_t)by * bw;
+                int wy = (y0 + by * FXB) / k - ty;
+                int cy = wy >> 1;
+                for (int bx = 1; bx < bw - 1; bx++) {
+                    if (!nr[bx] || !nr[bx - 1] || !nr[bx + 1] || !nr[bx - bw] || !nr[bx + bw]) continue;
+                    int wx = (x0 + bx * FXB) / k - tx;
+                    int cx = wx >> 2;
+                    unsigned hh = (((unsigned)cx * 73856093u) ^ ((unsigned)cy * 19349663u)) * 2654435761u;
+                    hh ^= hh >> 15;
+                    if ((hh & 1023u) > 102u) continue;
+                    float pha = (float)((hh >> 10) & 1023u) * (6.2831853f / 1023.0f);
+                    float nhip = 2.0f + (float)((hh >> 20) & 255u) * (2.6f / 255.0f);
+                    float sv = sinf(tn * nhip + pha);
+                    if (sv <= 0.5f) continue;
+                    float q = (sv - 0.5f) * 2.0f;
+                    float dai = 0.55f + 0.45f * sinf((float)wx * 0.045f + (float)wy * 0.10f - tn * 0.5f);
+                    int am = (int)(q * q * dai * manh);
+                    uint16_t *d = fx_bl + ((size_t)by * bw + bx) * 3;
+                    d[0] = (uint16_t)(d[0] + am * 215 / 256);
+                    d[1] = (uint16_t)(d[1] + am * 240 / 256);
+                    d[2] = (uint16_t)(d[2] + am);
+                    co = 1;
+                }
+            }
+            if (co) do_bloom = 1;
+        }
+        if (ngoai && dem && fx_den_n > 0) {
+            /* DEN BAN DEM: quang sang quanh bong den + vung sang elip tren mat dat duoi chan den (nhap nhay rat nhe) */
+            float sk = (float)k / FXB;                  /* diem logic -> o */
+            for (int i = 0; i < fx_den_n; i++) {
+                float lx = ((float)fx_den[i].x * k - x0) / FXB, ly = ((float)fx_den[i].y * k - y0) / FXB;
+                float nh = 0.93f + 0.07f * sinf((float)tt * (2.1f + (i % 5) * 0.37f) + i * 1.7f);
+                int kieu = fx_den[i].kieu;
+                if (kieu == 1) {
+                    fx_quang(fx_bl, bw, bh, lx, ly - 38.0f * sk, 27.0f * sk, 27.0f * sk, (int)(150 * nh), (int)(118 * nh), (int)(58 * nh));
+                    fx_quang(fx_bl, bw, bh, lx, ly + 4.0f * sk, 82.0f * sk, 34.0f * sk, (int)(118 * nh), (int)(96 * nh), (int)(52 * nh));
+                } else if (kieu == 3) {
+                    fx_quang(fx_bl, bw, bh, lx, ly - 22.0f * sk, 24.0f * sk, 24.0f * sk, (int)(170 * nh), (int)(128 * nh), (int)(60 * nh));
+                    fx_quang(fx_bl, bw, bh, lx, ly + 3.0f * sk, 56.0f * sk, 24.0f * sk, (int)(90 * nh), (int)(72 * nh), (int)(38 * nh));
+                } else {
+                    fx_quang(fx_bl, bw, bh, lx, ly - 7.0f * sk, 20.0f * sk, 18.0f * sk, (int)(160 * nh), (int)(112 * nh), (int)(44 * nh));
+                    fx_quang(fx_bl, bw, bh, lx, ly + 2.0f * sk, 40.0f * sk, 17.0f * sk, (int)(74 * nh), (int)(56 * nh), (int)(26 * nh));
+                }
+            }
+            do_bloom = 1;
+        }
     }
     /* --- tron vao khung: loa sang (noi suy trong o) + tia nang + toi goc. Moi o 8 x 8: tinh san 8 gia tri cong cua
      * 1 hang (buoc cong don, khong nhan chia), roi nhan he so toi goc + cong bao hoa bang lenh vector */
-    double tt = (double)(now % 6000000) / 1000.0;
     if (!fx_ray_ok) {
         fx_ray_ok = 1;
         for (int i = 0; i < 4096; i++) {
@@ -475,15 +577,61 @@ static void gfx_hd_scene(uint32_t *fb, int W, int H, int x0, int y0, int x1, int
         /* tia nang: dai sang cheo, troi cham, manh o tren va tat dan xuong duoi */
         int fade = 256 - by * 256 / bh;
         fade = fade * fade >> 8;
+        /* suong xa: phan tren cua canh (xa nguoi nhin) hoi nhat / xanh hon -> co chieu sau */
+        int hz = 0;
+        if (ngoai && song && !dem && gfx_fx_ray > 0) {
+            int lim = bh * 36 / 100;
+            if (by < lim) {
+                hz = (lim - by) * 256 / lim;
+                hz = hz * hz * 15 >> 16;
+            }
+        }
+        const int32_t *m0 = 0, *m1 = 0;
+        int mfy = 0;
+        if (co_may) {
+            m0 = fx_may + (by / FXC) * mw;
+            m1 = m0 + mw;
+            mfy = by % FXC;
+        }
         for (int bx = 0; bx < bw; bx++) {
             int px0 = x0 + bx * FXB, px1 = px0 + FXB < x1 ? px0 + FXB : x1;
             int bx1 = bx + 1 < bw ? bx + 1 : bx;
             int vg = (fx_vg && gfx_fx_vig > 0) ? 256 - (256 - fx_vg[(size_t)by * bw + bx]) * gfx_fx_vig / 100 : 256;
+            if (toi_dem < 256) vg = vg * toi_dem >> 8;
+            if (co_may) {
+                int gx = bx / FXC, mfx = bx % FXC;
+                int v0 = m0[gx] * (FXC - mfx) + m0[gx + 1] * mfx, v1 = m1[gx] * (FXC - mfx) + m1[gx + 1] * mfx;
+                int mv = (v0 * (FXC - mfy) + v1 * mfy) >> 14;      /* / 64 (noi suy) / 256 */
+                if (mv > 0) vg = vg * (256 - mv) >> 8;
+            }
             int ray = 0;
-            if (gfx_fx_ray > 0 && fade > 8 && !dem) {
+            if (gfx_fx_ray > 0 && fade > 8 && !dem && ngoai) {
                 /* pha u = (x + 0,55 y) / (46 diem logic) + troi theo thoi gian; mau lap lai sau 10 don vi -> bang 4096 o */
                 unsigned iu = (unsigned)((bx * FXB + by * FXB * 0.55f) * ray_sc + ray_t) & 4095u;
-                ray = fx_ray_lut[iu] * fade * gfx_fx_ray / 25600;
+                ray = fx_ray_lut[iu] * fade * gfx_fx_ray / 16000;
+            }
+            /* quang sang: ngay = nang am tu goc trai-tren (cung huong voi bong do), dem = anh trang lanh tu goc phai-tren */
+            int qr = 0, qg = 0, qb = 0;
+            if (ngoai && gfx_fx_ray > 0) {
+                float qx = dem ? (float)(bw - bx) / bw : (float)bx / bw, qy = (float)by / bh;
+                float r2 = qx * qx * 0.9f + qy * qy * 1.9f;
+                if (r2 < 1.0f) {
+                    float q = (1.0f - r2) * (1.0f - r2);
+                    if (dem) {
+                        qr = (int)(q * 16);
+                        qg = (int)(q * 26);
+                        qb = (int)(q * 46);
+                    } else {
+                        qr = (int)(q * 46);
+                        qg = (int)(q * 34);
+                        qb = (int)(q * 10);
+                    }
+                }
+            }
+            int ar0 = ray + qr + (hz * 220 >> 8), ag0 = (ray * 240 >> 8) + qg + (hz * 240 >> 8), ab0 = (ray * 200 >> 8) + qb + hz;
+            if (toi_dem < 256) {
+                ag0 += 3;               /* dem: nga xanh lam */
+                ab0 += song ? 16 : 6;
             }
             const uint16_t *b00 = 0, *b10 = 0, *b01 = 0, *b11 = 0;
             int lit = 0;
@@ -494,10 +642,10 @@ static void gfx_hd_scene(uint32_t *fb, int W, int H, int x0, int y0, int x1, int
                 b11 = fx_bl + ((size_t)by1 * bw + bx1) * 3;
                 lit = (b00[0] | b00[1] | b00[2] | b10[0] | b10[1] | b10[2] | b01[0] | b01[1] | b01[2] | b11[0] | b11[1] | b11[2]) > 1;
             }
-            if (!lit && vg >= 256 && ray <= 0) continue;
+            if (!lit && vg >= 256 && (ar0 | ag0 | ab0) == 0) continue;
             int n = px1 - px0;
             uint32_t add[FXB];
-            uint32_t rayc = ((uint32_t)ray << 16) | ((uint32_t)(ray * 240 >> 8) << 8) | (uint32_t)(ray * 200 >> 8);
+            uint32_t rayc = ((uint32_t)ar0 << 16) | ((uint32_t)ag0 << 8) | (uint32_t)ab0;
             if (!lit)
                 for (int i = 0; i < FXB; i++) add[i] = rayc;
             for (int y = py0; y < py1; y++) {
@@ -511,7 +659,7 @@ static void gfx_hd_scene(uint32_t *fb, int W, int H, int x0, int y0, int x1, int
                         st[c] = r - l;
                     }
                     for (int i = 0; i < FXB; i++) {
-                        int R = (acc[0] >> 6) + ray, G = (acc[1] >> 6) + (ray * 240 >> 8), B = (acc[2] >> 6) + (ray * 200 >> 8);
+                        int R = (acc[0] >> 6) + ar0, G = (acc[1] >> 6) + ag0, B = (acc[2] >> 6) + ab0;
                         if (R > 255) R = 255;
                         if (G > 255) G = 255;
                         if (B > 255) B = 255;
@@ -579,6 +727,7 @@ static void gfx_hd_scene(uint32_t *fb, int W, int H, int x0, int y0, int x1, int
             double tw = 0.55 + 0.45 * sin(t * (0.9 + fx * 1.3) + fy * 30.0);    /* lap lanh */
             int rad = (int)((1.1 + fz * 1.5) * k);
             int amp = (int)((38 + fz * 50) * tw * gfx_fx_bui / 100);
+            if (dem == 1 && !ngoai) continue;           /* trong nha ban dem: khong co dom dom */
             if (dem == 1) {
                 /* dom dom: nhap nhay manh hon, mau vang xanh */
                 double nh = sin(t * (1.6 + fx * 2.1) + fz * 50.0);
@@ -589,7 +738,26 @@ static void gfx_hd_scene(uint32_t *fb, int W, int H, int x0, int y0, int x1, int
             }
         }
     }
+    if (ngoai && song && !dem && gfx_theme == 0 && gfx_fx_bui > 0) th_life(fb, W, H, x0, y0, x1, y1, k, tx);
     th_draw(fb, W, H, x0, y0, x1, y1, k, dem);
+#if defined(__linux__) && !defined(__ANDROID__)
+    {
+        /* thu nghiem: J2N_CANHDUMP=<tep> ghi khung ngay sau hau ky (moi ~2 giay) */
+        static int dem2;
+        const char *tep = getenv("J2N_CANHDUMP");
+        if (tep && (dem2++ % 24) == 23) {
+            FILE *f = fopen(tep, "wb");
+            if (f) {
+                fprintf(f, "P6\n%d %d\n255\n", W, H);
+                for (int i = 0; i < W * H; i++) {
+                    unsigned char c[3] = {(unsigned char)(fb[i] >> 16), (unsigned char)(fb[i] >> 8), (unsigned char)fb[i]};
+                    fwrite(c, 1, 3, f);
+                }
+                fclose(f);
+            }
+        }
+    }
+#endif
 }
 
 /* ------------------------------------------------------------ 4) giao dien 3D (HdUi qua Graphics.setStrokeStyle 0x486x

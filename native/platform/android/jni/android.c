@@ -575,6 +575,14 @@ JNIEXPORT void JNICALL JNIFN(setHdKho)(JNIEnv *e, jclass cls, jint mb) {
     j2n_set_hd_budget(mb);
 }
 
+/* Avatar 250 HD: le an toan cua man hinh (lo camera / tai tho, goc bo tron) theo diem game: trai, phai, duoi + le cho vat
+ * o goc trai / phai - goi truoc start */
+JNIEXPORT void JNICALL JNIFN(setHdLe)(JNIEnv *e, jclass cls, jint l, jint r, jint b, jint gl, jint gr) {
+    (void)e;
+    (void)cls;
+    j2n_set_hd_inset(l, r, b, gl, gr);
+}
+
 /* Avatar 250 HD: chep khung moi nhat NGUYEN byte (0xAARRGGBB, khong dao kenh - Java ve bang bo loc mau doi R <-> B tren GPU).
  * Khung net cao 2-3 trieu diem: bo vong lap doi kenh tung diem cua copyFrame */
 JNIEXPORT jint JNICALL JNIFN(copyFrameRaw)(JNIEnv *e, jclass cls, jobject bmp, jint last) {

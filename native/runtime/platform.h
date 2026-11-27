@@ -72,6 +72,9 @@ void j2n_set_hd_k(int k);
 void j2n_set_hd_budget(int mb);
 /* May HD: muc hieu ung 3D (0 tat, 1 khoi noi + bong do, 2 them hau ky canh). Mac dinh 2 */
 void j2n_set_hd_fx(int muc);
+/* May HD: le an toan cua man hinh (tai tho, goc bo tron), don vi diem logic: trai, phai, duoi (day du) + le cho vat o goc
+ * man hinh ben trai / phai */
+void j2n_set_hd_inset(int l, int r, int b, int gl, int gr);
 /* Avatar: ket noi toi 127.0.0.1 / localhost duoc chuyen sang may chu nay: "host" (giu cong cua game) hoac "host:cong";
    NULL / "" = khong chuyen. Goi luc nao cung duoc (ap dung tu lan ket noi sau) */
 void j2n_set_server(const char *spec);

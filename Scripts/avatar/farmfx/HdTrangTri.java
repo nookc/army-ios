@@ -29,6 +29,22 @@ public final class HdTrangTri {
         return 0;
     }
 
+    /** vat tu ve nao la nguon sang ban dem (HdVat.den) */
+    static int denCua(String ten) {
+        if (ten.equals("cay_den")) {
+            return 1;
+        }
+        if (ten.equals("den_long") || ten.equals("cay_thong") || ten.equals("cong_tim") || ten.equals("chu_love") || ten.equals("cong_bong")
+                || ten.equals("cong_hoa") || ten.equals("khung_anh")) {
+            return 3;
+        }
+        if (ten.equals("nen") || ten.equals("bi_ngo") || ten.equals("bi_to") || ten.equals("bi_chong") || ten.equals("bu_nhin_bi")
+                || ten.equals("vac_thuoc") || ten.equals("qua_cau")) {
+            return 2;
+        }
+        return 0;
+    }
+
     private static Image[] kheAnh = new Image[5];
     private static boolean[] kheThu = new boolean[5];
 
@@ -122,7 +138,10 @@ public final class HdTrangTri {
                     continue;
                 }
                 HdVat o = new HdVat(v[i + 3], v[i + 4], im, lapLanh(TEN[v[i + 2]]));
-                if (TEN[v[i + 2]].equals("nen")) {
+                String ten = TEN[v[i + 2]];
+                o.khongBong = ten.equals("la_thu") || ten.equals("mang_nhen") || ten.equals("den_long") || ten.equals("co_day");
+                o.den = denCua(ten);
+                if (ten.equals("nen")) {
                     try {
                         o.im2 = Image.createImage("/hdx/p_nen_2.png");      // lua nen chap chon (2 khung)
                     } catch (Throwable e) {

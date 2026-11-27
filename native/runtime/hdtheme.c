@@ -16,13 +16,59 @@ typedef struct th_stamp {
     int w, h;
 } th_stamp;
 
-enum { TS_FLAKE = 0, TS_HEART, TS_STAR, TS_BALLOON, TS_GHOST, TS_BAT0, TS_BAT1, TS_BAT2, TS_CONF0, TS_N = TS_CONF0 + 8 };
+enum {
+    TS_FLAKE = 0, TS_HEART, TS_STAR, TS_BALLOON, TS_GHOST, TS_BAT0, TS_BAT1, TS_BAT2, TS_CONF0,
+    TS_BUOM0 = TS_CONF0 + 8, TS_BUOM1, TS_BUOM2,        /* buom: canh mo het / mo vua / khep */
+    TS_LA0, TS_LA1, TS_LA2, TS_LA3,                     /* canh hoa / la nho, 4 goc xoay */
+    TS_N
+};
 static th_stamp th_st[TS_N];
 static int th_k;
 
 /* ham hinh: (u, v) trong [-1, 1] -> do sang L (0..255), tra ve 0 neu ngoai hinh, 1 neu trong */
 static int th_shape(int id, float u, float v, int *L) {
     switch (id) {
+    case TS_BUOM0:
+    case TS_BUOM1:
+    case TS_BUOM2: {                /* buom nhin tu tren: than + 2 doi canh, be ngang canh theo muc mo */
+        static const float mo[3] = {1.0f, 0.62f, 0.26f};
+        float sx = mo[id - TS_BUOM0];
+        if (fabsf(u) < 0.085f && v > -0.50f && v < 0.56f) {
+            *L = 46;
+            return 1;
+        }
+        if (v < -0.48f && v > -0.84f && fabsf(fabsf(u) - (0.06f + (-0.48f - v) * 0.55f)) < 0.045f) {     /* rau */
+            *L = 46;
+            return 1;
+        }
+        float x = fabsf(u) / sx;
+        if (x > 1.0f) return 0;
+        float a1 = (x - 0.47f) / 0.47f, b1 = (v + 0.30f) / 0.44f;          /* canh tren */
+        float a2 = (x - 0.36f) / 0.34f, b2 = (v - 0.36f) / 0.32f;          /* canh duoi */
+        float d1 = a1 * a1 + b1 * b1, d2 = a2 * a2 + b2 * b2;
+        float d = d1 < d2 ? d1 : d2;
+        if (d > 1.0f) return 0;
+        float sh;
+        if (d > 0.70f) sh = 76.0f;                                         /* vien toi */
+        else if (d1 < 0.15f) sh = 246.0f;                                  /* dom sang giua canh */
+        else if (d2 < 0.13f) sh = 234.0f;
+        else sh = 182.0f - d * 26.0f;
+        *L = (int)sh;
+        return 1;
+    }
+    case TS_LA0:
+    case TS_LA1:
+    case TS_LA2:
+    case TS_LA3: {                  /* canh hoa / la nho hinh thoi tron */
+        float g = (float)(id - TS_LA0) * 0.7853982f;
+        float c = cosf(g), sn = sinf(g);
+        float x = u * c + v * sn, y = -u * sn + v * c;
+        float d = x * x / 0.80f + y * y / 0.20f;
+        if (d > 1.0f) return 0;
+        float sh = 190.0f + x * 44.0f - (d > 0.68f ? 42.0f : 0.0f);
+        *L = sh < 60 ? 60 : sh > 255 ? 255 : (int)sh;
+        return 1;
+    }
     case TS_FLAKE: {                /* bong tuyet 6 canh */
         float r = sqrtf(u * u + v * v);
         if (r > 1.0f) return 0;
@@ -124,7 +170,8 @@ static int th_shape(int id, float u, float v, int *L) {
 }
 
 static void th_build(int k) {
-    static const int co[TS_N] = {7, 12, 6, 15, 16, 14, 14, 14, 5, 5, 5, 5, 5, 5, 5, 5};      /* nua canh (diem logic) x 2 */
+    static const int co[TS_N] = {7, 12, 6, 15, 16, 14, 14, 14, 5, 5, 5, 5, 5, 5, 5, 5,
+                                 10, 10, 10, 5, 5, 5, 5};      /* canh (diem logic) */
     for (int i = 0; i < TS_N; i++) {
         free(th_st[i].la);
         int n = co[i] * k;
@@ -202,6 +249,46 @@ static inline unsigned th_hash(unsigned i) {
 }
 
 /* ve hat cua chu de len khung (sau hau ky canh). dem: 0 ngay, 1 dem, 2 trong nha (khong ve) */
+/* Su song cua canh ngoai troi ban ngay (khi khong bat chu de): buom bay luon + canh hoa / la roi cheo theo gio. Vi tri tinh
+ * theo THE GIOI (tx = do doi ngang cua the gioi tren man hinh, diem logic): cuon ban do thi buom / la o lai cho cu, khong
+ * dinh theo man hinh. Khong can trang thai: moi con la 1 ham cua thoi gian. */
+static void th_life(uint32_t *fb, int W, int H, int x0, int y0, int x1, int y1, int k, int tx) {
+    if (th_k != k) th_build(k);
+    int rw = x1 - x0, rh = y1 - y0;
+    float lw = (float)rw / k, lh = (float)rh / k;
+    double t = (double)(fx_ms() % 36000000) / 1000.0;
+    float P = lw + 120.0f;                                  /* chu ky lap theo chieu ngang (rong hon man hinh) */
+    static const int mb[5][3] = {{255, 214, 60}, {250, 250, 255}, {255, 150, 50}, {120, 190, 255}, {255, 150, 200}};
+    for (int i = 0; i < 7; i++) {
+        unsigned h = th_hash((unsigned)i + 4201);
+        float fx = (h & 1023) / 1023.0f, fy = ((h >> 10) & 1023) / 1023.0f, fz = ((h >> 20) & 1023) / 1023.0f;
+        float w1 = 0.31f * (0.7f + fz), w2 = 0.47f * (0.7f + fx);
+        float x = fx * P + 30.0f * sinf((float)t * w1 + fx * 11.0f) + 9.0f * sinf((float)t * 1.9f + fy * 5.0f);
+        float y = lh * (0.36f + 0.40f * fy) + 12.0f * sinf((float)t * w2 + fy * 7.0f) + 4.0f * sinf((float)t * 2.7f + fx * 3.0f);
+        x = fmodf(x + (float)tx, P);
+        if (x < 0) x += P;
+        x -= 60.0f;
+        int kh = (int)(t * 13.0 + i * 3) & 3;               /* vo canh: mo - vua - khep - vua */
+        const int *c = mb[h % 5];
+        th_blit(fb, W, H, x0, y0, x1, y1, &th_st[TS_BUOM0 + (kh == 3 ? 1 : kh)], x0 + (int)(x * k), y0 + (int)(y * k), c[0], c[1],
+                c[2], 255, 0);
+    }
+    static const int ml[4][3] = {{255, 196, 214}, {255, 236, 242}, {168, 214, 96}, {244, 214, 96}};
+    for (int i = 0; i < 12; i++) {
+        unsigned h = th_hash((unsigned)i + 5303);
+        float fx = (h & 1023) / 1023.0f, fy = ((h >> 10) & 1023) / 1023.0f, fz = ((h >> 20) & 1023) / 1023.0f;
+        float sp = 9.0f + fz * 8.0f, mh = lh + 30.0f;
+        float y = fmodf(fy * mh + (float)t * sp, mh) - 15.0f;
+        float x = fx * P + (float)fmod(t * (5.0 + fz * 5.0), (double)P) + sinf((float)t * (0.9f + fz) + fy * 20.0f) * 7.0f;
+        x = fmodf(x + (float)tx, P);
+        if (x < 0) x += P;
+        x -= 60.0f;
+        int quay = (int)((float)t * (2.2f + fz * 2.0f) + fx * 8.0f) & 3;
+        const int *c = ml[h % 4];
+        th_blit(fb, W, H, x0, y0, x1, y1, &th_st[TS_LA0 + quay], x0 + (int)(x * k), y0 + (int)(y * k), c[0], c[1], c[2], 228, 0);
+    }
+}
+
 static void th_draw(uint32_t *fb, int W, int H, int x0, int y0, int x1, int y1, int k, int dem) {
     int th = gfx_theme;
     if (th <= 0 || dem == 2) return;

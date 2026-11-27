@@ -510,7 +510,7 @@ static void ios_kb_hook(int show, int area);
     CGSize s = self.view.bounds.size;
     CGFloat sw = MAX(1, s.width - in.left - in.right), sh = MAX(1, s.height - in.top - in.bottom);
     if (gBanHd) {
-        [self startGameHd:sw cao:sh];
+        [self startGameHd:s.width cao:s.height];        /* ban HD: tran ca man hinh (ke ca vung tai tho / thanh Home) */
         return;
     }
     int h;
@@ -542,8 +542,11 @@ static void ios_kb_hook(int show, int area);
     if (gAutotest) autotest();
 }
 
-/* Ban HD: Canvas ngang - cao ~240..319 diem game (hoac theo "Co giao dien"), rong theo ti le vung an toan; khung ve net
-   gHdK lan. Man chua xoay ngang xong (rong < cao) thi doi them toi da ~1,5 giay roi moi chay. */
+/* Ban HD: Canvas ngang TRAN CA MAN HINH (sw x sh = ca view, khong tru vung an toan). Kich thuoc logic: cao 270, rong theo
+   ti le man; man dai (rong > 544) thi rong toi da 544 - ban do thanh pho rong 544 phai kin man - va cao giam theo (khong duoi
+   240). Khung ve net K lan (2..4) roi he thong keo ra vua khit man hinh (loc tuyen tinh). Le an toan (tai tho, goc bo tron,
+   thanh Home) doi ra diem logic va bao cho game de nut / phim mem tranh ra. Man chua xoay ngang xong (rong < cao) thi doi
+   them toi da ~1,5 giay roi moi chay. */
 - (void)startGameHd:(CGFloat)sw cao:(CGFloat)sh {
     static int doi = 0;
     if (sw < sh && doi < 5) {
@@ -557,28 +560,37 @@ static void ios_kb_hook(int show, int area);
     }
     CGFloat sc = screen_scale();
     int pw = (int)floor(sw * sc), ph = (int)floor(sh * sc);
-    int n;
-    if ([prefs() boolForKey:@"vwSet"]) {
-        int c = savedWidth();
-        int vh = c <= 240 ? 240 : c <= 320 ? 300 : 360;      /* To / Vua / Nho */
-        gH = vh;
-        gW = (int)lround(vh * sw / sh);
-        n = (int)lround(ph / (double)vh);
-        _px = 0;
-    } else {
-        n = MAX(2, MIN(pw, ph) / 240);
-        gW = pw / n;
-        gH = ph / n;
-        _px = n;
-    }
+    if (pw < 1) pw = 1;
+    if (ph < 1) ph = 1;
+    int vw, vh;
     if (pw >= ph) {
-        gW = MAX(gH * 4 / 3, MIN(gW, gH * 12 / 5));
-        gW -= gW % 2;
+        vh = 270;
+        vw = (int)floor(270.0 * pw / ph);
+        if (vw > 544) {
+            vh = MAX(240, (int)lround(544.0 * ph / pw));
+            vh -= vh % 2;
+            vw = (int)floor((double)vh * pw / ph);
+        }
+        vw -= vw % 2;
     } else {
-        gH = MAX(gW * 4 / 3, MIN(gH, gW * 12 / 5));
-        gH -= gH % 2;
+        /* khong xoay ngang duoc: giu ti le man doc */
+        vw = 270;
+        vh = (int)floor(270.0 * ph / pw);
+        vh = MIN(vh, 648);
+        vh -= vh % 2;
     }
-    gHdK = MAX(2, MIN(4, n));
+    gW = vw;
+    gH = vh;
+    _px = 0;
+    gHdK = MAX(2, MIN(4, (int)ceil((double)MIN(pw, ph) / MIN(vw, vh) - 0.15)));
+    {
+        UIEdgeInsets in = self.view.safeAreaInsets;
+        int l = (int)lround(in.left * vw / MAX(1, sw)), r = (int)lround(in.right * vw / MAX(1, sw));
+        int b = (int)lround(in.bottom * vh / MAX(1, sh));
+        /* tai tho / dao dong nam GIUA canh man hinh: vat o goc chi can tranh goc bo tron (~55% le) */
+        j2n_set_hd_inset(l, r, b, l > 0 ? l * 55 / 100 + 2 : 0, r > 0 ? r * 55 / 100 + 2 : 0);
+        plat_log([[NSString stringWithFormat:@"[app] le an toan: trai %d phai %d duoi %d (diem game)", l, r, b] UTF8String]);
+    }
     j2n_set_keyboard_hook(ios_kb_hook);
     if (!gEncOk) j2n_set_server(savedServer().UTF8String);
     j2n_set_hd(HD_CANVAS, 2);
@@ -589,12 +601,12 @@ static void ios_kb_hook(int show, int area);
         long long mb = (long long)(NSProcessInfo.processInfo.physicalMemory / 16 / (1024 * 1024));
         j2n_set_hd_budget((int)MAX(96, MIN(320, mb)));
     }
-    plat_log([[NSString stringWithFormat:@"[app] vao game HD: man %dx%d net x%d (vung an toan %.0fx%.0f diem)",
+    plat_log([[NSString stringWithFormat:@"[app] vao game HD: man %dx%d net x%d (tran man %.0fx%.0f diem)",
                gW, gH, gHdK, sw, sh] UTF8String]);
     gStarted = YES;
     j2n_start(MIDLET, gW, gH);
     log_roots("khoi dong");
-    _aa.hidden = NO;
+    _aa.hidden = YES;       /* ban HD khong co nut "Aa": cham bong chat / o nhap la ban phim tu hien */
     [self.view setNeedsLayout];
     if (gAutotest) autotest();
 }
@@ -608,6 +620,24 @@ static void ios_kb_hook(int show, int area);
 - (void)layoutScreen {
     UIEdgeInsets in = self.view.safeAreaInsets;
     CGSize s = self.view.bounds.size;
+    if (gBanHd && gStarted && gW > 0 && gH > 0) {
+        /* Ban HD: khung game tran ca man hinh. Game xin ban phim (o chat): day ca khung len de day vung game nam ngay tren
+           ban phim (o chat + phim mem van to ro); ban phim do hop nhap khac: thu khung vua phan con thay */
+        CGRect f = CGRectMake(0, 0, s.width, s.height);
+        if (_kbTop > 0 && _kbTop < s.height) {
+            if (_gameKbArea > 0) {
+                CGFloat y = _kbTop - s.height * MIN(_gameKbArea, gH) / gH;
+                f.origin.y = MIN(0, floor(y));
+            } else {
+                CGFloat k = MIN(s.width / gW, _kbTop / gH);
+                CGFloat dw = round(gW * k), dh = round(gH * k);
+                f = CGRectMake(round((s.width - dw) / 2), round((_kbTop - dh) / 2), dw, dh);
+            }
+        }
+        _screen.frame = f;
+        _aa.hidden = YES;
+        return;
+    }
     CGFloat top = in.top, bottom = s.height - in.bottom;
     CGFloat fullH = MAX(1, bottom - top);
     if (_kbTop > 0 && _kbTop < bottom) bottom = _kbTop;

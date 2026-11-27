@@ -501,6 +501,7 @@ public final class KeyTap {
 
     public static void g(int x, int y) {
         keoNgang = false;                // lan cham moi: chua keo ngang
+        HdUi.cham(x, y);                 // ban HD: gon song tai cho cham
         if (DauTruong.cham(x, y)) {
             return;                      // cham vao bang sung / nut / boss o dau truong
         }

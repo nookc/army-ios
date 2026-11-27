@@ -28,6 +28,10 @@ public class Graphics {
     int hdKieu;
     /** May HD: kieu chuyen dong song cho cac lan ve anh ke tiep (C doc) */
     int hdLac;
+    /** May HD: duong chan cua vat dang ve (Integer.MIN_VALUE = khong co) - C doc de do bong */
+    int hdChan = Integer.MIN_VALUE;
+    /** May HD: 0 = vat the thuong; 0x100 | pha = manh cua nhan vat (khong ap nguong kich thuoc bong; pha nhip tho) */
+    int hdChanK;
 
     Graphics(Image target) {
         img = target;
@@ -58,6 +62,8 @@ public class Graphics {
         hdp = j2n.Disp.hdK() > 1;       // May HD: hinh ve luon min o diem anh that
         hdLac = 0;
         hdKieu = 0;
+        hdChan = Integer.MIN_VALUE;
+        hdChanK = 0;
         font = Font.getDefaultFont();
     }
 
@@ -131,10 +137,39 @@ public class Graphics {
             hdKieu = s - 0x4860;
             return;
         }
+        if ((s >>> 24) == 0x4A || (s >>> 24) == 0x4B) {
+            // May HD: "duong chan" (toa do y nhu khi ve) cua vat sap ve -> may ve do bong xuong mat dat duoi duong nay.
+            // 0x4A00yyyy = vat the; 0x4Bppyyyy = 1 manh cua nhan vat (pp = pha rieng cua nhan vat do: nhip tho)
+            hdChan = (short) s;
+            hdChanK = (s >>> 24) == 0x4B ? (0x100 | ((s >> 16) & 0xFF)) : 0;
+            return;
+        }
+        if (s == 0x4854) {
+            hdChan = Integer.MIN_VALUE;         // het vat: thoi do bong
+            hdChanK = 0;
+            return;
+        }
         if (s >= 0x4850 && s <= 0x4853) {
+            hdChan = Integer.MIN_VALUE;
+            hdChanK = 0;
             // May HD: client bao ve nen (0x4852) / vat the dong cua the gioi (0x4850) / vat the tinh cua ban do (0x4853) /
             // ket thuc the gioi (0x4851) - HdUi
             hdCanh(s == 0x4850 ? 1 : s == 0x4851 ? 2 : s == 0x4852 ? 3 : 4);
+            return;
+        }
+        if ((s >>> 24) == 0x4D) {
+            // May HD: le trong 2 ben cua ban do hep hon man hinh (trai << 12 | phai) - may ve lat guong mep ban do ra le
+            hdCanh(s);
+            return;
+        }
+        if ((s >>> 24) == 0x4C) {
+            // May HD: nguon sang ban dem tai chan vat vua ve (cot den, den long, nen...) - hd3d.c fx_den
+            hdCanh(s);
+            return;
+        }
+        if (s >= 0x48A0 && s <= 0x48A7) {
+            // May HD: co cua canh sap ve (1 ngoai troi, 2 co su song mat dat, 4 ban dem) - xem hd3d.c gfx_canh_co
+            hdCanh(32 + (s - 0x48A0));
             return;
         }
         if (s >= 0x4870 && s <= 0x4877) {

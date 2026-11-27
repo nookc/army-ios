@@ -95,6 +95,14 @@ public final class MainActivity extends Activity {
                 setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
             } catch (Throwable t) {
             }
+            // ban HD tran ca man hinh: ve ca vao vung lo camera / tai tho o canh ngan (Android 9+; goi qua reflection de
+            // bien dich duoc voi moi ban SDK). Nut / phim mem cua game tranh vung do theo le an toan (onViewSizedHd).
+            try {
+                WindowManager.LayoutParams lp = w.getAttributes();
+                lp.getClass().getField("layoutInDisplayCutoutMode").setInt(lp, 1);     // LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
+                w.setAttributes(lp);
+            } catch (Throwable t) {
+            }
         }
         Intent it = getIntent();
         String extra = it != null ? it.getStringExtra("server") : null;   // CI / loi tat: am start --es server host:cong
@@ -347,6 +355,29 @@ public final class MainActivity extends Activity {
 
     long hdChoTu;
 
+    /** le cua vung bi cat tren man hinh (lo camera / tai tho), diem anh: {trai, tren, phai, duoi}; Android < 9: 0 het */
+    int[] leCat() {
+        int[] r = new int[4];
+        try {
+            Object ins = view == null ? null : View.class.getMethod("getRootWindowInsets").invoke(view);
+            Object cut = ins == null ? null : ins.getClass().getMethod("getDisplayCutout").invoke(ins);
+            if (cut == null) {
+                // view chua gan xong vao cua so: hoi thang man hinh (Android 10+)
+                Object d = getWindowManager().getDefaultDisplay();
+                cut = d.getClass().getMethod("getCutout").invoke(d);
+            }
+            if (cut != null) {
+                Class<?> c = cut.getClass();
+                r[0] = (Integer) c.getMethod("getSafeInsetLeft").invoke(cut);
+                r[1] = (Integer) c.getMethod("getSafeInsetTop").invoke(cut);
+                r[2] = (Integer) c.getMethod("getSafeInsetRight").invoke(cut);
+                r[3] = (Integer) c.getMethod("getSafeInsetBottom").invoke(cut);
+            }
+        } catch (Throwable t) {
+        }
+        return r;
+    }
+
     /** Ban HD: Canvas ngang - cao ~220..300 diem game (hoac theo "Co giao dien"), rong theo ti le man; khung ve net K lan */
     void onViewSizedHd(final int w, final int h) {
         if (w < h) {
@@ -367,29 +398,36 @@ public final class MainActivity extends Activity {
                 return;
             }
         }
-        int vw, vh, n;
-        if (prefs.getBoolean("vwSet", false)) {
-            int c = savedWidth();
-            vh = c <= 240 ? 240 : c <= 320 ? 300 : 360;      // To / Vua / Nho
-            vw = Math.round(vh * (float) w / Math.max(1, h));
-            n = Math.round(h / (float) vh);
-            pxScale = 0;
-        } else {
-            n = Math.max(2, Math.min(w, h) / 240);
-            vw = w / n;
-            vh = h / n;
-            pxScale = n;
-        }
+        // Kich thuoc logic: cao 270, rong theo ti le man; man dai (rong > 544) thi rong toi da 544 - ban do thanh pho rong 544
+        // phai kin man - va cao giam theo (khong duoi 240). Khung ve net K lan (2..4) roi keo ra vua khit CA man hinh.
+        int vw, vh;
         if (w >= h) {
-            vw = Math.max(vh * 4 / 3, Math.min(vw, vh * 12 / 5));
+            vh = 270;
+            vw = (int) Math.floor(270.0 * w / Math.max(1, h));
+            if (vw > 544) {
+                vh = Math.max(240, (int) Math.round(544.0 * h / w));
+                vh -= vh % 2;
+                vw = (int) Math.floor((double) vh * w / h);
+            }
             vw -= vw % 2;
         } else {
-            vh = Math.max(vw * 4 / 3, Math.min(vh, vw * 12 / 5));
+            // khong xoay ngang duoc (cua so chia doi...): giu ti le man doc
+            vw = 270;
+            vh = Math.min(648, (int) Math.floor(270.0 * h / Math.max(1, w)));
             vh -= vh % 2;
         }
+        pxScale = 0;
         gW = vw;
         gH = vh;
-        hdK = Math.max(2, Math.min(4, n));
+        hdK = Math.max(2, Math.min(4, (int) Math.ceil(Math.min(w, h) / (double) Math.min(vw, vh) - 0.15)));
+        {
+            // le an toan (lo camera / tai tho) doi ra diem game. Lo camera thuong nam o GOC nen vat o goc cung tranh ca le
+            int[] le = leCat();
+            int l = Math.round(le[0] * vw / (float) Math.max(1, w)), r = Math.round(le[2] * vw / (float) Math.max(1, w));
+            int b = Math.round(le[3] * vh / (float) Math.max(1, h));
+            Native.setHdLe(l, r, b, l, r);
+            Log.i(TAG, "[app] le an toan: trai " + l + " phai " + r + " duoi " + b + " (diem game)");
+        }
         File data = new File(getFilesDir(), "rms");
         data.mkdirs();
         if (!encOk) {
@@ -822,6 +860,33 @@ public final class MainActivity extends Activity {
             } catch (Throwable t) {
             }
             kbShown = avail < h * 0.85f;
+            if (banHd) {
+                // Ban HD: khung game tran ca man hinh. Game xin ban phim (o chat): day ca khung len de day vung game nam ngay
+                // tren ban phim; ban phim do hop nhap khac: thu khung vua phan con thay
+                int ox = 0, oy = 0, dw = w, dh = h;
+                if (kbShown && gameKbArea > 0) {
+                    oy = Math.min(0, avail - Math.round(h * (float) Math.min(gameKbArea, gH) / Math.max(1, gH)));
+                } else if (kbShown) {
+                    float kk = Math.min(w / (float) gW, avail / (float) gH);
+                    dw = Math.round(gW * kk);
+                    dh = Math.round(gH * kk);
+                    ox = (w - dw) / 2;
+                    oy = Math.max(0, (avail - dh) / 2);
+                }
+                k = dh / (float) Math.max(1, gH);
+                if (dst.left != ox || dst.top != oy || dst.width() != dw || dst.height() != dh) {
+                    dst.set(ox, oy, ox + dw, oy + dh);
+                    invalidate();
+                }
+                // cung dang voi ban thuong (kich ban kiem thu doc theo cot): ban HD khong co nut Aa -> "aa 0 0"
+                String l = "[bocuc] canvas " + (loc[0] + dst.left) + " " + (loc[1] + dst.top) + " " + (loc[0] + dst.right) + " "
+                        + (loc[1] + dst.bottom) + " aa 0 0 game " + gW + " " + gH;
+                if (!l.equals(lastLayout)) {
+                    lastLayout = l;
+                    Log.i(TAG, l);
+                }
+                return;
+            }
             int n = act.pxScale;
             if (n > 0 && gW * n <= w && gH * n <= h && (!kbShown || gameKbArea > 0)) {
                 k = n;
@@ -856,7 +921,7 @@ public final class MainActivity extends Activity {
                 src.set(0, 0, f.getWidth(), f.getHeight());
                 c.drawBitmap(f, src, dst, banHd ? hdPaint : f.getWidth() > gW || k < 2f ? smooth : sharp);
             }
-            if (started) {
+            if (started && !banHd) {      // ban HD khong co nut "Aa": cham bong chat / o nhap la ban phim tu hien
                 float r = 9 * getResources().getDisplayMetrics().density;
                 c.drawRoundRect(tabRect, r, r, tab);
                 c.drawRoundRect(tabRect, r, r, tabLine);
@@ -865,12 +930,13 @@ public final class MainActivity extends Activity {
         }
 
         int gx(float x) {
-            int v = (int) ((x - dst.left) / Math.max(0.01f, k));
+            // ban HD keo khung ra ca man hinh (ti le ngang / doc lech nhau rat it): doi theo tung chieu
+            int v = banHd && dst.width() > 0 ? (int) ((x - dst.left) * gW / dst.width()) : (int) ((x - dst.left) / Math.max(0.01f, k));
             return Math.max(0, Math.min(gW - 1, v));
         }
 
         int gy(float y) {
-            int v = (int) ((y - dst.top) / Math.max(0.01f, k));
+            int v = banHd && dst.height() > 0 ? (int) ((y - dst.top) * gH / dst.height()) : (int) ((y - dst.top) / Math.max(0.01f, k));
             return Math.max(0, Math.min(gH - 1, v));
         }
 
@@ -889,7 +955,7 @@ public final class MainActivity extends Activity {
             }
             int a = e.getActionMasked();
             float x = e.getX(), y = e.getY();
-            if (a == MotionEvent.ACTION_DOWN && tabRect.contains(x, y)) {
+            if (a == MotionEvent.ACTION_DOWN && !banHd && tabRect.contains(x, y)) {
                 onTab = true;
                 tabDown = System.currentTimeMillis();
                 return true;

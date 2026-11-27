@@ -55,13 +55,13 @@ public final class KbHook {
                 dx.m = true; // go thang ky tu (khong T9)
                 kieu = k;
                 oCu = o;
-                j2n.Disp.wantKeyboard(k, main.a.n);   // 1 / 2: nen tang coi khac 0 la hien, 2 = o mat khau
+                j2n.Disp.wantKeyboard(k, HdUi.vungPhim(o));   // 1 / 2: nen tang coi khac 0 la hien, 2 = o mat khau
             } else if (o != null && (o != oCu || k != kieu)) {
                 // sang o chu khac (vd tai khoan -> mat khau): bao lai. Khung nao chua thay o nao (o == null) thi bo qua,
                 // khong lam ban phim xoa bo dem giua chung (Telex dang ghep dau)
                 kieu = k;
                 oCu = o;
-                j2n.Disp.wantKeyboard(k, main.a.n);
+                j2n.Disp.wantKeyboard(k, HdUi.vungPhim(o));
             } else if (chat && !im.c) {
                 // da gui / dong o chat: tat che do go chu nhu khi bam lai bong chat (ban phim ao + ban phim dien thoai)
                 chat = false;

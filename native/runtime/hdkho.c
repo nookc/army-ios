@@ -22,9 +22,10 @@ enum { HD_FREE = 0, HD_WAIT, HD_BUILD, HD_READY, HD_NONE };
 
 typedef struct hd_ent {
     uint32_t *px;               /* diem anh he so k (malloc) */
-    uint8_t *shd;               /* mat na bong do (w x (h + shm)), NULL = khong co bong */
-    int shm;
+    uint8_t *shd;               /* mat na bong do theo huong nang (hd3d.c hd_shadow_make): w x shm hang + bang doan, NULL = khong co */
+    int shm;                    /* so hang cua mat na */
     int w, h, k, kind;
+    int flags;                  /* HDF_PLANT (cay: lay theo gio), HDF_GLOW (hao quang: khong do bong) - hdbong.c */
     uint32_t gen;               /* the he cua o: Image.bgen phai khop */
     uint32_t last;              /* khung dung gan nhat */
     int state, pins, rq;        /* rq = he so duoc yeu cau */
@@ -59,6 +60,9 @@ void j2n_set_hd_budget(int mb) {
 
 static void hd_post(uint32_t *px, int w, int h, int k, int mode);
 static uint8_t *hd_shadow_make(const uint32_t *px, int w, int h, int k, int *omg);
+#define SH_SIZE(w, mh) (((((size_t)(w) * (size_t)(mh)) + 1) & ~(size_t)1) + (size_t)(mh) * 4)
+static int hd_flags(const uint32_t *px, int w, int h, int k, int mode);
+static __thread int hd_flags_cu;        /* co cua anh luong nay vua lam xong (hd_do ghi, nguoi goi doc ngay sau) */
 
 static int64_t hd_now_us(void) {
     struct timespec ts;
@@ -73,8 +77,9 @@ static uint32_t *hd_do(const uint32_t *src, int sw, int sh, int s, int k, int sm
     *osh = 0;
     *oshm = 0;
     if (!px) return 0;
+    hd_flags_cu = hd_flags(px, *ow, *oh, k, mode);      /* truoc khi doi mau theo chu de */
     if (mode) hd_post(px, *ow, *oh, k, mode);
-    if (mode & 2) *osh = hd_shadow_make(px, *ow, *oh, k, oshm);
+    if ((mode & 2) && !(hd_flags_cu & 2)) *osh = hd_shadow_make(px, *ow, *oh, k, oshm);    /* hao quang (HDF_GLOW = 2): khong do bong */
     int kind = 0;
     size_t n = (size_t)*ow * *oh;
     for (size_t i = 0; i < n; i++) {
@@ -111,7 +116,9 @@ static void *hd_worker(void *arg) {
         int ow = 0, oh = 0, kind = 0, shm = 0;
         uint8_t *shp = 0;
         uint32_t *px = hd_do(src, sw, sh, s, k, smooth, mode, &ow, &oh, &kind, &shp, &shm);
+        int co = hd_flags_cu;
         pthread_mutex_lock(&hd_mu);
+        e->flags = co;
         hd_pend -= e->est;
         hd_pin[slot] = 0;
         e->src = 0;
@@ -122,7 +129,7 @@ static void *hd_worker(void *arg) {
             e->kind = kind;
             e->shd = shp;
             e->shm = shm;
-            hd_bytes += (size_t)ow * oh * 4 + (shp ? (size_t)ow * (oh + shm) : 0);
+            hd_bytes += (size_t)ow * oh * 4 + (shp ? SH_SIZE(ow, shm) : 0);
             hd_nready++;
             __atomic_store_n(&e->state, HD_READY, __ATOMIC_SEQ_CST);
         } else {
@@ -168,7 +175,7 @@ static int hd_drop_try(int slot) {
 static void hd_drop(int slot) {
     hd_ent *e = &hd_tab[slot];
     if (e->px) {
-        hd_bytes -= (size_t)e->w * e->h * 4 + (e->shd ? (size_t)e->w * (e->h + e->shm) : 0);
+        hd_bytes -= (size_t)e->w * e->h * 4 + (e->shd ? SH_SIZE(e->w, e->shm) : 0);
         free(e->px);
         free(e->shd);
         e->px = 0;

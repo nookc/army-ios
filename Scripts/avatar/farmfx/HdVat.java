@@ -9,7 +9,8 @@ import javax.microedition.lcdui.Image;
 final class HdVat extends cc {
     Image im, im2;  // im2 != null: 2 khung doi nhau (lua nen)
     int lac;        // so dom lap lanh ve them tren vat
-    private int hat;
+    boolean khongBong;
+    int den;        // nguon sang ban dem: 0 khong, 1 cot den cao, 2 den nho / nen sat dat, 3 den treo cao vua
 
     HdVat(int x, int y, Image im, int lac) {
         super(30000, x, y, im == null ? 0 : im.getWidth());
@@ -29,9 +30,15 @@ final class HdVat extends cc {
             if (x + w / 2 < cx || x - w / 2 > cx + main.a.m) {
                 return;
             }
+            if (khongBong) {
+                g.setStrokeStyle(0x4854);       // la rung, mang nhen...: nam sat dat / treo cao -> khong do bong
+            }
             long now = System.currentTimeMillis();
             Image ve = im2 != null && ((now / 260 + aw) & 1) == 1 ? im2 : im;
             g.drawImage(ve, x, y, Graphics.BOTTOM | Graphics.HCENTER);
+            if (den != 0 && ir.j == 1) {
+                HdUi.den(g, den, x, y);
+            }
             if (lac > 0) {
                 Image sao = HdTrangTri.sao();
                 if (sao != null) {

@@ -375,6 +375,11 @@ int main(int argc, char **argv) {
     const char *hk = getenv("J2N_HDK");
     if (hk && hk[0]) j2n_set_hd_k(atoi(hk));
     if (getenv("J2N_HDFX")) j2n_set_hd_fx(atoi(getenv("J2N_HDFX")));
+    if (getenv("J2N_LE")) {
+        int l = 0, r = 0, b = 0, gl = -1, gr = -1;      /* thu nghiem: le man hinh "trai,phai,duoi[,goc trai,goc phai]" */
+        sscanf(getenv("J2N_LE"), "%d,%d,%d,%d,%d", &l, &r, &b, &gl, &gr);
+        j2n_set_hd_inset(l, r, b, gl < 0 ? l : gl, gr < 0 ? r : gr);
+    }
     if (getenv("J2N_FX")) {
         /* thu nghiem: cuong do tung hieu ung (%) "loa,toi_goc,tia_nang,bui" */
         extern int gfx_fx_bloom, gfx_fx_vig, gfx_fx_ray, gfx_fx_bui;

@@ -66,7 +66,10 @@ public class PatchFarmFx {
                 continue;                      // ban cu cua lop moi (chay lai patcher tren jar da va)
             }
             switch (name) {
-                case "main/a.class": data = va(va(va(data, PatchFarmFx::keyTap, can, name), PatchFarmFx::tocDoVongLap, can, name), PatchFarmFx::veNoi, can, name); break;
+                case "main/a.class": data = va(va(va(va(data, PatchFarmFx::keyTap, can, name), PatchFarmFx::tocDoVongLap, can, name), PatchFarmFx::veNoi, can, name), PatchFarmFx::hd12, can, name); data = va(data, PatchFarmFx::hdPhimAo, can, name); break;
+                case "le.class": data = va(data, PatchFarmFx::hdLe, can, name); break;
+                case "im.class": data = va(data, PatchFarmFx::hdOChat, can, name); break;
+                case "hj.class": data = va(data, PatchFarmFx::hdGoc, can, name); break;
                 case "dm.class": data = va(data, PatchFarmFx::tocDoCaiDat, can, name); break;
                 case "kc.class": data = va(data, PatchFarmFx::cayRong, can, name); break;
                 case "ir.class": data = va(va(va(data, PatchFarmFx::oDat, can, name), PatchFarmFx::chamVat, can, name), PatchFarmFx::hdVeVat, can, name); break;
@@ -84,7 +87,7 @@ public class PatchFarmFx {
                 case "j.class":
                 case "ko.class": data = va(data, PatchFarmFx::oKho, can, name); break;
                 case "dh.class": data = va(data, PatchFarmFx::chuHoa, can, name); break;
-                case "ea.class": data = va(data, PatchFarmFx::nhanBanDo, can, name); break;
+                case "ea.class": data = va(va(data, PatchFarmFx::nhanBanDo, can, name), PatchFarmFx::hdTp, can, name); break;
                 case "dx.class": data = va(data, PatchFarmFx::oChu, can, name); break;
                 case "cy.class": data = va(data, PatchFarmFx::danhSach, can, name); break;
                 case "gt.class": data = va(va(data, PatchFarmFx::hoiShop, can, name), PatchFarmFx::moTruong, can, name); break;
@@ -140,6 +143,11 @@ public class PatchFarmFx {
                 && can.getOrDefault("hd_tg_nen", 0) == 7 && can.getOrDefault("hd_tg_tren", 0) == 7
                 && can.getOrDefault("hd_phim_mem", 0) == 1 && can.getOrDefault("hd_ve_vat", 0) == 1
                 && can.getOrDefault("hd_lac_phan", 0) == 2 && can.getOrDefault("hd_lac_thu", 0) == 1
+                && can.getOrDefault("hd_mail_ve", 0) == 1 && can.getOrDefault("hd_mail_chu", 0) == 1
+                && can.getOrDefault("hd_phim_nao", 0) == 1 && can.getOrDefault("hd_12", 0) == 1
+                && can.getOrDefault("hd_le", 0) >= 1 && can.getOrDefault("hd_ve_dong", 0) == 1
+                && can.getOrDefault("hd_goc", 0) == 2 && can.getOrDefault("hd_tp", 0) == 1
+                && can.getOrDefault("hd_phim_ao", 0) == 1 && can.getOrDefault("hd_o_chat", 0) >= 1
                 && can.getOrDefault("hd_k_hop", 0) == 1 && can.getOrDefault("hd_k_khung", 0) == 5
                 && can.getOrDefault("hd_k_menu", 0) == 4 && can.getOrDefault("hd_k_phim", 0) == 1
                 && can.getOrDefault("trom_cay", 0) == 1 && can.getOrDefault("o_kho", 0) == 2
@@ -521,11 +529,22 @@ public class PatchFarmFx {
                         String f = ((FieldInsnNode) n).name;
                         dang = f.equals("ap") ? "vePhimAo" : f.equals("aq") ? "veChat" : dang;
                     }
+                    if (n instanceof FieldInsnNode && n.getOpcode() == Opcodes.GETSTATIC && ((FieldInsnNode) n).owner.equals("hj")
+                            && ((FieldInsnNode) n).name.equals("ao")) {
+                        dang = "veMail";
+                    }
+                    if (n instanceof MethodInsnNode && n.getOpcode() == Opcodes.INVOKEINTERFACE && ((MethodInsnNode) n).owner.equals("cs")
+                            && ((MethodInsnNode) n).desc.equals("(Ljavax/microedition/lcdui/Graphics;Ljava/lang/String;III)V")) {
+                        mn.instructions.set(n, new MethodInsnNode(Opcodes.INVOKESTATIC, "HdUi", "chuMail",
+                                "(Lcs;Ljavax/microedition/lcdui/Graphics;Ljava/lang/String;III)V", false));
+                        dem(can, "hd_mail_chu");
+                        continue;
+                    }
                     if (dang != null && n instanceof MethodInsnNode && ((MethodInsnNode) n).name.equals("drawImage")
                             && ((MethodInsnNode) n).desc.equals("(Ljavax/microedition/lcdui/Image;III)V")) {
                         mn.instructions.set(n, new MethodInsnNode(Opcodes.INVOKESTATIC, "HdUi", dang,
                                 "(Ljavax/microedition/lcdui/Graphics;Ljavax/microedition/lcdui/Image;III)V", false));
-                        dem(can, dang.equals("vePhimAo") ? "hd_phim_ve" : "hd_chat_ve");
+                        dem(can, dang.equals("vePhimAo") ? "hd_phim_ve" : dang.equals("veMail") ? "hd_mail_ve" : "hd_chat_ve");
                         dang = null;
                     }
                 }
@@ -592,6 +611,144 @@ public class PatchFarmFx {
     }
 
     /**
+     * Ban HD (HdUi): hj.a(Graphics) ve nhan o goc phai tren (phien ban "2.5.8" luc chua dang nhap / luu luong kt.k) bang
+     * main.a.M tai main.a.af -> HdUi.chuGoc (ban HD lui vao trong le man hinh: goc man hinh dien thoai bo tron)
+     */
+    static void hdGoc(ClassNode cn, Map<String, Integer> can) {
+        for (MethodNode mn : cn.methods) {
+            if (!mn.name.equals("a") || !mn.desc.equals("(Ljavax/microedition/lcdui/Graphics;)V") || (mn.access & Opcodes.ACC_STATIC) != 0) {
+                continue;
+            }
+            for (AbstractInsnNode n : mn.instructions.toArray()) {
+                if (n instanceof MethodInsnNode && n.getOpcode() == Opcodes.INVOKEINTERFACE && ((MethodInsnNode) n).owner.equals("cs")
+                        && ((MethodInsnNode) n).desc.equals("(Ljavax/microedition/lcdui/Graphics;Ljava/lang/String;III)V")) {
+                    mn.instructions.set(n, new MethodInsnNode(Opcodes.INVOKESTATIC, "HdUi", "chuGoc",
+                            "(Lcs;Ljavax/microedition/lcdui/Graphics;Ljava/lang/String;III)V", false));
+                    dem(can, "hd_goc");
+                }
+            }
+        }
+    }
+
+    /**
+     * Ban HD (HdUi): ea = man BAN DO THANH PHO. ea.a(Graphics) goi this.b(g) ve ca ban do (o gach, bieu tuong khu, may, ten
+     * khu) -> HdUi.veTp(ea, g): ve xong thi cho may ve hau ky canh (bong may troi, nuoc lap lanh, nang, toi goc)
+     */
+    static void hdTp(ClassNode cn, Map<String, Integer> can) {
+        for (MethodNode mn : cn.methods) {
+            if (!mn.name.equals("a") || !mn.desc.equals("(Ljavax/microedition/lcdui/Graphics;)V") || (mn.access & Opcodes.ACC_STATIC) != 0) {
+                continue;
+            }
+            for (AbstractInsnNode n : mn.instructions.toArray()) {
+                if (n instanceof MethodInsnNode && n.getOpcode() == Opcodes.INVOKEVIRTUAL && ((MethodInsnNode) n).owner.equals("ea")
+                        && ((MethodInsnNode) n).name.equals("b") && ((MethodInsnNode) n).desc.equals("(Ljavax/microedition/lcdui/Graphics;)V")) {
+                    mn.instructions.set(n, new MethodInsnNode(Opcodes.INVOKESTATIC, "HdUi", "veTp",
+                            "(Lea;Ljavax/microedition/lcdui/Graphics;)V", false));
+                    dem(can, "hd_tp");
+                }
+            }
+        }
+    }
+
+    /**
+     * Ban HD (HdUi): main.a.b() tao ban phim ao (z = new b()) luc vao che do go chu (bam bong chat). Man NGANG thi ban phim
+     * ao chiem 1/3 ben phai va game co lai (main.a.m = m - m/3 - 1) - ban HD dung ban phim dien thoai nen ngay sau lenh
+     * putstatic main.a.z goi HdUi.sauPhimAo(): tra lai be rong day du, cho vung ban phim ao ve 0 (khong nuot cham).
+     */
+    static void hdPhimAo(ClassNode cn, Map<String, Integer> can) {
+        for (MethodNode mn : cn.methods) {
+            if (!mn.name.equals("b") || !mn.desc.equals("()V") || (mn.access & Opcodes.ACC_STATIC) != 0) {
+                continue;
+            }
+            for (AbstractInsnNode n : mn.instructions.toArray()) {
+                if (n instanceof FieldInsnNode && n.getOpcode() == Opcodes.PUTSTATIC && ((FieldInsnNode) n).owner.equals("main/a")
+                        && ((FieldInsnNode) n).name.equals("z") && n.getPrevious() instanceof MethodInsnNode
+                        && ((MethodInsnNode) n.getPrevious()).name.equals("<init>")) {
+                    mn.instructions.insert(n, new MethodInsnNode(Opcodes.INVOKESTATIC, "HdUi", "sauPhimAo", "()V", false));
+                    dem(can, "hd_phim_ao");
+                }
+            }
+        }
+    }
+
+    /**
+     * Ban HD (HdUi): im.b() dat vi tri o chat (im.b: y = q - T - cao - 5, rong = m - 10). Truoc moi lenh return goi
+     * HdUi.oChat(this): lui o vao trong le man hinh (tai tho) + nang len theo phim mem.
+     */
+    static void hdOChat(ClassNode cn, Map<String, Integer> can) {
+        for (MethodNode mn : cn.methods) {
+            if (!mn.name.equals("b") || !mn.desc.equals("()V")) {
+                continue;
+            }
+            for (AbstractInsnNode n : mn.instructions.toArray()) {
+                if (n.getOpcode() != Opcodes.RETURN) {
+                    continue;
+                }
+                InsnList l = new InsnList();
+                l.add(new VarInsnNode(Opcodes.ALOAD, 0));
+                l.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "HdUi", "oChat", "(Lim;)V", false));
+                mn.instructions.insertBefore(n, l);
+                dem(can, "hd_o_chat");
+            }
+        }
+    }
+
+    /** Ban HD (HdUi): main.a.a(Graphics) (static) ve nhan "12+" -> HdUi.ve12 (ban HD doi xuong goc trai duoi) */
+    static void hd12(ClassNode cn, Map<String, Integer> can) {
+        for (MethodNode mn : cn.methods) {
+            if (!mn.name.equals("a") || !mn.desc.equals("(Ljavax/microedition/lcdui/Graphics;)V") || (mn.access & Opcodes.ACC_STATIC) == 0) {
+                continue;
+            }
+            for (AbstractInsnNode n : mn.instructions.toArray()) {
+                if (n instanceof MethodInsnNode && ((MethodInsnNode) n).name.equals("drawImage")
+                        && ((MethodInsnNode) n).desc.equals("(Ljavax/microedition/lcdui/Image;III)V")) {
+                    mn.instructions.set(n, new MethodInsnNode(Opcodes.INVOKESTATIC, "HdUi", "ve12",
+                            "(Ljavax/microedition/lcdui/Graphics;Ljavax/microedition/lcdui/Image;III)V", false));
+                    dem(can, "hd_12");
+                }
+            }
+        }
+    }
+
+    /**
+     * Ban HD (HdUi): le.a(Vector, int kieu) dat vi tri bang menu noi cua phim mem (a = x, b = m = y). Truoc moi lenh return:
+     * a = HdUi.menuX(a, kieu, c); b = HdUi.menuY(b, kieu); m = b  (ban HD: bang ben trai xo xuong duoi nut MENU o goc tren)
+     */
+    static void hdLe(ClassNode cn, Map<String, Integer> can) {
+        for (MethodNode mn : cn.methods) {
+            if (!mn.name.equals("a") || !mn.desc.equals("(Ljava/util/Vector;I)V")) {
+                continue;
+            }
+            for (AbstractInsnNode n : mn.instructions.toArray()) {
+                if (n.getOpcode() != Opcodes.RETURN) {
+                    continue;
+                }
+                InsnList l = new InsnList();
+                l.add(new VarInsnNode(Opcodes.ALOAD, 0));
+                l.add(new VarInsnNode(Opcodes.ALOAD, 0));
+                l.add(new FieldInsnNode(Opcodes.GETFIELD, "le", "a", "I"));
+                l.add(new VarInsnNode(Opcodes.ILOAD, 2));
+                l.add(new VarInsnNode(Opcodes.ALOAD, 0));
+                l.add(new FieldInsnNode(Opcodes.GETFIELD, "le", "c", "I"));
+                l.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "HdUi", "menuX", "(III)I", false));
+                l.add(new FieldInsnNode(Opcodes.PUTFIELD, "le", "a", "I"));
+                l.add(new VarInsnNode(Opcodes.ALOAD, 0));
+                l.add(new VarInsnNode(Opcodes.ALOAD, 0));
+                l.add(new FieldInsnNode(Opcodes.GETFIELD, "le", "b", "I"));
+                l.add(new VarInsnNode(Opcodes.ILOAD, 2));
+                l.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "HdUi", "menuY", "(II)I", false));
+                l.add(new FieldInsnNode(Opcodes.PUTFIELD, "le", "b", "I"));
+                l.add(new VarInsnNode(Opcodes.ALOAD, 0));
+                l.add(new VarInsnNode(Opcodes.ALOAD, 0));
+                l.add(new FieldInsnNode(Opcodes.GETFIELD, "le", "b", "I"));
+                l.add(new FieldInsnNode(Opcodes.PUTFIELD, "le", "m", "I"));
+                mn.instructions.insertBefore(n, l);
+                dem(can, "hd_le");
+            }
+        }
+    }
+
+    /**
      * Ban HD (HdUi): ir.d(Graphics) tron 3 danh sach da sap theo chieu sau roi ve tung vat bang js.a(g). Cho ve vat the tinh
      * (truong W, lay tu ir.l): getfield W; aload; invokevirtual js.a(Graphics) -> invokestatic HdUi.veVat(js, Graphics).
      */
@@ -616,6 +773,12 @@ public class PatchFarmFx {
                         mn.instructions.set(n, new MethodInsnNode(Opcodes.INVOKESTATIC, "HdUi", "veVat",
                                 "(Ljs;Ljavax/microedition/lcdui/Graphics;)V", false));
                         dem(can, "hd_ve_vat");
+                    } else if (p2 instanceof FieldInsnNode && p2.getOpcode() == Opcodes.GETFIELD && ((FieldInsnNode) p2).name.equals("V")
+                            && ((FieldInsnNode) p2).desc.equals("Ljs;")) {
+                        // vat the dong (truong V, lay tu ir.m) -> HdUi.veDong: bao duong chan de do bong
+                        mn.instructions.set(n, new MethodInsnNode(Opcodes.INVOKESTATIC, "HdUi", "veDong",
+                                "(Ljs;Ljavax/microedition/lcdui/Graphics;)V", false));
+                        dem(can, "hd_ve_dong");
                     }
                 }
             }
@@ -665,6 +828,13 @@ public class PatchFarmFx {
             int lan = 0;
             boolean mem = false;
             for (AbstractInsnNode n : mn.instructions.toArray()) {
+                // chi so phim mem vua cham: invokeinterface ew.d()I -> HdUi.phimNao(ew) (ban HD: nut MENU o goc tren = phim trai)
+                if (n instanceof MethodInsnNode && n.getOpcode() == Opcodes.INVOKEINTERFACE && ((MethodInsnNode) n).owner.equals("ew")
+                        && ((MethodInsnNode) n).name.equals("d") && ((MethodInsnNode) n).desc.equals("()I")) {
+                    mn.instructions.set(n, new MethodInsnNode(Opcodes.INVOKESTATIC, "HdUi", "phimNao", "(Lew;)I", false));
+                    dem(can, "hd_phim_nao");
+                    continue;
+                }
                 // lan goi main.a.b(IIII)Z dau tien = vung dai phim mem (0, y, rong - 1, cao dai) -> HdUi.vungPhimMem
                 if (!mem && n instanceof MethodInsnNode && n.getOpcode() == Opcodes.INVOKESTATIC && ((MethodInsnNode) n).owner.equals("main/a")
                         && ((MethodInsnNode) n).name.equals("b") && ((MethodInsnNode) n).desc.equals("(IIII)Z")) {

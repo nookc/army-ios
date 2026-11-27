@@ -227,6 +227,19 @@ void j2n_set_hd_fx(int muc);
 void gfx_hd_frame(void);
 int gfx_hd_info(int what);
 void gfx_hd_set_k(int k);
+/* May HD: le an toan cua man hinh (tai tho, goc bo tron) tinh bang diem logic - nen tang dat truoc khi chay game; client
+ * (HdUi) doc qua thuoc tinh "j2n.le" de dat nut / phim mem tranh ra. l, r, b = le trai / phai / duoi day du (vat nam giua
+ * chieu cao man hinh phai tranh tai tho); gl, gr = le cho vat nam o GOC man hinh (chi can tranh goc bo tron; may co lo
+ * camera o goc thi bang le day du). */
+static int hd_le[5];
+void j2n_set_hd_inset(int l, int r, int b, int gl, int gr) {
+    hd_le[0] = l < 0 ? 0 : l > 200 ? 200 : l;
+    hd_le[1] = r < 0 ? 0 : r > 200 ? 200 : r;
+    hd_le[2] = b < 0 ? 0 : b > 100 ? 100 : b;
+    hd_le[3] = gl < 0 ? 0 : gl > 200 ? 200 : gl;
+    hd_le[4] = gr < 0 ? 0 : gr > 200 ? 200 : gr;
+}
+
 static int64_t hdm_t0, hdm_sum;
 static int hdm_n, hdm_avg, hdm_tot;
 static int hdm_d[90];
@@ -284,6 +297,7 @@ int32_t N_j2n_Disp_hdTin(jctx *t, int32_t what) {
         hdm_avg = 0;
         return v;
     }
+    if (what >= 8 && what <= 12) return hd_le[what - 8];     /* le man hinh trai / phai / duoi / goc trai / goc phai (diem logic) */
     if (what == 5) return hdm_tot;
     if (what == 7) return gfx_hd_fx;
     if (what == 6) {

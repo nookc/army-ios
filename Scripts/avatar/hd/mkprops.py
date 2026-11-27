@@ -881,7 +881,59 @@ def lap_lanh():
     return c.xong()
 
 
-VAT = [cong_hoa, khung_anh, huong_duong, rom_bi, bu_nhin, co_day, cay_thong, nguoi_tuyet, ong_noel, hop_qua, cong_tim, chu_love, gau_tim,
+def _mem(w, h, f):
+    """anh mem (do trong suot lien tuc) w x h diem logic: f(u, v) voi u, v trong [-1, 1] -> (r, g, b, a 0..255) tung diem"""
+    im = Image.new('RGBA', (w * S, h * S), (0, 0, 0, 0))
+    px = im.load()
+    for y in range(h * S):
+        v = (y + 0.5) / (h * S) * 2 - 1
+        for x in range(w * S):
+            u = (x + 0.5) / (w * S) * 2 - 1
+            r, g, b, a = f(u, v)
+            if a > 0:
+                px[x, y] = (int(r), int(g), int(b), max(0, min(255, int(a))))
+    return im
+
+
+def vong():
+    """vong sang duoi chan nhan vat cua minh (elip det, vien sang mem + long nhat)"""
+    def f(u, v):
+        d = math.sqrt(u * u + v * v)
+        a = 170 * math.exp(-((d - 0.80) / 0.085) ** 2)
+        if d < 0.80:
+            a += 34 * (d / 0.80) ** 2
+        return 255, 240, 170, a
+    return _mem(36, 15, f)
+
+
+def _bui(ban, duc):
+    def f(u, v):
+        a = 0.0
+        for (cx, cy, r) in ((-0.34, 0.10, 0.52), (0.30, 0.16, 0.48), (0.0, -0.22, 0.56)):
+            d = math.hypot((u - cx * ban) / (r * ban), (v - cy * ban) / (r * ban))
+            if d < 1:
+                a = max(a, (1 - d * d) ** 1.4)
+        return 240, 232, 214, a * duc
+    return _mem(18, 12, f)
+
+
+def bui_0():
+    return _bui(0.55, 150)
+
+
+def bui_1():
+    return _bui(0.72, 118)
+
+
+def bui_2():
+    return _bui(0.88, 78)
+
+
+def bui_3():
+    return _bui(1.0, 40)
+
+
+VAT = [vong, bui_0, bui_1, bui_2, bui_3, cong_hoa, khung_anh, huong_duong, rom_bi, bu_nhin, co_day, cay_thong, nguoi_tuyet, ong_noel, hop_qua, cong_tim, chu_love, gau_tim,
        cong_bong, sao_vui, bi_ngo, cay_ma, bia_mo, canh_tt, dai_phun, khi_cau, xich_du, den_long, chau_hoa, cong_trai,
        bi_chong, nen, nen_2, vac_thuoc, bi_to, la_thu, mang_nhen, bu_nhin_bi, cay_den, gau_trang, xe_tuyet, qua_cau, bo_hoa, bong_tim, banh_kem, lap_lanh, khe_0, khe_1, khe_2, khe_3, khe_4]
 

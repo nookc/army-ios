@@ -1,5 +1,6 @@
 /* gfx.c - man hinh (bo dem khung), Graphics, Image (giai ma PNG), Font. Ngu nghia ve bam theo bo chay phoneME cu. */
 #include <math.h>
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -65,6 +66,12 @@ void j2n_set_hd_k(int k) { gfx_hdk = (k >= 2 && k <= 4) ? k : 0; }   /* truoc kh
 #include "hdkho.c"
 #include "hd3d.c"
 #include "hdtheme.c"
+#include "hdbong.c"
+
+/* 1 = lan ve nay vao ANH NGOAI MAN HINH net cao (game ve 1 lan roi dung mai, vd nen rung / troi cua ban do, man chao): ban
+ * net cao cua anh nguon phai co NGAY - neu ve tam ban goc thi o vuong bi "nuong" vao anh do vinh vien. Moi luong 1 ban (nap
+ * ban do co the chay o luong mang, song song voi luong ve). */
+static __thread int hd_ngay;
 
 /* lay (va ghim) ban he so rq cua anh bat bien; NULL = chua co (dang lam / khong lam duoc) -> ve tam bang diem anh goc */
 static hd_ent *hd_get(struct O_javax_microedition_lcdui_Image *im, int rq) {
@@ -164,7 +171,7 @@ static hd_ent *hd_get(struct O_javax_microedition_lcdui_Image *im, int rq) {
         hd_pin[slot] = im->f_argb__5b;
         hd_pend += est;
         if (hd_nworker == 0) hd_start_workers();
-        if (hd_nworker < 0 || (lw * lh <= HD_SYNC_PX && hd_sync_left > 0)) {
+        if (hd_nworker < 0 || hd_ngay || (lw * lh <= HD_SYNC_PX && hd_sync_left > 0)) {
             /* anh nho: lam ngay (net tu khung dau), co han muc thoi gian moi khung */
             e->state = HD_BUILD;
             const uint32_t *src = e->src;
@@ -174,8 +181,10 @@ static hd_ent *hd_get(struct O_javax_microedition_lcdui_Image *im, int rq) {
             int ow = 0, oh = 0, kind = 0, shm = 0;
             uint8_t *shp = 0;
             uint32_t *px = hd_do(src, sw, sh, s, k, smooth, mode, &ow, &oh, &kind, &shp, &shm);
+            int co = hd_flags_cu;
             int64_t dt = hd_now_us() - t0;
             pthread_mutex_lock(&hd_mu);
+            e->flags = co;
             hd_sync_left -= (int)dt;
             hd_pend -= est;
             hd_pin[slot] = 0;
@@ -191,7 +200,7 @@ static hd_ent *hd_get(struct O_javax_microedition_lcdui_Image *im, int rq) {
             e->kind = kind;
             e->shd = shp;
             e->shm = shm;
-            hd_bytes += (size_t)ow * oh * 4 + (shp ? (size_t)ow * (oh + shm) : 0);
+            hd_bytes += (size_t)ow * oh * 4 + (shp ? SH_SIZE(ow, shm) : 0);
             hd_nready++;
             __atomic_store_n(&e->state, HD_READY, __ATOMIC_SEQ_CST);
         } else {
@@ -206,6 +215,19 @@ static hd_ent *hd_get(struct O_javax_microedition_lcdui_Image *im, int rq) {
         }
     }
     e->last = hd_frame_no;
+    if (hd_ngay && (e->state == HD_WAIT || e->state == HD_BUILD)) {
+        /* dang xep hang / dang lam o luong nen: cho xong (toi da ~2 giay; chi xay ra luc nap ban do / man hinh) */
+        uint32_t gen = e->gen;
+        for (int i = 0; i < 2000 && e->gen == gen && (e->state == HD_WAIT || e->state == HD_BUILD); i++) {
+            pthread_mutex_unlock(&hd_mu);
+            usleep(1000);
+            pthread_mutex_lock(&hd_mu);
+        }
+        if (e->gen != gen) {
+            pthread_mutex_unlock(&hd_mu);
+            return 0;
+        }
+    }
     if (e->state != HD_READY) {
         pthread_mutex_unlock(&hd_mu);
         return 0;
@@ -462,6 +484,13 @@ void N_javax_microedition_lcdui_Graphics_fillRect(jctx *t, jobj self, int32_t x,
     if (w <= 0 || h <= 0) return;
     tgt o;
     if (!target(t, self, &o)) return;
+    if (gfx_hdk > 1 && o.k == gfx_hdk && (o.color & 0xFFFFFF) <= 2 && (!G(self)->f_img_L || IMG(G(self)->f_img_L)->f_hd_I <= 1) && x + o.tx <= 0 && y + o.ty <= 0
+        && x + o.tx + w >= o.w / o.k && y + o.ty + h >= o.h / o.k && o.x0 <= 0 && o.y0 <= 0 && o.x1 >= o.w / o.k && o.y1 >= o.h / o.k) {
+        /* May HD: game xoa ca man hinh bang mau den (ban do / phong nho hon man hinh) -> nen chuyen mau thay cho den tron */
+        phys(&o);
+        fill_nen(&o);
+        return;
+    }
     fill_abs(&o, x + o.tx, y + o.ty, w, h);
 }
 
@@ -856,6 +885,28 @@ static void blit(tgt *o, const uint32_t *src, int sstride, int sx, int sy, int d
  * pha 2 = ve xong the gioi: tat che do + hau ky canh (loa sang, tia nang, toi goc, bui sang) len dich hien tai */
 void N_javax_microedition_lcdui_Graphics_hdCanh(jctx *t, jobj self, int32_t pha) {
     if (gfx_hdk <= 1) return;
+    if (((uint32_t)pha >> 24) == 0x4D) {
+        /* le trong 2 ben ban do hep hon man hinh: trai (12 bit) | phai (12 bit), diem logic */
+        int l = (pha >> 12) & 0xFFF, r = pha & 0xFFF;
+        gfx_le_trai = l > 80 ? 0 : l;
+        gfx_le_phai = r > 80 ? 0 : r;
+        return;
+    }
+    if (((uint32_t)pha >> 24) == 0x4C) {
+        /* nguon sang ban dem: kieu (2 bit) | x + 1024 (12 bit) | y + 256 (10 bit), toa do nhu khi ve (chan cua vat) */
+        tgt o;
+        if (fx_den_n < DEN_MAX && target(t, self, &o) && o.k == gfx_hdk) {
+            fx_den[fx_den_n].x = (short)(((pha >> 10) & 0xFFF) - 1024 + o.tx);
+            fx_den[fx_den_n].y = (short)((pha & 0x3FF) - 256 + o.ty);
+            fx_den[fx_den_n].kieu = (uint8_t)((pha >> 22) & 3);
+            fx_den_n++;
+        }
+        return;
+    }
+    if (pha >= 32) {
+        gfx_canh_co = pha - 32;         /* co cua canh: 1 ngoai troi, 2 co su song mat dat, 4 ban dem */
+        return;
+    }
     if (pha >= 16) {
         /* chu de may chu bao (0..4); Linux thu nghiem: bien J2N_THEME de len */
         static int ep = -2;
@@ -865,35 +916,107 @@ void N_javax_microedition_lcdui_Graphics_hdCanh(jctx *t, jobj self, int32_t pha)
     }
     int th = gfx_hd_fx >= 1 ? gfx_theme : 0;
     if (pha == 3) {
-        /* sap ve nen (o gach, phong nen): chi nhuom mau theo chu de */
+        /* sap ve nen (o gach, phong nen): nhuom mau theo chu de + van noi; chuan bi bang danh dau bong do */
         gfx_world = 0;
-        gfx_hd_mode = (th == 1 || th == 2 || th == 4) ? ((th << 2) | 32) : 0;
+        gfx_hd_mode = gfx_hd_fx >= 1 ? ((th << 2) | 32 | 128) : 0;
+        fx_den_n = 0;
+        gfx_le_trai = gfx_le_phai = 0;
+        tgt o;
+        if (gfx_hd_fx >= 1 && target(t, self, &o) && o.k == gfx_hdk) sh_begin(&o);
+        else sh_tgt = 0;
         return;
     }
     if (pha == 1 || pha == 4) {
-        /* 1 = vat the dong (nhan vat, thu), 4 = vat the tinh cua ban do (cay, ghe, nha...: them xu ly theo chu de) */
+        /* 1 = vat the dong (nhan vat, thu): khoi noi; 4 = vat the tinh cua ban do (cay, ghe, nha...): them van noi, xu ly
+         * theo chu de, cay lay theo gio */
         gfx_world = gfx_hd_fx >= 1;
-        gfx_hd_mode = gfx_hd_fx >= 1 ? (3 | (th << 2) | (pha == 4 ? 64 : 0)) : 0;
+        gfx_hd_mode = gfx_hd_fx >= 1 ? (3 | (th << 2) | (pha == 4 ? (64 | 128) : 0)) : 0;     /* 1 khoi noi + 2 mat na bong do */
+        if (gfx_le_trai > 0 || gfx_le_phai > 0) {
+            /* vua ve xong NEN cua ban do hep hon man hinh: lat guong mep nen ra 2 le (truoc khi ve vat the -> chu / vat khong bi
+             * lat theo), canh kin man hinh */
+            tgt o;
+            if (target(t, self, &o) && o.k == gfx_hdk && o.x0 <= 0 && o.x1 * o.k >= o.w)
+                fx_lat_le(o.px, o.w, o.h, o.y0 * o.k, o.y1 * o.k, o.k);
+            gfx_le_trai = gfx_le_phai = 0;
+        }
         return;
     }
     int dang = gfx_world;
     gfx_world = 0;
     gfx_hd_mode = 0;
+#if defined(__linux__) && !defined(__ANDROID__)
+    {
+        static int dem;
+        if (getenv("J2N_BONGLOG") && ((dem++ % 90) == 0 || gfx_canh_co == 1)) fprintf(stderr, "[pha2] dang %d fx %d co %d\n", dang, gfx_hd_fx, gfx_canh_co);
+    }
+#endif
     if (!dang) return;
     tgt o;
     if (!target(t, self, &o)) return;
     if (o.k != gfx_hdk) return;
     if (gfx_hd_fx >= 2) {
-        gfx_hd_scene(o.px, o.w, o.h, o.x0 * o.k, o.y0 * o.k, o.x1 * o.k, o.y1 * o.k, o.k);
-    } else if (th) {
-        /* may yeu da tat hau ky canh: van ve hat cua chu de (nhe) */
+        gfx_hd_scene(o.px, o.w, o.h, o.x0 * o.k, o.y0 * o.k, o.x1 * o.k, o.y1 * o.k, o.k, o.tx, o.ty);
+    } else {
+        /* may yeu da tat hau ky canh: van ve hat cua chu de / buom + la roi (nhe) */
         int X0 = o.x0 * o.k, Y0 = o.y0 * o.k, X1 = o.x1 * o.k, Y1 = o.y1 * o.k;
         if (X0 < 0) X0 = 0;
         if (Y0 < 0) Y0 = 0;
         if (X1 > o.w) X1 = o.w;
         if (Y1 > o.h) Y1 = o.h;
-        if (X1 - X0 >= 160 * o.k && Y1 - Y0 >= 120 * o.k) th_draw(o.px, o.w, o.h, X0, Y0, X1, Y1, o.k, fx_dem(o.px, o.w, X0, Y0, X1, Y1, o.k));
+        if (X1 - X0 >= 160 * o.k && Y1 - Y0 >= 120 * o.k) {
+            int ngoai = gfx_canh_co & 1;
+            int dem = ngoai ? ((gfx_canh_co & 4) ? 1 : 0) : fx_dem(o.px, o.w, X0, Y0, X1, Y1, o.k);
+            fx_dem_cu = dem;
+            if (ngoai && (gfx_canh_co & 2) && !dem && !th && gfx_fx_bui > 0) th_life(o.px, o.w, o.h, X0, Y0, X1, Y1, o.k, o.tx);
+            if (th) th_draw(o.px, o.w, o.h, X0, Y0, X1, Y1, o.k, dem);
+        }
     }
+}
+
+/* ve 1 vung anh (da lay bo dem qua img_px) kem cac hieu ung cua may HD: bong do theo huong nang, chuyen dong song (canh,
+ * thu cung, hao quang), cay lay theo gio. Tha ghim neu co. */
+static void ve_them(jobj self, tgt *o, struct O_javax_microedition_lcdui_Image *im, hd_ent *pin, const uint32_t *src, int stride,
+                    int sc, int kind, int xs, int ys, int w, int h, int tr, int px, int py) {
+    if (pin && sc == o->k && gfx_hd_fx >= 1) {
+        int lac = G(self)->f_hdLac_I, chan = G(self)->f_hdChan_I, ck = G(self)->f_hdChanK_I;
+        tgt o2;
+        tgt *od = o;
+        if (gfx_world && chan != NO_FOOT && lac != 3 && pin->shd) sh_cast(o, pin, xs, ys, w, h, tr, px, py, chan, ck != 0);
+        if (gfx_world && ck && chan != NO_FOOT && o->px == sh_tgt) {
+            /* NHIP THO cua nhan vat: ca nguoi gian / co ~1,7% theo chieu doc quanh duong chan -> moi manh (dau, ao, toc, canh...)
+             * dich len / xuong ti le voi do cao cua no (dau nhich ~2 diem anh that, chan dung yen). Dich bang cach doi goc bo
+             * dem cua dich di dy hang (diem anh that, min hon 1 diem logic). */
+            int FY = (chan + o->ty) * sc;
+            int cao = FY - (py * sc + h * sc / 2);
+            if (cao > 2 * sc && cao < 130 * sc) {
+                float tg = (float)(fx_ms() % 3600000) / 1000.0f;
+                float pha = (float)(ck & 0xFF) * (6.2831853f / 256.0f);
+                int dy = (int)lroundf(-(float)cao * 0.017f * sinf(tg * 2.3f + pha));
+                if (dy > sc) dy = sc;
+                else if (dy < -sc) dy = -sc;
+                if (dy) {
+                    o2 = *o;
+                    o2.px = o->px + (ptrdiff_t)dy * o->w;
+                    if (dy < 0 && o2.y0 * sc + dy < 0) o2.y0++;             /* giu moi hang ve nam trong bo dem */
+                    if (dy > 0 && o2.y1 * sc + dy > o->h) o2.y1--;
+                    if (o2.y1 > o2.y0) od = &o2;
+                }
+            }
+        }
+        if (lac && draw_img_lac(od, src, stride, sc, xs, ys, w, h, tr, px, py, kind, lac)) {
+            hd_put(pin);
+            return;
+        }
+        if (gfx_world && (pin->flags & HDF_PLANT) && tr == 0 && draw_img_sway(od, src, stride, sc, xs, ys, w, h, px, py, kind)) {
+            hd_put(pin);
+            return;
+        }
+        draw_img(od, src, stride, sc, xs, ys, w, h, tr, px, py, kind);
+        hd_put(pin);
+        return;
+    }
+    draw_img(o, src, stride, sc, xs, ys, w, h, tr, px, py, kind);
+    if (pin) hd_put(pin);
 }
 
 void N_javax_microedition_lcdui_Graphics_drawImage0(jctx *t, jobj self, jobj img, int32_t x, int32_t y, int32_t anchor) {
@@ -918,15 +1041,10 @@ void N_javax_microedition_lcdui_Graphics_drawImage0(jctx *t, jobj self, jobj img
     }
     int stride, kind;
     hd_ent *pin;
+    hd_ngay = o.k > 1 && o.k == gfx_hdk && G(self)->f_img_L && IMG(G(self)->f_img_L)->f_hd_I > 1;   /* anh ngoai man hinh cua game */
     src = img_px(t, im, o.k, &stride, &sc, &kind, &pin);
-    int lac = G(self)->f_hdLac_I;
-    if (lac && pin && sc == o.k && gfx_hd_fx >= 1 && draw_img_lac(&o, src, stride, sc, 0, 0, lw, lh, 0, px, py, kind, lac)) {
-        hd_put(pin);
-        return;
-    }
-    if (gfx_world && pin && pin->shd && sc == o.k) sh_draw(&o, pin, 0, 0, lw, lh, 0, px, py);
-    draw_img(&o, src, stride, sc, 0, 0, lw, lh, 0, px, py, kind);
-    if (pin) hd_put(pin);
+    hd_ngay = 0;
+    ve_them(self, &o, im, pin, src, stride, sc, kind, 0, 0, lw, lh, 0, px, py);
 }
 
 /* bien doi: (lx, ly) dich -> (sx, sy) nguon = base + col*lx + row*ly (giong transform_steps cua bo chay cu) */
@@ -1132,15 +1250,10 @@ void N_javax_microedition_lcdui_Graphics_drawRegion0(jctx *t, jobj self, jobj im
     }
     int stride, kind;
     hd_ent *pin;
+    hd_ngay = o.k > 1 && o.k == gfx_hdk && G(self)->f_img_L && IMG(G(self)->f_img_L)->f_hd_I > 1;   /* anh ngoai man hinh cua game */
     src = img_px(t, im, o.k, &stride, &sc, &kind, &pin);
-    int lac = G(self)->f_hdLac_I;
-    if (lac && pin && sc == o.k && gfx_hd_fx >= 1 && draw_img_lac(&o, src, stride, sc, xs, ys, w, h, tr, px, py, kind, lac)) {
-        hd_put(pin);
-        return;
-    }
-    if (gfx_world && pin && pin->shd && sc == o.k) sh_draw(&o, pin, xs, ys, w, h, tr, px, py);
-    draw_img(&o, src, stride, sc, xs, ys, w, h, tr, px, py, kind);
-    if (pin) hd_put(pin);
+    hd_ngay = 0;
+    ve_them(self, &o, im, pin, src, stride, sc, kind, xs, ys, w, h, tr, px, py);
 }
 
 void N_javax_microedition_lcdui_Graphics_drawRGB(jctx *t, jobj self, jobj rgb, int32_t off, int32_t scan, int32_t x,
