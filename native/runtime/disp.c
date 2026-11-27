@@ -177,6 +177,31 @@ int32_t N_j2n_Disp_hdSeen(jctx *t) {
     return v != 0;
 }
 
+/* Avatar HD: he so lon nhat (2 = anh HD x2 cua may chu, 3 = anh dt3/ dau truong) */
+int32_t N_j2n_Disp_hdMuc(jctx *t) {
+    (void)t;
+    int v = gfx_hd_seen;
+    gfx_hd_seen = 0;
+    return v;
+}
+
+static int hd_anh;
+
+void j2n_set_hd_anh(int on) { hd_anh = on != 0; }
+
+/* May HD: he so toan cuc (gfx.c) */
+extern int gfx_hdk;
+
+int32_t N_j2n_Disp_hdK(jctx *t) {
+    (void)t;
+    return gfx_hdk;
+}
+
+int32_t N_j2n_Disp_hdAnh(jctx *t) {
+    (void)t;
+    return hd_anh;
+}
+
 void N_j2n_Disp_presentImage(jctx *t, jobj argb, int32_t w, int32_t h) {
     if (!argb) {
         rt_npe(t);

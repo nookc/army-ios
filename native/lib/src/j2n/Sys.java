@@ -23,6 +23,9 @@ public final class Sys {
         if (key.equals("microedition.io.file.FileConnection.version")) {
             return null;
         }
+        if (key.equals("j2n.hd")) {
+            return Disp.hdAnh() ? "1" : null;       // Avatar HD: client (HdAnh) xin bo anh HD cua may chu
+        }
         return property0(key);
     }
 

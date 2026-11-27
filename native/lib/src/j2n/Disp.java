@@ -60,6 +60,15 @@ public final class Disp {
     /** Avatar: khung vua ve co anh net cao (dt3/) hay khong (doc xong xoa co) */
     public static native boolean hdSeen();
 
+    /** Avatar HD: he so net cao lon nhat cua anh da ve tu lan hoi truoc (0 / 1 = khong co anh net cao), roi xoa */
+    public static native int hdMuc();
+
+    /** Avatar HD: nen tang bat "anh nhan vat / do / ban do net cao" (app xin bo anh HD x2 cua may chu) */
+    public static native boolean hdAnh();
+
+    /** May HD: so diem anh that cho 1 diem logic o moi dich ve (2..4); 0 = tat (ban thuong) */
+    public static native int hdK();
+
     /** Avatar: game vao / ra che do go chu -> nen tang bat / tat ban phim he thong.
      *  show 1/0; areaBottom = day vung game con dung duoc (diem anh Canvas, 0 = ca man) de dat ngay tren ban phim */
     public static native void wantKeyboard(int show, int areaBottom);

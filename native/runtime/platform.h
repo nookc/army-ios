@@ -63,6 +63,11 @@ int j2n_snapshot(uint32_t *out, int w, int h);
 uint32_t *j2n_snapshot_any(int *w, int *h, int *frame_no);
 /* Avatar: Canvas co ten lop trong 'names' (cach nhau dau phay, vd "FishGame") ve phong to 'scale' lan - goi truoc j2n_start */
 void j2n_set_hd(const char *names, int scale);
+/* Avatar HD: 1 = app xin bo anh HD x2 cua may chu (nhan vat, do, ban do ve net gap doi; toa do game giu nguyen) */
+void j2n_set_hd_anh(int on);
+/* May HD (ban "Avatar 250 HD"): k = 2..4 diem anh that cho 1 diem logic o moi dich ve - anh duoc phong to thong minh, bo dem
+   ngoai man hinh + hinh ve + chu deu net cao; khung trinh bay co (w*k) x (h*k). 0 = tat. Goi truoc j2n_start */
+void j2n_set_hd_k(int k);
 /* Avatar: ket noi toi 127.0.0.1 / localhost duoc chuyen sang may chu nay: "host" (giu cong cua game) hoac "host:cong";
    NULL / "" = khong chuyen. Goi luc nao cung duoc (ap dung tu lan ket noi sau) */
 void j2n_set_server(const char *spec);

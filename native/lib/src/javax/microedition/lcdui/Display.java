@@ -137,4 +137,17 @@ public class Display {
     public static void presentImage(Image i) {
         j2n.Disp.presentImage(i.argb, i.w, i.h);
     }
+
+    /** May HD: bo dem trinh bay dung so diem anh that (khong nhan he so) */
+    public static Image rawImage(int w, int h) {
+        return Image.createRaw(w, h);
+    }
+
+    public static int rawWidth(Image i) {
+        return i.w;
+    }
+
+    public static int rawHeight(Image i) {
+        return i.h;
+    }
 }

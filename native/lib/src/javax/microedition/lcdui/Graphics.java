@@ -28,7 +28,13 @@ public class Graphics {
     Graphics(Image target) {
         img = target;
         if (target != null) {
-            reset(target.w, target.h);
+            if (target.hd > 1) {
+                // May HD: anh mutable net cao - game ve theo toa do logic, moi diem logic = hd diem anh that
+                reset(target.getWidth(), target.getHeight());
+                k = target.hd;
+            } else {
+                reset(target.w, target.h);
+            }
         } else {
             reset(j2n.Disp.width(), j2n.Disp.height());
         }
@@ -45,7 +51,7 @@ public class Graphics {
         ch = h;
         color = 0;
         stroke = SOLID;
-        hdp = false;
+        hdp = j2n.Disp.hdK() > 1;       // May HD: hinh ve luon min o diem anh that
         font = Font.getDefaultFont();
     }
 
@@ -106,7 +112,7 @@ public class Graphics {
 
     public void setStrokeStyle(int s) {
         if (s == 0x4844 || s == 0x4845) {
-            hdp = s == 0x4844;
+            hdp = s == 0x4844 || j2n.Disp.hdK() > 1;
             return;
         }
         if (s == 0x4846) {

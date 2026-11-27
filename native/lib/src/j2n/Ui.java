@@ -165,7 +165,10 @@ public final class Ui {
     private static void paintNow() {
         Disp.clearRepaint();
         Displayable d = cur;
-        if (d != null && Display.isCanvas(d)) {
+        int hdK = Disp.hdK();
+        if (d != null && Display.isCanvas(d) && hdK > 1) {
+            paintHd(d, hdK);
+        } else if (d != null && Display.isCanvas(d)) {
             int s = Display.scaleOf(d);
             if (s > 1) {
                 int w = Disp.width() * s, h = Disp.height() * s;
@@ -183,9 +186,16 @@ public final class Ui {
             } else {
                 hdImg = null;
                 hdG = null;
-                if (Disp.hdSeen()) {
+                int muc = Disp.hdMuc();
+                if (muc > 1) {
                     hdKhong = 0;
-                    hdMan = HD_MAN;
+                    // anh dt3/ (x3, dau truong) -> man x3; chi anh HD x2 cua may chu -> man x2 (ve dung tung diem anh)
+                    int m = muc >= HD_MAN ? HD_MAN : 2;
+                    if (m != hdMan) {
+                        hdMan = m;
+                        manImg = null;
+                        manG = null;
+                    }
                 } else if (hdMan > 1 && ++hdKhong > 6) {
                     hdMan = 1;      // roi dau truong: ve lai nhu cu (bo anh lon)
                     manImg = null;
@@ -222,6 +232,32 @@ public final class Ui {
             paintedSeq++;
             paintLock.notifyAll();
         }
+    }
+
+    /* May HD: moi Canvas ve vao 1 bo dem net cao (K diem anh that / diem logic cua man). Canvas phong to s lan (ban ban
+     * ca: kich thuoc logic gap s) ve voi he so K / s -> cung ra bo dem do net do. */
+    private static void paintHd(Displayable d, int K) {
+        int s = Display.scaleOf(d);
+        if (s < 1) {
+            s = 1;
+        }
+        int k = (K + s - 1) / s;
+        if (k < 1) {
+            k = 1;
+        }
+        int lw = Disp.width() * s, lh = Disp.height() * s;
+        int pw = lw * k, ph = lh * k;
+        if (manImg == null || Display.rawWidth(manImg) != pw || Display.rawHeight(manImg) != ph) {
+            manImg = Display.rawImage(pw, ph);
+            manG = manImg.getGraphics();
+        }
+        Display.resetGraphicsK(manG, lw, lh, k);
+        try {
+            Display.paintCanvas(d, manG);
+        } catch (Throwable e) {
+            System.err.println("[Ui] loi paint: " + e);
+        }
+        Display.presentImage(manImg);
     }
 
     private static void notifyShown() {

@@ -120,6 +120,7 @@ public class PatchFarmFx {
                 && can.getOrDefault("dt_tin", 0) == 1 && can.getOrDefault("cam_mo", 0) == 1 && can.getOrDefault("dt_ten", 0) == 1
                 && can.getOrDefault("hd_tat", 0) == 2 && can.getOrDefault("hd_hoi", 0) == 1
                 && can.getOrDefault("gia_luong", 0) == 1 && can.getOrDefault("phien_ban", 0) == 1
+                && can.getOrDefault("loai_anh", 0) == 1
                 && can.getOrDefault("trom_cay", 0) == 1 && can.getOrDefault("o_kho", 0) == 2
                 && can.getOrDefault("cham_vat", 0) == 1 && can.getOrDefault("nhan_chon", 0) == 1
                 && can.getOrDefault("cuoi_cho", 0) == 1 && can.getOrDefault("cuoi_kiem", 0) == 1
@@ -1066,6 +1067,17 @@ public class PatchFarmFx {
                     // "L" cuoi: doc duoc gia luong lon; ".19": ban giao lan 19 (may chu: Session.banApp - luoi xem do co trang phuc)
                     ((LdcInsnNode) n).cst = "2.5.8.20L";
                     dem(can, "phien_ban");
+                }
+                // byte loai tai nguyen "gy.Y - 1" -> HdAnh.loai(gy.Y - 1): app native ve net cao xin bo anh HD cua may chu
+                if (n.getOpcode() == Opcodes.ISUB && mn.name.equals("b") && mn.desc.equals("()V")) {
+                    AbstractInsnNode p1 = n.getPrevious(), p2 = p1 == null ? null : p1.getPrevious();
+                    AbstractInsnNode nx = n.getNext();
+                    if (p1 != null && p1.getOpcode() == Opcodes.ICONST_1 && p2 instanceof FieldInsnNode
+                            && ((FieldInsnNode) p2).owner.equals("gy") && ((FieldInsnNode) p2).name.equals("Y")
+                            && nx instanceof MethodInsnNode && ((MethodInsnNode) nx).name.equals("writeByte")) {
+                        mn.instructions.insert(n, new MethodInsnNode(Opcodes.INVOKESTATIC, "HdAnh", "loai", "(I)I", false));
+                        dem(can, "loai_anh");
+                    }
                 }
             }
         }

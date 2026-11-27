@@ -11,6 +11,12 @@ public class Image {
     int akind;       /* 0 dac, 1 chi trong suot hoan toan, 2 ban trong suot (C chon cach ve nhanh) */
     /* Avatar: anh net cao - w, h, argb la diem anh that, kich thuoc logic = w / hd (anh dt3/ ve tren man net cao) */
     int hd = 1;
+    /* May HD (j2n.Disp.hdK() > 1): ban da phong to len he so cua dich ve - C tao lan dau anh duoc ve (gfx.c hd_build).
+     * bq = he so da yeu cau, bk = he so that cua big (0 = chua co / khong lam duoc), bkind = kieu alpha cua big */
+    int[] big;
+    int bk, bq, bkind;
+    /* May HD: 1 = anh "min" (ve 3D, chuyen mau lien tuc) -> phong to bicubic; 0 = pixel art -> xBRZ; -1 = tu nhan dang */
+    int smooth = -1;
     /** Graphics.setStrokeStyle(0x4846) dat: anh createRGBImage ke tiep co he so nay (dung 1 lan) */
     static int hdLan;
 
@@ -25,6 +31,22 @@ public class Image {
         if (w <= 0 || h <= 0) {
             throw new IllegalArgumentException();
         }
+        int k = j2n.Disp.hdK();
+        if (k > 1 && (long) w * k * h * k <= 40000000L) {
+            // May HD: bo dem ngoai man hinh cua game cung net cao - kich thuoc logic w x h, diem anh that gap k lan
+            int[] q = new int[w * k * h * k];
+            for (int i = 0; i < q.length; i++) {
+                q[i] = 0xFFFFFFFF;
+            }
+            Image im = new Image(w * k, h * k, q, true);
+            im.hd = k;
+            return im;
+        }
+        return createRaw(w, h);
+    }
+
+    /** anh mutable dung so diem anh that w x h (he so 1) - bo dem trinh bay cua j2n.Ui */
+    static Image createRaw(int w, int h) {
         int[] p = new int[w * h];
         for (int i = 0; i < p.length; i++) {
             p[i] = 0xFFFFFFFF;
@@ -41,6 +63,7 @@ public class Image {
         Image i = new Image(src.w, src.h, p, false);
         i.akind = src.akind;
         i.hd = src.hd;
+        i.smooth = src.smooth;
         return i;
     }
 
@@ -64,6 +87,7 @@ public class Image {
             if (b3 != null) {
                 Image i3 = decode(b3, 0, b3.length);
                 i3.hd = j2n.Ui.HD_MAN;
+                i3.smooth = 1;
                 cachePut(r3, i3);
                 return i3;
             }
@@ -73,6 +97,9 @@ public class Image {
             throw new IOException("khong co anh: " + name);
         }
         Image i = decode(b, 0, b.length);
+        if (r.startsWith("fish/") || r.startsWith("fish1/") || r.startsWith("dt/")) {
+            i.smooth = 1;       // ban ca / dau truong: anh ve 3D, khong phai pixel art
+        }
         cachePut(r, i);
         return i;
     }
@@ -175,7 +202,37 @@ public class Image {
         if (i == null) {
             throw new IllegalArgumentException("anh hong");
         }
+        int d = heSoHd(data, off, len);
+        if (d > 1 && i.w % d == 0 && i.h % d == 0) {
+            i.hd = d;           // anh HD cua may chu (x2): kich thuoc logic = diem anh / d, ve net o man net cao
+        }
         return i;
+    }
+
+    /**
+     * Avatar HD: may chu danh dau anh HD (ban x2 dung gap doi ban thuong) bang chunk rieng "apHd" (1 byte he so) ngay sau
+     * IHDR. Tra ve he so (2..4), 0 neu khong co. Chi doc cac chunk truoc IDAT.
+     */
+    static int heSoHd(byte[] b, int off, int len) {
+        if (len < 33 || (b[off] & 0xFF) != 0x89 || b[off + 1] != 'P' || b[off + 2] != 'N' || b[off + 3] != 'G') {
+            return 0;
+        }
+        int p = off + 8, het = off + len;
+        for (int k = 0; k < 8 && p + 8 <= het; k++) {
+            int n = ((b[p] & 0xFF) << 24) | ((b[p + 1] & 0xFF) << 16) | ((b[p + 2] & 0xFF) << 8) | (b[p + 3] & 0xFF);
+            if (n < 0 || p + 12 + n > het) {
+                return 0;
+            }
+            if (b[p + 4] == 'a' && b[p + 5] == 'p' && b[p + 6] == 'H' && b[p + 7] == 'd' && n >= 1) {
+                int d = b[p + 8] & 0xFF;
+                return d >= 2 && d <= 4 ? d : 0;
+            }
+            if (b[p + 4] == 'I' && b[p + 5] == 'D' && b[p + 6] == 'A' && b[p + 7] == 'T') {
+                return 0;
+            }
+            p += 12 + n;
+        }
+        return 0;
     }
 
     /* C tao doi tuong qua ham nay */
@@ -194,6 +251,25 @@ public class Image {
         }
         if (rgb.length < w * h) {
             throw new ArrayIndexOutOfBoundsException();
+        }
+        if (rgbMang != null) {
+            // May HD: game cat anh con bang getRGB -> createRGBImage. Dung mang cua lan getRGB cuoi, noi dung chua doi ->
+            // cat thang tu anh nguon de giu he so net cao (khong tut ve diem anh logic)
+            Image tu = null;
+            int cx = 0, cy = 0;
+            synchronized (rgbKhoa) {
+                if (rgb == rgbMang && processAlpha && w == rgbW && h == rgbH && rgbAnh != null && hdLan <= 1
+                        && tong(rgb, w * h) == rgbTong) {
+                    tu = rgbAnh;
+                    cx = rgbX;
+                    cy = rgbY;
+                }
+                rgbMang = null;
+                rgbAnh = null;
+            }
+            if (tu != null) {
+                return createImage(tu, cx, cy, w, h, 0);
+            }
         }
         int[] p = new int[w * h];
         int k = 0;
@@ -263,12 +339,37 @@ public class Image {
                     out[d + i] = argb[s + i * hd];
                 }
             }
-            return;
+        } else {
+            for (int j = 0; j < hh; j++) {
+                int s = (y + j) * w + x;
+                int d = off + j * scan;
+                System.arraycopy(argb, s, out, d, ww);
+            }
         }
-        for (int j = 0; j < hh; j++) {
-            int s = (y + j) * w + x;
-            int d = off + j * scan;
-            System.arraycopy(argb, s, out, d, ww);
+        if (off == 0 && scan == ww && ww > 0 && hh > 0 && j2n.Disp.hdK() > 1) {
+            synchronized (rgbKhoa) {
+                rgbMang = out;
+                rgbAnh = this;
+                rgbX = x;
+                rgbY = y;
+                rgbW = ww;
+                rgbH = hh;
+                rgbTong = tong(out, ww * hh);
+            }
         }
+    }
+
+    /* May HD: lan getRGB cuoi (xem createRGBImage) */
+    private static final Object rgbKhoa = new Object();
+    private static int[] rgbMang;
+    private static Image rgbAnh;
+    private static int rgbX, rgbY, rgbW, rgbH, rgbTong;
+
+    private static int tong(int[] a, int n) {
+        int t = 17;
+        for (int i = 0; i < n; i++) {
+            t = t * 31 + a[i];
+        }
+        return t;
     }
 }

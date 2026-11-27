@@ -15,6 +15,7 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 #include "font_data.h"
+#include "hdscale.c"   /* may HD: phong to anh (xBRZ / bicubic). Gop vao day de cac kich ban build khong phai them tep */
 
 #define G(o) ((struct O_javax_microedition_lcdui_Graphics *)(o))
 #define IMG(o) ((struct O_javax_microedition_lcdui_Image *)(o))
@@ -43,6 +44,72 @@ typedef struct tgt {
 
 /* Avatar: khung nay co ve anh net cao (anh dt3/, hd > 1) -> j2n.Ui ve khung sau o man net cao */
 volatile int gfx_hd_seen;
+
+/* ------------------------------------------------------------ may HD (ban "Avatar 250 HD")
+ * gfx_hdk = K (2..4): moi dich ve (man hinh, anh mutable) co K diem anh that cho 1 diem logic; game van ve theo toa do
+ * logic. Anh bat bien duoc phong to thong minh len dung he so cua dich lan dau duoc ve (Image.big), hinh ve min o diem anh
+ * that. 0 = tat (moi thu y nhu truoc). Nen tang dat truoc khi chay game: j2n_set_hd_k(). */
+int gfx_hdk;
+
+void j2n_set_hd_k(int k) { gfx_hdk = (k >= 2 && k <= 4) ? k : 0; }
+
+/* anh lon hon muc nay (diem anh that sau phong to) thi phong to it hon / giu nguyen: tranh ngon bo nho */
+#define HD_BIG_MAX 9000000
+
+/* tao Image.big = ban he so 'k' cua anh bat bien (nguon he so s). Khong lam duoc thi de trong (ve theo cach chung).
+ * Image.bq = he so da yeu cau (de khong lam lai moi lan ve), Image.bk = he so that cua Image.big (0 = khong co). */
+static void hd_build(jctx *t, struct O_javax_microedition_lcdui_Image *im, int k) {
+    int s = im->f_hd_I > 1 ? im->f_hd_I : 1;
+    im->f_bq_I = k;
+    im->f_big__5b = 0;
+    im->f_bk_I = 0;
+    if (!im->f_argb__5b || im->f_w_I <= 0 || im->f_h_I <= 0 || im->f_w_I % s || im->f_h_I % s) return;
+    int lw = im->f_w_I / s, lh = im->f_h_I / s;
+    while (k > s && (int64_t)lw * k * lh * k > HD_BIG_MAX) k--;
+    if (k <= s) return;
+    int ow = 0, oh = 0;
+    uint32_t *px = hd_make(AD(im->f_argb__5b, uint32_t), im->f_w_I, im->f_h_I, s, k, im->f_smooth_I, &ow, &oh);
+    if (!px) return;
+    jobj arr = rt_newarr(t, &rt_arr_I, ow * oh);
+    if (!arr) {
+        free(px);
+        t->exc = 0;
+        return;
+    }
+    uint32_t *d = AD(arr, uint32_t);
+    int kind = 0;
+    size_t n = (size_t)ow * oh;
+    for (size_t i = 0; i < n; i++) {
+        uint32_t v = px[i], a = v >> 24;
+        d[i] = v;
+        if (a != 255) {
+            if (a != 0) kind = 2;
+            else if (kind == 0) kind = 1;
+        }
+    }
+    free(px);
+    im->f_bkind_I = kind;
+    im->f_big__5b = arr;
+    im->f_bk_I = k;
+}
+
+/* bo dem ve cua anh cho dich he so k: diem anh, be rong hang, he so, kieu alpha */
+static const uint32_t *img_px(jctx *t, struct O_javax_microedition_lcdui_Image *im, int k, int *stride, int *sc, int *kind) {
+    int s = im->f_hd_I > 1 ? im->f_hd_I : 1;
+    if (gfx_hdk > 1 && k > 1 && s != k && !im->f_mutable_Z) {
+        if (im->f_bq_I != k) hd_build(t, im, k);
+        if (im->f_big__5b && im->f_bk_I > 1) {
+            *stride = im->f_w_I / s * im->f_bk_I;
+            *sc = im->f_bk_I;
+            *kind = im->f_bkind_I;
+            return AD(im->f_big__5b, uint32_t);
+        }
+    }
+    *stride = im->f_w_I;
+    *sc = s;
+    *kind = im->f_akind_I;
+    return AD(im->f_argb__5b, uint32_t);
+}
 
 static int target(jctx *t, jobj g, tgt *o) {
     struct O_javax_microedition_lcdui_Graphics *gr = G(g);
@@ -536,7 +603,9 @@ void N_javax_microedition_lcdui_Graphics_drawImage0(jctx *t, jobj self, jobj img
         free(tmp);
         return;
     }
-    draw_img(&o, src, im->f_w_I, sc, 0, 0, lw, lh, 0, px, py, im->f_akind_I);
+    int stride, kind;
+    src = img_px(t, im, o.k, &stride, &sc, &kind);
+    draw_img(&o, src, stride, sc, 0, 0, lw, lh, 0, px, py, kind);
 }
 
 /* bien doi: (lx, ly) dich -> (sx, sy) nguon = base + col*lx + row*ly (giong transform_steps cua bo chay cu) */
@@ -588,7 +657,7 @@ static void region_draw(tgt *o, const uint32_t *src, int sstride, int xs, int ys
 static void draw_img(tgt *o, const uint32_t *src, int sstride, int s, int xs, int ys, int w, int h, int tr, int px, int py,
                      int kind) {
     if (s < 1) s = 1;
-    if (s > 1) gfx_hd_seen = 1;
+    if (s > gfx_hd_seen) gfx_hd_seen = s;   /* he so lon nhat trong khung: j2n.Ui chon do net man */
     int k = o->k;
     if (s == k) {
         tgt p = *o;
@@ -663,7 +732,9 @@ void N_javax_microedition_lcdui_Graphics_drawRegion0(jctx *t, jobj self, jobj im
         free(tmp);
         return;
     }
-    draw_img(&o, src, im->f_w_I, sc, xs, ys, w, h, tr, px, py, im->f_akind_I);
+    int stride, kind;
+    src = img_px(t, im, o.k, &stride, &sc, &kind);
+    draw_img(&o, src, stride, sc, xs, ys, w, h, tr, px, py, kind);
 }
 
 void N_javax_microedition_lcdui_Graphics_drawRGB(jctx *t, jobj self, jobj rgb, int32_t off, int32_t scan, int32_t x,
@@ -882,5 +953,6 @@ jobj N_javax_microedition_lcdui_Image_createImage_6f34(jctx *t, jobj src, int32_
     }
     jobj r = make_image(t, ow, oh, arr, im->f_akind_I);
     if (r && sc > 1) IMG(r)->f_hd_I = sc;
+    if (r) IMG(r)->f_smooth_I = im->f_smooth_I;
     return r;
 }

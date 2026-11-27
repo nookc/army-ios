@@ -316,6 +316,10 @@ int main(int argc, char **argv) {
         if (fd) fclose(fd);
         fprintf(stderr, "[harness] server.dat: %s\n", j2n_set_server_enc(buf, nr) ? "hop le" : "KHONG hop le");
     }
+    const char *ha = getenv("J2N_HDANH");
+    if (ha && ha[0] == '1') j2n_set_hd_anh(1);
+    const char *hk = getenv("J2N_HDK");
+    if (hk && hk[0]) j2n_set_hd_k(atoi(hk));
     const char *hd = getenv("J2N_HD");
     if (hd && hd[0]) {
         char hb[256];
