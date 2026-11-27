@@ -913,24 +913,24 @@ def _bui(ban, duc):
             d = math.hypot((u - cx * ban) / (r * ban), (v - cy * ban) / (r * ban))
             if d < 1:
                 a = max(a, (1 - d * d) ** 1.4)
-        return 240, 232, 214, a * duc
+        return 226, 212, 186, a * duc
     return _mem(18, 12, f)
 
 
 def bui_0():
-    return _bui(0.55, 150)
+    return _bui(0.55, 205)
 
 
 def bui_1():
-    return _bui(0.72, 118)
+    return _bui(0.72, 165)
 
 
 def bui_2():
-    return _bui(0.88, 78)
+    return _bui(0.88, 112)
 
 
 def bui_3():
-    return _bui(1.0, 40)
+    return _bui(1.0, 58)
 
 
 VAT = [vong, bui_0, bui_1, bui_2, bui_3, cong_hoa, khung_anh, huong_duong, rom_bi, bu_nhin, co_day, cay_thong, nguoi_tuyet, ong_noel, hop_qua, cong_tim, chu_love, gau_tim,

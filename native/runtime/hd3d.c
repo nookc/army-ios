@@ -372,6 +372,8 @@ static int32_t *fx_may;             /* do toi cua bong may tai nut luoi tho (0 .
 static int fx_mw, fx_mh;
 static uint8_t *fx_nuoc;            /* o la mat nuoc (1) */
 static int fx_nn;
+static uint8_t *fx_lum;             /* do sang trung binh cua o (ban dem: o sang khong bi lam toi) */
+static int fx_ln;
 
 /* fb: bo dem W x H (diem anh that), vung [x0,x1) x [y0,y1), k = diem anh that / diem logic; (tx, ty) = do doi cua the gioi
  * tren man hinh (diem logic) de hieu ung bam theo ban do khi cuon */
@@ -420,9 +422,18 @@ static void gfx_hd_scene(uint32_t *fb, int W, int H, int x0, int y0, int x1, int
     int ngoai = gfx_canh_co & 1, song = gfx_canh_co & 2;
     int dem = ngoai ? ((gfx_canh_co & 4) ? 1 : 0) : fx_dem(fb, W, x0, y0, x1, y1, k);
     fx_dem_cu = dem;
-    int nguong = dem ? 226 : 218;               /* nguong sang de loa */
-    /* BAN DEM ngoai troi: ca canh toi di + nga xanh; den / cua so / vat trang van sang (loa manh) va cot den toa vung sang am */
+    int nguong = 218;                           /* nguong sang de loa */
+    /* BAN DEM ngoai troi: ca canh toi di + nga xanh, cot den toa vung sang am. O SANG (bong thoai trang, bong den, bang hieu)
+     * thi khong lam toi - he so toi tinh theo do sang trung binh cua o (fx_lum) - nen chu trong bong thoai van ro net */
     int toi_dem = (ngoai && dem) ? (song ? 186 : 226) : 256;
+    if (toi_dem < 256) {
+        if (fx_ln < bw * bh) {
+            free(fx_lum);
+            fx_lum = (uint8_t *)malloc((size_t)bw * bh);
+            fx_ln = fx_lum ? bw * bh : 0;
+        }
+        if (!fx_lum || gfx_fx_bloom <= 0) toi_dem = 256;
+    }
     double tt = (double)(now % 6000000) / 1000.0;
     /* --- bong may troi tren mat dat (ngoai troi, ban ngay): nhieu tan so thap tinh o luoi tho roi noi suy theo o */
     int co_may = ngoai && !dem && gfx_fx_ray > 0;
@@ -483,12 +494,13 @@ static void gfx_hd_scene(uint32_t *fb, int W, int H, int x0, int y0, int x1, int
                     thay_nuoc |= nc;
                 }
                 int key = (r * 77 + g * 150 + b * 29) >> 8;     /* do sang (troi xanh / co khong tinh, trang va vang moi loa) */
+                if (toi_dem < 256) fx_lum[(size_t)by * bw + bx] = (uint8_t)key;
                 if (key <= nguong) {
                     d[0] = d[1] = d[2] = 0;
                 } else {
                     int wgt = (key - nguong) * 256 / (255 - nguong);       /* 0..256 */
                     wgt = wgt * wgt >> 8;
-                    wgt = wgt * gfx_fx_bloom / 100 * (dem ? 210 : 126) / 256;      /* cuong do loa (cong bao hoa) */
+                    wgt = wgt * gfx_fx_bloom / 100 * (dem ? 140 : 126) / 256;      /* cuong do loa (cong bao hoa) */
                     d[0] = (uint16_t)(r * wgt >> 8);
                     d[1] = (uint16_t)(g * wgt >> 8);
                     d[2] = (uint16_t)(b * wgt >> 8);
@@ -545,13 +557,13 @@ static void gfx_hd_scene(uint32_t *fb, int W, int H, int x0, int y0, int x1, int
                 float nh = 0.93f + 0.07f * sinf((float)tt * (2.1f + (i % 5) * 0.37f) + i * 1.7f);
                 int kieu = fx_den[i].kieu;
                 if (kieu == 1) {
-                    fx_quang(fx_bl, bw, bh, lx, ly - 38.0f * sk, 27.0f * sk, 27.0f * sk, (int)(150 * nh), (int)(118 * nh), (int)(58 * nh));
+                    fx_quang(fx_bl, bw, bh, lx, ly - 38.0f * sk, 24.0f * sk, 24.0f * sk, (int)(112 * nh), (int)(88 * nh), (int)(42 * nh));
                     fx_quang(fx_bl, bw, bh, lx, ly + 4.0f * sk, 82.0f * sk, 34.0f * sk, (int)(118 * nh), (int)(96 * nh), (int)(52 * nh));
                 } else if (kieu == 3) {
-                    fx_quang(fx_bl, bw, bh, lx, ly - 22.0f * sk, 24.0f * sk, 24.0f * sk, (int)(170 * nh), (int)(128 * nh), (int)(60 * nh));
+                    fx_quang(fx_bl, bw, bh, lx, ly - 22.0f * sk, 22.0f * sk, 22.0f * sk, (int)(120 * nh), (int)(90 * nh), (int)(42 * nh));
                     fx_quang(fx_bl, bw, bh, lx, ly + 3.0f * sk, 56.0f * sk, 24.0f * sk, (int)(90 * nh), (int)(72 * nh), (int)(38 * nh));
                 } else {
-                    fx_quang(fx_bl, bw, bh, lx, ly - 7.0f * sk, 20.0f * sk, 18.0f * sk, (int)(160 * nh), (int)(112 * nh), (int)(44 * nh));
+                    fx_quang(fx_bl, bw, bh, lx, ly - 7.0f * sk, 20.0f * sk, 18.0f * sk, (int)(124 * nh), (int)(88 * nh), (int)(34 * nh));
                     fx_quang(fx_bl, bw, bh, lx, ly + 2.0f * sk, 40.0f * sk, 17.0f * sk, (int)(74 * nh), (int)(56 * nh), (int)(26 * nh));
                 }
             }
@@ -597,7 +609,14 @@ static void gfx_hd_scene(uint32_t *fb, int W, int H, int x0, int y0, int x1, int
             int px0 = x0 + bx * FXB, px1 = px0 + FXB < x1 ? px0 + FXB : x1;
             int bx1 = bx + 1 < bw ? bx + 1 : bx;
             int vg = (fx_vg && gfx_fx_vig > 0) ? 256 - (256 - fx_vg[(size_t)by * bw + bx]) * gfx_fx_vig / 100 : 256;
-            if (toi_dem < 256) vg = vg * toi_dem >> 8;
+            if (toi_dem < 256) {
+                int L = fx_lum[(size_t)by * bw + bx], f = toi_dem;
+                if (L > 196) {
+                    int tq = (L - 196) * 256 / 48;
+                    f = toi_dem + ((256 - toi_dem) * (tq > 256 ? 256 : tq) >> 8);
+                }
+                vg = vg * f >> 8;
+            }
             if (co_may) {
                 int gx = bx / FXC, mfx = bx % FXC;
                 int v0 = m0[gx] * (FXC - mfx) + m0[gx + 1] * mfx, v1 = m1[gx] * (FXC - mfx) + m1[gx + 1] * mfx;
