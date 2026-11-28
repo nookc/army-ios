@@ -47,8 +47,10 @@ dat(GT, 4, 'bi_to', 530, 130); dat(GT, 4, 'bi_chong', 462, 150, 598, 150); dat(G
 dat(GT, 4, 'la_thu', 420, 120, 480, 160, 600, 110, 660, 160, 380, 150, 700, 130)
 
 # ================= Nong trai chung (25): 648 x 168; cong FARM cu o (207, 20), duong dat y 68..148
+# cong_trai = -2: anh cong FARM goc da bi thay bang anh trong suot (hdx/0976e328.png) nen cong moi PHAI luon duoc ve,
+# ke ca khi chu de = 0 (truoc day -1 -> quan tri tat chu de la mat cong)
 NT = 25
-dat(NT, -1, 'cong_trai', 207, 21); dat(NT, -1, 'huong_duong', 148, 60, 266, 62); dat(NT, -1, 'rom_bi', 400, 64); dat(NT, -1, 'bu_nhin', 575, 72)
+dat(NT, -2, 'cong_trai', 207, 21); dat(NT, -1, 'huong_duong', 148, 60, 266, 62); dat(NT, -1, 'rom_bi', 400, 64); dat(NT, -1, 'bu_nhin', 575, 72)
 dat(NT, 1, 'nguoi_tuyet', 306, 66); dat(NT, 1, 'cay_den', 120, 64, 345, 64); dat(NT, 1, 'gau_trang', 452, 68); dat(NT, 1, 'hop_qua', 500, 68)
 dat(NT, 2, 'bo_hoa', 306, 66, 120, 66); dat(NT, 2, 'bong_tim', 452, 70)
 dat(NT, 3, 'sao_vui', 306, 68); dat(NT, 3, 'banh_kem', 452, 68)
@@ -56,7 +58,7 @@ dat(NT, 4, 'bi_chong', 306, 66, 120, 66); dat(NT, 4, 'nen', 240, 70, 176, 70); d
 dat(NT, 4, 'la_thu', 100, 100, 220, 120, 340, 96, 460, 126, 560, 100, 300, 140)
 
 out = ['/**', ' * Vi tri vat trang tri ban HD - TEP SINH TU DONG boi Scripts/avatar/hd/mkvitri.py (sua o do roi chay lai).',
-       ' * Moi vat 5 so: ma ban do, chu de (-1 luc nao cung co, 1 Giang sinh, 2 Tinh nhan, 3 Vui nhon, 4 Halloween),',
+       ' * Moi vat 5 so: ma ban do, chu de (-2 LUON co ke ca khi quan tri tat chu de - vat thay han anh goc nhu cong nong trai;', ' * -1 vat chung khi bat chu de bat ky, 1 Giang sinh, 2 Tinh nhan, 3 Vui nhon, 4 Halloween),',
        ' * so anh (HdTrangTri.TEN), x, y (diem chan giua, don vi ban do: 1 o = 24).', ' */', 'final class HdViTri {', '    private HdViTri() {', '    }', '',
        '    static final String[] TEN = {' + ', '.join('"%s"' % n for n in TEN) + '};', '', '    static final int[] VT = {']
 for i in range(0, len(V), 6):

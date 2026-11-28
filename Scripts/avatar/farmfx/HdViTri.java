@@ -1,6 +1,7 @@
 /**
  * Vi tri vat trang tri ban HD - TEP SINH TU DONG boi Scripts/avatar/hd/mkvitri.py (sua o do roi chay lai).
- * Moi vat 5 so: ma ban do, chu de (-1 luc nao cung co, 1 Giang sinh, 2 Tinh nhan, 3 Vui nhon, 4 Halloween),
+ * Moi vat 5 so: ma ban do, chu de (-2 LUON co ke ca khi quan tri tat chu de - vat thay han anh goc nhu cong nong trai;
+ * -1 vat chung khi bat chu de bat ky, 1 Giang sinh, 2 Tinh nhan, 3 Vui nhon, 4 Halloween),
  * so anh (HdTrangTri.TEN), x, y (diem chan giua, don vi ban do: 1 o = 24).
  */
 final class HdViTri {
@@ -29,7 +30,7 @@ final class HdViTri {
         9, 1, 33, 620, 162, 9, 2, 10, 530, 130, 9, 2, 36, 474, 142, 9, 2, 36, 586, 142, 9, 2, 37, 436, 152, 9, 2, 37, 626, 152,
         9, 3, 13, 530, 130, 9, 3, 14, 470, 142, 9, 3, 14, 590, 142, 9, 3, 38, 530, 152, 9, 4, 28, 530, 130, 9, 4, 25, 462, 150,
         9, 4, 25, 598, 150, 9, 4, 26, 500, 162, 9, 4, 26, 562, 164, 9, 4, 26, 640, 150, 9, 4, 29, 420, 120, 9, 4, 29, 480, 160,
-        9, 4, 29, 600, 110, 9, 4, 29, 660, 160, 9, 4, 29, 380, 150, 9, 4, 29, 700, 130, 25, -1, 24, 207, 21, 25, -1, 2, 148, 60,
+        9, 4, 29, 600, 110, 9, 4, 29, 660, 160, 9, 4, 29, 380, 150, 9, 4, 29, 700, 130, 25, -2, 24, 207, 21, 25, -1, 2, 148, 60,
         25, -1, 2, 266, 62, 25, -1, 3, 400, 64, 25, -1, 4, 575, 72, 25, 1, 7, 306, 66, 25, 1, 32, 120, 64, 25, 1, 32, 345, 64,
         25, 1, 33, 452, 68, 25, 1, 9, 500, 68, 25, 2, 36, 306, 66, 25, 2, 36, 120, 66, 25, 2, 37, 452, 70, 25, 3, 14, 306, 68,
         25, 3, 38, 452, 68, 25, 4, 25, 306, 66, 25, 4, 25, 120, 66, 25, 4, 26, 240, 70, 25, 4, 26, 176, 70, 25, 4, 31, 452, 68,
