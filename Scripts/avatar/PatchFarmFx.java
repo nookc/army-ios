@@ -89,7 +89,8 @@ public class PatchFarmFx {
                     break;
                 case "ce.class": data = va(data, PatchFarmFx::dauTruongCe, can, name); break;
                 case "do.class": data = va(va(data, PatchFarmFx::camMo, can, name), PatchFarmFx::hdCamTruoc, can, name); break;
-                case "gr.class": data = va(va(va(data, PatchFarmFx::moTruong, can, name), PatchFarmFx::hdThu, can, name), PatchFarmFx::thuAnToan, can, name); break;
+                case "gr.class": data = va(va(va(va(data, PatchFarmFx::moTruong, can, name), PatchFarmFx::hdThu, can, name), PatchFarmFx::thuAnToan, can, name), PatchFarmFx::thuMuot, can, name); break;
+                case "fa.class": data = va(data, PatchFarmFx::thuMuot, can, name); break;
                 case "ic.class":
                 case "bb.class": data = va(data, PatchFarmFx::tatHuongDan, can, name); break;
                 case "fx.class": data = va(data, PatchFarmFx::giaLuong, can, name); break;
@@ -211,7 +212,7 @@ public class PatchFarmFx {
                 && can.getOrDefault("ds_cao", 0) == 1 && can.getOrDefault("ds_cat", 0) == 1
                 && can.getOrDefault("nut_shop", 0) == 1 && can.getOrDefault("hoi_shop", 0) == 2
                 && can.getOrDefault("tt_xem", 0) == 1 && can.getOrDefault("mo_truong", 0) == 5
-                && can.getOrDefault("hd_di_muot", 0) == 2 && can.getOrDefault("hd_di_buoc", 0) == 1 && can.getOrDefault("hd_thu", 0) == 2
+                && can.getOrDefault("hd_di_muot", 0) == 2 && can.getOrDefault("hd_di_buoc", 0) == 1 && can.getOrDefault("hd_thu", 0) == 2 && can.getOrDefault("thu_muot", 0) == 2 && can.getOrDefault("thu_muot_fa", 0) == 1
                 && can.getOrDefault("tp_tin", 0) == 1 && can.getOrDefault("tp_nap", 0) == 2 && can.getOrDefault("tp_cap_nhat", 0) == 1
                 && can.getOrDefault("tp_noi", 0) == 1 && can.getOrDefault("menu_lenh", 0) == 1 && can.getOrDefault("bang_o", 0) == 1 && can.getOrDefault("bang_y", 0) == 1 && can.getOrDefault("bc_ta_ve", 0) >= 1 && can.getOrDefault("cot5_khac", 0) == 2 && can.getOrDefault("quay_dong", 0) == 1 && can.getOrDefault("quay_lenh", 0) == 1 && can.getOrDefault("quay_tick", 0) == 1 && can.getOrDefault("quay_mo", 0) == 1 && can.getOrDefault("quay_dau", 0) == 1 && can.getOrDefault("quay_giam", 0) == 1 && can.getOrDefault("quay_bo", 0) == 1 && can.getOrDefault("bang_cot", 0) >= 8 && can.getOrDefault("phong_cho", 0) == 1 && can.getOrDefault("ghe_kx", 0) >= 2 && can.getOrDefault("ghe_ja", 0) >= 2 && can.getOrDefault("gw_khung", 0) == 1 && can.getOrDefault("gw_chon", 0) == 1 && can.getOrDefault("o_luoi", 0) == 1 && can.getOrDefault("o_chon", 0) >= 1 && can.getOrDefault("quay_giu", 0) == 1 && can.getOrDefault("quay_san", 0) == 2 && can.getOrDefault("quay_luc", 0) == 1 && can.getOrDefault("dua_chip", 0) == 1 && can.getOrDefault("dua_nhan", 0) == 1 && can.getOrDefault("tp_dang_nhap", 0) == 2 && can.getOrDefault("thu_cap", 0) == 1 && can.getOrDefault("thu_ngau", 0) >= 2
                 && can.getOrDefault("hd_cam_truoc", 0) == 1 && can.getOrDefault("cham_dat", 0) >= 6
@@ -1237,6 +1238,29 @@ public class PatchFarmFx {
             l.add(tiep);
             mn.instructions.insert(l);
             dem(can, "hd_thu");
+        }
+    }
+
+    /**
+     * Thu cung co chu ky muot (ThuMuot): moi "fx.b(short)" trong gr (ve thu di theo) va fa (ve mon do theo khung) ->
+     * truoc do doi ma anh: gr: ThuMuot.anh(ma, this); fa: ThuMuot.anh(ma, null).
+     */
+    static void thuMuot(ClassNode cn, Map<String, Integer> can) {
+        boolean thu = cn.name.equals("gr");
+        for (MethodNode mn : cn.methods) {
+            if (mn.instructions == null || (mn.access & Opcodes.ACC_STATIC) != 0) {
+                continue;
+            }
+            for (AbstractInsnNode n : mn.instructions.toArray()) {
+                if (n.getOpcode() == Opcodes.INVOKESTATIC && ((MethodInsnNode) n).owner.equals("fx") && ((MethodInsnNode) n).name.equals("b")
+                        && ((MethodInsnNode) n).desc.equals("(S)Lf;")) {
+                    InsnList l = new InsnList();
+                    l.add(thu ? new VarInsnNode(Opcodes.ALOAD, 0) : new InsnNode(Opcodes.ACONST_NULL));
+                    l.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "ThuMuot", "anh", "(SLgr;)S", false));
+                    mn.instructions.insertBefore(n, l);
+                    dem(can, thu ? "thu_muot" : "thu_muot_fa");
+                }
+            }
         }
     }
 
