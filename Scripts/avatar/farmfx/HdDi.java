@@ -332,4 +332,112 @@ public final class HdDi {
     public static int quayGiam(int j) {
         return j - 5;
     }
+
+    // ---------------------------------------------------------------- vong quay so: quay tiep / tu quay ngay tren man vong quay
+    static boolean quayRoi, quayTrong, tuQuay;
+    static long quayXong, quayGui;
+    static by cmTu, cmDong;
+
+    /** vao man vong quay */
+    public static void quayMo() {
+        tuQuay = false;
+        quayXong = 0;
+        quayGui = 0;
+    }
+
+    /** this.r.a() trong lenh 2 cua vong quay: chi roi man hinh khi nguoi choi bam "Dong" */
+    public static void quayDong(hj r) {
+        if (quayRoi && r != null) {
+            r.a();
+        }
+    }
+
+    /** gui 1 luot quay moi voi luc cua lan truoc (datLai: vong dang hien qua -> dat lai vong truoc) */
+    static void quayNua(hw o, int s, int m, boolean datLai) {
+        if (datLai) {
+            quayTrong = true;
+            try {
+                o.a(2, 0);              // lenh goc: dat lai vong + hien qua bay len nguoi (khong roi vi quayRoi = false)
+            } catch (Throwable e) {
+                // buoc cuoi cua lenh goc (hien qua bay len) nem loi khi mon trung chua tai xong hinh: vong da dat lai roi -> quay tiep
+            } finally {
+                quayTrong = false;
+            }
+        }
+        int luc = m < 96 ? 96 : m > 270 ? 270 : m;
+        cx.a().a((short) s, luc - 90);
+        main.a.i();
+        quayGui = System.currentTimeMillis();
+    }
+
+    /** dau hw.a(lenh, _): true = da xu ly */
+    public static boolean quayLenh(hw o, int lenh, int s, int m) {
+        if (quayTrong) {
+            return false;
+        }
+        try {
+            if (lenh == 2) {                    // phim giua sau khi ra qua: "Quay tiep"
+                quayNua(o, s, m, true);
+                return true;
+            }
+            if (lenh == 33) {                   // "Dong"
+                tuQuay = false;
+                quayRoi = true;
+                quayTrong = true;
+                try {
+                    o.a(2, 0);
+                } catch (Throwable e) {
+                } finally {
+                    quayTrong = false;
+                    quayRoi = false;
+                }
+                return true;
+            }
+            if (lenh == 32) {                   // "Tu quay" / "Dung tu quay"
+                tuQuay = !tuQuay;
+                quayXong = 0;
+                quayGui = 0;
+                return true;
+            }
+        } catch (Throwable e) {
+        }
+        return false;
+    }
+
+    /** dau hw.k() (moi nhip): dat nhan 3 phim + tu quay. t = phim "Quay" (chua quay), v = phim hien sau khi ra du 3 qua */
+    public static void quayTick(hw o, int s, int m, by t, by v) {
+        try {
+            if (cmTu == null) {
+                cmTu = new by("Tự quay", 32);
+                cmDong = new by(kf.d, 33);
+            }
+            v.a = "Quay tiếp";
+            cmTu.a = tuQuay ? "Dừng tự quay" : "Tự quay";
+            o.ac = cmTu;
+            o.ae = cmDong;
+            if (!tuQuay) {
+                return;
+            }
+            long now = System.currentTimeMillis();
+            if (o.ad == v) {                    // da hien du 3 qua: nghi 1 giay cho nguoi choi nhin roi quay tiep
+                if (quayXong == 0) {
+                    quayXong = now;
+                } else if (now - quayXong >= 1000) {
+                    quayXong = 0;
+                    quayNua(o, s, m, true);
+                }
+            } else if (o.ad == t) {             // vong dang dung cho
+                quayXong = 0;
+                if (quayGui == 0) {
+                    quayNua(o, s, m, false);    // vua bat tu quay: quay luon
+                } else if (now - quayGui > 5000) {
+                    tuQuay = false;             // may chu khong cho quay (het xu / luong / ve, ruong day): dung tu quay
+                    quayGui = 0;
+                }
+            } else {
+                quayXong = 0;
+            }
+        } catch (Throwable e) {
+        }
+    }
 }

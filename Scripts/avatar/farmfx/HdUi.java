@@ -407,6 +407,24 @@ public final class HdUi {
         }
     }
 
+    /** mo o nhap chat trong phong OnGame (bau cua, tien len, phom...): y nhu game goc mo bong chat o the gioi, dich gui = phong */
+    static void moChatPhong() {
+        try {
+            if (!(main.a.r instanceof kx) || main.a.A != null) {
+                return;
+            }
+            if (!dm.d) {
+                dm.d = true;
+                dm.b().b[4] = 1;
+                main.a.a.b();
+                main.a.z.a = true;
+            }
+            im.d().d = (cq) main.a.r;
+            im.c = true;
+        } catch (Throwable e) {
+        }
+    }
+
     /** dp vua dat khung bang (je): ban HD can bang giua ca chieu cao man hinh (tab khong bi cat, chua cho nut X goc tren) */
     public static void bangY() {
         if (!hd()) {
@@ -1005,7 +1023,8 @@ public final class HdUi {
             }
             xt += NUT + 6;
         }
-        if (tran && hj.ap != null && main.GameMidlet.e == 9 && main.a.m()) {
+        // phong cho / ban choi OnGame (kx) cung co nut chat: ban HD khong co ban phim ao nen truoc day KHONG chat duoc trong phong
+        if (tran && ((hj.ap != null && main.GameMidlet.e == 9 && main.a.m()) || phong)) {
             veNutAnh(g, "nut_chat", N_CHAT, xt, yT);
             xt += NUT + 6;
         }
@@ -1075,6 +1094,10 @@ public final class HdUi {
                 }
             } catch (Throwable e) {
             }
+        }
+        // dang mo o chat trong phong OnGame: phim giua cua phong (Bat dau / San sang) khong ve o hang day (bi nut Chat de len)
+        if (phong && im.c && sc != null && (sc.equals(kf.n) || sc.equals(kf.j) || sc.equals(kf.k))) {
+            sc = null;
         }
         // ---- hang day: phim trai (khong phai Menu) o goc trai; phim giua + phai don ve goc phai
         int yD = H - CAO - 3 - nang();
@@ -1174,6 +1197,12 @@ public final class HdUi {
         chamPhim = -1;
         goIn("nha");
         int n = nutTai(main.a.h, main.a.i);
+        if (n == N_CHAT && main.a.r instanceof kx && trong(n, main.a.j, main.a.k, 9)) {
+            moChatPhong();              // phong OnGame: mo o chat (game goc chi mo bong chat o the gioi, GameMidlet.e == 9)
+            main.a.g = false;
+            main.a.f = false;
+            return false;
+        }
         if (n < 0 || n == N_CHAT || !trong(n, main.a.j, main.a.k, 9)) {
             return false;
         }

@@ -152,6 +152,7 @@ public class PatchFarmFx {
             if (name.equals("hw.class")) {
                 data = va(data, PatchFarmFx::hdQuay, can, name);
                 data = va(data, PatchFarmFx::quayNhanh, can, name);
+                data = va(data, PatchFarmFx::quayLai, can, name);
             }
             if (name.equals("main/a.class")) {
                 data = va(data, PatchFarmFx::tpNoi, can, name);
@@ -212,7 +213,7 @@ public class PatchFarmFx {
                 && can.getOrDefault("tt_xem", 0) == 1 && can.getOrDefault("mo_truong", 0) == 5
                 && can.getOrDefault("hd_di_muot", 0) == 2 && can.getOrDefault("hd_di_buoc", 0) == 1 && can.getOrDefault("hd_thu", 0) == 2
                 && can.getOrDefault("tp_tin", 0) == 1 && can.getOrDefault("tp_nap", 0) == 2 && can.getOrDefault("tp_cap_nhat", 0) == 1
-                && can.getOrDefault("tp_noi", 0) == 1 && can.getOrDefault("menu_lenh", 0) == 1 && can.getOrDefault("bang_o", 0) == 1 && can.getOrDefault("bang_y", 0) == 1 && can.getOrDefault("bc_ta_ve", 0) >= 1 && can.getOrDefault("cot5_khac", 0) == 2 && can.getOrDefault("quay_dau", 0) == 1 && can.getOrDefault("quay_giam", 0) == 1 && can.getOrDefault("quay_bo", 0) == 1 && can.getOrDefault("bang_cot", 0) >= 8 && can.getOrDefault("phong_cho", 0) == 1 && can.getOrDefault("ghe_kx", 0) >= 2 && can.getOrDefault("ghe_ja", 0) >= 2 && can.getOrDefault("gw_khung", 0) == 1 && can.getOrDefault("gw_chon", 0) == 1 && can.getOrDefault("o_luoi", 0) == 1 && can.getOrDefault("o_chon", 0) >= 1 && can.getOrDefault("quay_giu", 0) == 1 && can.getOrDefault("quay_san", 0) == 2 && can.getOrDefault("quay_luc", 0) == 1 && can.getOrDefault("dua_chip", 0) == 1 && can.getOrDefault("dua_nhan", 0) == 1 && can.getOrDefault("tp_dang_nhap", 0) == 2 && can.getOrDefault("thu_cap", 0) == 1 && can.getOrDefault("thu_ngau", 0) >= 2
+                && can.getOrDefault("tp_noi", 0) == 1 && can.getOrDefault("menu_lenh", 0) == 1 && can.getOrDefault("bang_o", 0) == 1 && can.getOrDefault("bang_y", 0) == 1 && can.getOrDefault("bc_ta_ve", 0) >= 1 && can.getOrDefault("cot5_khac", 0) == 2 && can.getOrDefault("quay_dong", 0) == 1 && can.getOrDefault("quay_lenh", 0) == 1 && can.getOrDefault("quay_tick", 0) == 1 && can.getOrDefault("quay_mo", 0) == 1 && can.getOrDefault("quay_dau", 0) == 1 && can.getOrDefault("quay_giam", 0) == 1 && can.getOrDefault("quay_bo", 0) == 1 && can.getOrDefault("bang_cot", 0) >= 8 && can.getOrDefault("phong_cho", 0) == 1 && can.getOrDefault("ghe_kx", 0) >= 2 && can.getOrDefault("ghe_ja", 0) >= 2 && can.getOrDefault("gw_khung", 0) == 1 && can.getOrDefault("gw_chon", 0) == 1 && can.getOrDefault("o_luoi", 0) == 1 && can.getOrDefault("o_chon", 0) >= 1 && can.getOrDefault("quay_giu", 0) == 1 && can.getOrDefault("quay_san", 0) == 2 && can.getOrDefault("quay_luc", 0) == 1 && can.getOrDefault("dua_chip", 0) == 1 && can.getOrDefault("dua_nhan", 0) == 1 && can.getOrDefault("tp_dang_nhap", 0) == 2 && can.getOrDefault("thu_cap", 0) == 1 && can.getOrDefault("thu_ngau", 0) >= 2
                 && can.getOrDefault("hd_cam_truoc", 0) == 1 && can.getOrDefault("cham_dat", 0) >= 6
                 && can.getOrDefault("dau_shop", 0) == 1 && can.getOrDefault("ve_o", 0) == 2
                 && can.getOrDefault("ve_preview", 0) == 1 && can.getOrDefault("ve_noi", 0) == 1
@@ -1432,6 +1433,64 @@ public class PatchFarmFx {
                         dem(can, "quay_bo");
                     }
                 }
+            }
+        }
+    }
+
+    /**
+     * Vong quay so (hw) - quan tri: "chon mon xong co cai vong quay, vong quay do phai quay duoc nhieu lan hoac auto quay ngay
+     * o do" (ban goc quay 1 lan la phai Dong, mo lai menu NPC, chon lai mon). Moi ban (JAR / doc / HD):
+     *  - dau hw.a(II)V: if (HdDi.quayLenh(this, lenh, s, m)) return;  (phim giua sau khi ra qua = "Quay tiep": dat lai vong +
+     *    quay luon voi luc cu; phim trai "Tu quay" / "Dung tu quay"; phim phai "Dong")
+     *  - trong hw.a(II)V: this.r.a() (roi man hinh) -> HdDi.quayDong(r) (chi roi khi bam "Dong")
+     *  - dau hw.k()V: HdDi.quayTick(this, s, m, t, v) (dat nhan phim, tu quay lien tuc)
+     *  - dau hw.a(Lhj;S)V: HdDi.quayMo() (vao man hinh: tat tu quay)
+     */
+    static void quayLai(ClassNode cn, Map<String, Integer> can) {
+        for (MethodNode mn : cn.methods) {
+            if (mn.instructions == null) {
+                continue;
+            }
+            if (mn.name.equals("a") && mn.desc.equals("(II)V")) {
+                for (AbstractInsnNode n : mn.instructions.toArray()) {
+                    if (n.getOpcode() == Opcodes.INVOKEVIRTUAL && ((MethodInsnNode) n).name.equals("a") && ((MethodInsnNode) n).desc.equals("()V")
+                            && n.getPrevious() != null && n.getPrevious().getOpcode() == Opcodes.GETFIELD
+                            && ((FieldInsnNode) n.getPrevious()).owner.equals("hw") && ((FieldInsnNode) n.getPrevious()).name.equals("r")) {
+                        mn.instructions.set(n, new MethodInsnNode(Opcodes.INVOKESTATIC, "HdDi", "quayDong", "(Lhj;)V", false));
+                        dem(can, "quay_dong");
+                    }
+                }
+                LabelNode tiep = new LabelNode();
+                InsnList l = new InsnList();
+                l.add(new VarInsnNode(Opcodes.ALOAD, 0));
+                l.add(new VarInsnNode(Opcodes.ILOAD, 1));
+                l.add(new VarInsnNode(Opcodes.ALOAD, 0));
+                l.add(new FieldInsnNode(Opcodes.GETFIELD, "hw", "s", "S"));
+                l.add(new VarInsnNode(Opcodes.ALOAD, 0));
+                l.add(new FieldInsnNode(Opcodes.GETFIELD, "hw", "m", "I"));
+                l.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "HdDi", "quayLenh", "(Lhw;III)Z", false));
+                l.add(new JumpInsnNode(Opcodes.IFEQ, tiep));
+                l.add(new InsnNode(Opcodes.RETURN));
+                l.add(tiep);
+                mn.instructions.insert(l);
+                dem(can, "quay_lenh");
+            } else if (mn.name.equals("k") && mn.desc.equals("()V")) {
+                InsnList l = new InsnList();
+                l.add(new VarInsnNode(Opcodes.ALOAD, 0));
+                l.add(new VarInsnNode(Opcodes.ALOAD, 0));
+                l.add(new FieldInsnNode(Opcodes.GETFIELD, "hw", "s", "S"));
+                l.add(new VarInsnNode(Opcodes.ALOAD, 0));
+                l.add(new FieldInsnNode(Opcodes.GETFIELD, "hw", "m", "I"));
+                l.add(new VarInsnNode(Opcodes.ALOAD, 0));
+                l.add(new FieldInsnNode(Opcodes.GETFIELD, "hw", "t", "Lby;"));
+                l.add(new VarInsnNode(Opcodes.ALOAD, 0));
+                l.add(new FieldInsnNode(Opcodes.GETFIELD, "hw", "v", "Lby;"));
+                l.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "HdDi", "quayTick", "(Lhw;IILby;Lby;)V", false));
+                mn.instructions.insert(l);
+                dem(can, "quay_tick");
+            } else if (mn.name.equals("a") && mn.desc.equals("(Lhj;S)V")) {
+                mn.instructions.insert(new MethodInsnNode(Opcodes.INVOKESTATIC, "HdDi", "quayMo", "()V", false));
+                dem(can, "quay_mo");
             }
         }
     }
