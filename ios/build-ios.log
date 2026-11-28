@@ -1,0 +1,80 @@
+warning: refs/tags/v8.2.8 d54010c33189bfac434d85d315ad69783be7ea9b is not a commit!
+j2c: 510 lop, 8 tep, 0 loi dich, 0 tham chieu thieu
+classes 510
+methods 3889
+literals 1416
+selectors 166
+icache 453
+loi dich 0
+tham chieu thieu:
+== bien dich (iphoneos)
+== lien ket
+== Info.plist: Xcode 26.3 (17C529) -> DTXcode 2630, SDK iphoneos26.2 (23C57), macOS 24H232
+/Users/runner/work/army-ios/army-ios/native/platform/avatar-ios/PrivacyInfo.xcprivacy: OK
+/Users/runner/work/army-ios/army-ios/native/build/avatar-ios/dev/Avatar.app/AppIcon60x60@2x.png
+/Users/runner/work/army-ios/army-ios/native/build/avatar-ios/dev/Avatar.app/AppIcon76x76@2x~ipad.png
+/Users/runner/work/army-ios/army-ios/native/build/avatar-ios/dev/Avatar.app/Assets.car
+/Users/runner/work/army-ios/army-ios/native/build/avatar-ios/dev/icon-info.plist
+
+co Assets.car
+total 174608
+drwxr-xr-x  12 runner  staff       384 Nov 28 15:32 .
+drwxr-xr-x   8 runner  staff       256 Nov 28 15:32 ..
+-rw-r--r--   1 runner  staff     22627 Nov 28 15:31 AppIcon60x60@2x.png
+-rw-r--r--   1 runner  staff     35666 Nov 28 15:31 AppIcon60x60@3x.png
+-rw-r--r--   1 runner  staff     33091 Nov 28 15:31 AppIcon76x76@2x~ipad.png
+-rw-r--r--   1 runner  staff    669512 Nov 28 15:32 Assets.car
+-rwxr-xr-x   1 runner  staff   3091048 Nov 28 15:31 Avatar
+-rw-r--r--   1 runner  staff  85523137 Nov 28 15:31 Avatar258.jar
+-rw-r--r--   1 runner  staff      1568 Nov 28 15:31 Info.plist
+-rw-r--r--   1 runner  staff         8 Nov 28 15:32 PkgInfo
+-rw-r--r--   1 runner  staff       549 Nov 28 15:31 PrivacyInfo.xcprivacy
+-rw-r--r--   1 runner  staff         0 Nov 28 15:31 server.txt
+-rw-r--r--  1 runner  staff  87547244 Nov 28 15:32 /Users/runner/work/army-ios/army-ios/native/build/avatar-ios/Avatar-Thuan.ipa
+Non-fat file: /Users/runner/work/army-ios/army-ios/native/build/avatar-ios/dev/Avatar.app/Avatar is architecture: arm64
+vn.avatar.diemky.hd
+Avatar 250 HD
+Array {
+    UIInterfaceOrientationLandscapeRight
+    UIInterfaceOrientationLandscapeLeft
+}
+/Users/runner/work/army-ios/army-ios/native/build/avatar-ios/ipa-hd/Payload/Avatar.app/AppIcon76x76@2x~ipad.png
+/Users/runner/work/army-ios/army-ios/native/build/avatar-ios/ipa-hd/Payload/Avatar.app/Assets.car
+
+HD: co Assets.car (bieu tuong rieng)
+-rw-r--r--  1 runner  staff  89006144 Nov 28 15:32 /Users/runner/work/army-ios/army-ios/native/build/avatar-ios/AvatarHD-Thuan.ipa
+== bien dich (iphonesimulator)
+== lien ket
+== Info.plist: Xcode 26.3 (17C529) -> DTXcode 2630, SDK iphonesimulator26.2 (23C57), macOS 24H232
+/Users/runner/work/army-ios/army-ios/native/platform/avatar-ios/PrivacyInfo.xcprivacy: OK
+/Users/runner/work/army-ios/army-ios/native/build/avatar-ios/sim/Avatar.app/AppIcon60x60@2x.png
+/Users/runner/work/army-ios/army-ios/native/build/avatar-ios/sim/Avatar.app/AppIcon76x76@2x~ipad.png
+/Users/runner/work/army-ios/army-ios/native/build/avatar-ios/sim/Avatar.app/Assets.car
+/Users/runner/work/army-ios/army-ios/native/build/avatar-ios/sim/icon-info.plist
+
+co Assets.car
+total 174656
+drwxr-xr-x  12 runner  staff       384 Nov 28 15:32 .
+drwxr-xr-x   8 runner  staff       256 Nov 28 15:32 ..
+-rw-r--r--   1 runner  staff     22627 Nov 28 15:32 AppIcon60x60@2x.png
+-rw-r--r--   1 runner  staff     35666 Nov 28 15:32 AppIcon60x60@3x.png
+-rw-r--r--   1 runner  staff     33091 Nov 28 15:32 AppIcon76x76@2x~ipad.png
+-rw-r--r--   1 runner  staff    669512 Nov 28 15:32 Assets.car
+-rwxr-xr-x   1 runner  staff   3115352 Nov 28 15:32 Avatar
+-rw-r--r--   1 runner  staff  85523137 Nov 28 15:32 Avatar258.jar
+-rw-r--r--   1 runner  staff      1595 Nov 28 15:32 Info.plist
+-rw-r--r--   1 runner  staff         8 Nov 28 15:32 PkgInfo
+-rw-r--r--   1 runner  staff       549 Nov 28 15:32 PrivacyInfo.xcprivacy
+-rw-r--r--   1 runner  staff         0 Nov 28 15:32 server.txt
+/Users/runner/work/army-ios/army-ios/native/build/avatar-ios/sim/Avatar.app: replacing existing signature
+vn.avatar.diemky.hd
+Avatar 250 HD
+Array {
+    UIInterfaceOrientationLandscapeRight
+    UIInterfaceOrientationLandscapeLeft
+}
+/Users/runner/work/army-ios/army-ios/native/build/avatar-ios/sim-hd/Avatar.app/AppIcon76x76@2x~ipad.png
+/Users/runner/work/army-ios/army-ios/native/build/avatar-ios/sim-hd/Avatar.app/Assets.car
+
+HD: co Assets.car (bieu tuong rieng)
+/Users/runner/work/army-ios/army-ios/native/build/avatar-ios/sim-hd/Avatar.app: replacing existing signature

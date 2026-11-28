@@ -1,0 +1,1 @@
+ket noi tu 127.0.0.1:36956 nhan 3 byte: e50000

@@ -1,0 +1,155 @@
+chon: iPhone 17
+simulator CC50B935-E88F-4236-845E-A9A369409D57
+Monitoring boot status for iPhone 17 (CC50B935-E88F-4236-845E-A9A369409D57).
+[2026-11-28 15:33:55 +0000] Status=2, isTerminal=NO, Elapsed=00:57.
+	Waiting on Data Migration
+		Reason:Running plugin com.apple.-0LaunchServicesMigrator (00LaunchServicesMigrator.migrator, user-agnostic)
+		Migration Elapsed:00:45 seconds
+
+[2026-11-28 15:33:56 +0000] Status=2, isTerminal=NO, Elapsed=00:58.
+	Waiting on Data Migration
+		Reason:Running plugin com.apple.-0LaunchServicesMigrator (00LaunchServicesMigrator.migrator, user-agnostic)
+		Migration Elapsed:00:46 seconds
+
+[2026-11-28 15:33:57 +0000] Status=2, isTerminal=NO, Elapsed=00:59.
+	Waiting on Data Migration
+		Reason:Running plugin com.apple.-0LaunchServicesMigrator (00LaunchServicesMigrator.migrator, user-agnostic)
+		Migration Elapsed:00:47 seconds
+
+[2026-11-28 15:33:58 +0000] Status=2, isTerminal=NO, Elapsed=01:00.
+	Waiting on Data Migration
+		Reason:Running plugin com.apple.-0LaunchServicesMigrator (00LaunchServicesMigrator.migrator, user-agnostic)
+		Migration Elapsed:00:48 seconds
+
+[2026-11-28 15:33:59 +0000] Status=2, isTerminal=NO, Elapsed=01:01.
+	Waiting on Data Migration
+		Reason:Running plugin com.apple.-0LaunchServicesMigrator (00LaunchServicesMigrator.migrator, user-agnostic)
+		Migration Elapsed:00:49 seconds
+
+[2026-11-28 15:34:00 +0000] Status=2, isTerminal=NO, Elapsed=01:02.
+	Waiting on Data Migration
+		Reason:Running plugin com.apple.-0LaunchServicesMigrator (00LaunchServicesMigrator.migrator, user-agnostic)
+		Migration Elapsed:00:50 seconds
+
+[2026-11-28 15:34:07 +0000] Status=2, isTerminal=NO, Elapsed=01:10.
+	Waiting on Data Migration
+		Reason:Running plugin com.apple.securityd.KeychainMigrator (KeychainMigrator.migrator, user-agnostic)
+		Migration Elapsed:00:51 seconds
+
+[2026-11-28 15:34:11 +0000] Status=2, isTerminal=NO, Elapsed=01:13.
+	Waiting on Data Migration
+		Reason:Running plugin com.apple.MobileSafari.migrator (MobileSafari.migrator)
+		Migration Elapsed:00:57 seconds
+
+[2026-11-28 15:34:13 +0000] Status=4, isTerminal=NO, Elapsed=01:15.
+	Waiting on System App
+
+[2026-11-28 15:34:14 +0000] Status=4, isTerminal=NO, Elapsed=01:16.
+	Waiting on System App
+
+[2026-11-28 15:34:16 +0000] Status=4, isTerminal=NO, Elapsed=01:19.
+	Waiting on System App
+
+[2026-11-28 15:34:18 +0000] Status=4, isTerminal=NO, Elapsed=01:20.
+	Waiting on System App
+
+[2026-11-28 15:34:18 +0000] Status=4, isTerminal=NO, Elapsed=01:20.
+	Waiting on System App
+
+[2026-11-28 15:34:20 +0000] Status=4, isTerminal=NO, Elapsed=01:22.
+	Waiting on System App
+
+[2026-11-28 15:34:20 +0000] Status=4, isTerminal=NO, Elapsed=01:23.
+	Waiting on System App
+
+[2026-11-28 15:34:21 +0000] Status=4, isTerminal=NO, Elapsed=01:23.
+	Waiting on System App
+
+[2026-11-28 15:34:21 +0000] Status=4, isTerminal=NO, Elapsed=01:24.
+	Waiting on System App
+
+[2026-11-28 15:34:23 +0000] Status=4, isTerminal=NO, Elapsed=01:25.
+	Waiting on System App
+
+[2026-11-28 15:34:31 +0000] Status=4294967295, isTerminal=YES, Elapsed=01:33.
+	Finished
+
+app khoi dong sau 4 giay
+Detected file type 'PNG' from extension
+Wrote screenshot to: /Users/runner/work/army-ios/army-ios/native/build/avatar-ios/test/man_hinh_simulator.png
+Detected file type 'PNG' from extension
+Wrote screenshot to: /Users/runner/work/army-ios/army-ios/native/build/avatar-ios/test/hd_man_hinh_simulator.png
+== HD:
+man 542x250
+fps man mo dau 20.0
+ram 281 MB
+28/11 15:37:40 [app] vao game HD: man 542x250 net x4 (tran man 874x402 diem)
+total 22024
+drwxr-xr-x  29 runner  staff      928 Nov 28 15:38 .
+drwxr-xr-x  13 runner  staff      416 Nov 28 15:32 ..
+-rw-r--r--@  1 runner  staff       43 Nov 28 15:37 autotest.txt
+-rw-r--r--   1 runner  staff     2391 Nov 28 15:37 console.log
+-rw-r--r--   1 runner  staff        0 Nov 28 15:37 crash_app.txt
+-rw-r--r--@  1 runner  staff       43 Nov 28 15:38 hd_autotest.txt
+-rw-r--r--   1 runner  staff     2510 Nov 28 15:38 hd_console.log
+-rw-r--r--   1 runner  staff        0 Nov 28 15:38 hd_crash_app.txt
+-rw-r--r--   1 runner  staff     1263 Nov 28 15:38 hd_log_app.txt
+-rw-r--r--@  1 runner  staff  2036946 Nov 28 15:38 hd_man_hinh_simulator.png
+-rw-r--r--   1 runner  staff  1118156 Nov 28 15:38 hd_t1_mo_dau.png
+-rw-r--r--   1 runner  staff  1134411 Nov 28 15:38 hd_t2_o_dang_nhap.png
+-rw-r--r--   1 runner  staff  1999072 Nov 28 15:38 hd_t3_ban_phim.png
+-rw-r--r--   1 runner  staff  1131931 Nov 28 15:38 hd_t4_da_go.png
+-rw-r--r--   1 runner  staff  1124048 Nov 28 15:38 hd_t5_choi_tiep.png
+-rw-r--r--   1 runner  staff  1109062 Nov 28 15:38 hd_t6_thanh_pho.png
+-rw-r--r--   1 runner  staff  1045280 Nov 28 15:38 hd_t7_ket_noi.png
+-rw-r--r--   1 runner  staff     1188 Nov 28 15:37 log_app.txt
+-rw-r--r--@  1 runner  staff    92462 Nov 28 15:37 man_hinh_simulator.png
+-rw-r--r--   1 runner  staff      551 Nov 28 15:32 may_chu_gia.py
+-rw-r--r--   1 runner  staff       94 Nov 28 15:38 may_chu_gia.txt
+-rw-r--r--   1 runner  staff    15703 Nov 28 15:37 t1_mo_dau.png
+-rw-r--r--   1 runner  staff    16467 Nov 28 15:37 t2_o_dang_nhap.png
+-rw-r--r--   1 runner  staff   326870 Nov 28 15:37 t3_ban_phim.png
+-rw-r--r--   1 runner  staff    16554 Nov 28 15:37 t4_da_go.png
+-rw-r--r--   1 runner  staff    15984 Nov 28 15:37 t5_choi_tiep.png
+-rw-r--r--   1 runner  staff    13077 Nov 28 15:37 t6_thanh_pho.png
+-rw-r--r--   1 runner  staff    11899 Nov 28 15:37 t7_ket_noi.png
+-rw-r--r--   1 runner  staff       13 Nov 28 15:37 trang_thai_app.txt
+native/tools/avatar_sim_test.sh: line 127:  4570 Terminated: 15          python3 "$OUT/may_chu_gia.py" "$OUT/may_chu_gia.txt"
+app con chay
+man 241x466
+fps man mo dau 19.8
+ram 182 MB
+== may chu gia:
+ket noi tu 127.0.0.1:50148 nhan 3 byte: e50000
+ket noi tu 127.0.0.1:50376 nhan 3 byte: e50000
+28/11 15:36:54 [app] khoi dong Avatar 2.5.8 (46), iOS 26.2, ban thuan (ma may)
+28/11 15:36:54 [app] vao game: man 241x466 (vung an toan 402x778 diem)
+28/11 15:37:18 [mang] 127.0.0.1:14444 -> may chu
+2026-11-28 15:36:54.064 Avatar[7669:28085] [app] khoi dong Avatar 2.5.8 (46), iOS 26.2, ban thuan (ma may)
+2026-11-28 15:36:54.399 Avatar[7669:28085] [app] vao game: man 241x466 (vung an toan 402x778 diem)
+2026-11-28 15:36:54.499 Avatar[7669:28085] [gc] khoi dong: 471 thu vien da nap, GC xet 1021 vung du lieu (giu 3 cua app, bo 1018 cua he thong)
+2026-11-28 15:36:54.562 Avatar[7669:28146] [Boot] khoi dong main.GameMidlet
+2026-11-28 15:36:57.328 Avatar[7669:28147] index: 25
+2026-11-28 15:36:57.329 Avatar[7669:28147] saveLogin
+2026-11-28 15:36:57.772 Avatar[7669:28148] [Boot] giai nen san anh lon: 0 ms
+2026-11-28 15:37:02.281 Avatar[7669:28092] [autotest] t1_mo_dau 241x466 khung 152
+2026-11-28 15:37:07.394 Avatar[7669:28147] clickNewGame: false    1
+2026-11-28 15:37:08.888 Avatar[7669:28092] [autotest] t2_o_dang_nhap 241x466 khung 283
+2026-11-28 15:37:11.410 Avatar[7669:28085] [autotest] t3_ban_phim (cua so)
+2026-11-28 15:37:13.032 Avatar[7669:28092] [autotest] t4_da_go 241x466 khung 359
+2026-11-28 15:37:15.531 Avatar[7669:28092] [autotest] t5_choi_tiep 241x466 khung 407
+2026-11-28 15:37:15.543 Avatar[7669:28147] clickNewGame: false    0
+2026-11-28 15:37:18.761 Avatar[7669:28092] [autotest] t6_thanh_pho 241x466 khung 472
+2026-11-28 15:37:18.794 Avatar[7669:30773] [mang] 127.0.0.1:14444 -> may chu
+2026-11-28 15:37:18.796 Avatar[7669:28147] setProviderAndClientType: frp2qrxacmig_,nld1com.noig_,trfrp1qr3555d328824d87-4t250ig_,xs4frp1qr11233r3yr7839372-3t251ig_,trfrp1qr3555d328824d87-2t250ig_,fvfrp1qr411233r8ddd484srg-1t252ig_,trfrp1qr3555d328824d870t250ig_,fvfrp1qr411233r8ddd484srg1t252ig_,trfrp1qr3555d328824d872t250ig_,xs4frp1qr11233r3yr78393723t251ig_,trfrp1qr3555d328824d874t250ig_,fvfrp1qr411233r8ddd484srg5t252    nld1    4nld1
+2026-11-28 15:37:18.798 Avatar[7669:28147] login: true    0
+2026-11-28 15:37:18.799 Avatar[7669:28147] loginaaaaaaaaaaaaaa: test1    123456
+2026-11-28 15:37:23.884 Avatar[7669:28092] [autotest] t7_ket_noi 241x466 khung 574
+2026-11-28 15:37:23.887 Avatar[7669:28092] [autotest] man 241x466
+fps man mo dau 19.8
+ram 182 MB
+2026-11-28 15:37:23.887 Avatar[7669:28092] [gc] sau tu kiem thu: 724 thu vien da nap, GC xet 1620 vung du lieu (giu 3 cua app, bo 1617 cua he thong)
+2026-11-28 15:37:23.889 Avatar[7669:28092] [autotest] xong
+2026-11-28 15:37:29.128 Avatar[7669:30776] onDisconnected
+vn.avatar.diemky: 7669
+KET QUA: client da ket noi va gui goi dang nhap toi may chu (OK)

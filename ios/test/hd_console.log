@@ -1,0 +1,28 @@
+2026-11-28 15:37:40.439 Avatar[9230:32786] [app] khoi dong Avatar 2.5.8 (46), iOS 26.2, ban thuan (ma may)
+2026-11-28 15:37:40.519 Avatar[9230:32786] [app] le an toan: trai 38 phai 38 duoi 12 (diem game)
+2026-11-28 15:37:40.521 Avatar[9230:32786] [app] vao game HD: man 542x250 net x4 (tran man 874x402 diem)
+2026-11-28 15:37:40.531 Avatar[9230:32786] [gc] khoi dong: 471 thu vien da nap, GC xet 1021 vung du lieu (giu 3 cua app, bo 1018 cua he thong)
+2026-11-28 15:37:40.548 Avatar[9230:32843] [Boot] khoi dong main.GameMidlet
+2026-11-28 15:37:43.409 Avatar[9230:32849] index: 25
+2026-11-28 15:37:43.411 Avatar[9230:32849] saveLogin
+2026-11-28 15:37:43.789 Avatar[9230:32850] [Boot] giai nen san anh lon: 0 ms
+2026-11-28 15:37:48.409 Avatar[9230:32804] [autotest] t1_mo_dau 2168x1000 khung 152
+2026-11-28 15:37:53.561 Avatar[9230:32849] clickNewGame: false    1
+2026-11-28 15:37:55.095 Avatar[9230:32804] [autotest] t2_o_dang_nhap 2168x1000 khung 286
+2026-11-28 15:37:58.441 Avatar[9230:32786] [autotest] t3_ban_phim (cua so)
+2026-11-28 15:38:00.294 Avatar[9230:32804] [autotest] t4_da_go 2168x1000 khung 380
+2026-11-28 15:38:02.937 Avatar[9230:32804] [autotest] t5_choi_tiep 2168x1000 khung 433
+2026-11-28 15:38:02.961 Avatar[9230:32849] clickNewGame: false    0
+2026-11-28 15:38:06.236 Avatar[9230:32804] [autotest] t6_thanh_pho 2168x1000 khung 499
+2026-11-28 15:38:06.277 Avatar[9230:35343] [mang] 127.0.0.1:14444 -> may chu
+2026-11-28 15:38:06.278 Avatar[9230:32849] setProviderAndClientType: frp2qrxacmig_,nld1com.noig_,trfrp1qr3555d328824d87-4t250ig_,xs4frp1qr11233r3yr7839372-3t251ig_,trfrp1qr3555d328824d87-2t250ig_,fvfrp1qr411233r8ddd484srg-1t252ig_,trfrp1qr3555d328824d870t250ig_,fvfrp1qr411233r8ddd484srg1t252ig_,trfrp1qr3555d328824d872t250ig_,xs4frp1qr11233r3yr78393723t251ig_,trfrp1qr3555d328824d874t250ig_,fvfrp1qr411233r8ddd484srg5t252    nld1    4nld1
+2026-11-28 15:38:06.278 Avatar[9230:32849] login: true    0
+2026-11-28 15:38:06.278 Avatar[9230:32849] loginaaaaaaaaaaaaaa: test1    123456
+2026-11-28 15:38:11.432 Avatar[9230:32804] [autotest] t7_ket_noi 2168x1000 khung 602
+2026-11-28 15:38:11.439 Avatar[9230:32804] [autotest] man 542x250
+fps man mo dau 20.0
+ram 281 MB
+2026-11-28 15:38:11.440 Avatar[9230:32804] [gc] sau tu kiem thu: 724 thu vien da nap, GC xet 1620 vung du lieu (giu 3 cua app, bo 1617 cua he thong)
+2026-11-28 15:38:11.445 Avatar[9230:32804] [autotest] xong
+2026-11-28 15:38:16.469 Avatar[9230:35346] onDisconnected
+vn.avatar.diemky.hd: 9230

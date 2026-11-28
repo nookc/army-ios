@@ -1,0 +1,2 @@
+ket noi tu 127.0.0.1:50148 nhan 3 byte: e50000
+ket noi tu 127.0.0.1:50376 nhan 3 byte: e50000

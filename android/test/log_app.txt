@@ -1,0 +1,25 @@
+--------- beginning of main
+11-28 15:34:02.795  2420  2420 I Avatar  : [bocuc] canvas 0 0 1080 2280 aa 1026 1002 game 270 570
+--------- beginning of system
+--------- beginning of kernel
+11-28 15:34:06.182  2700  2700 I Avatar  : [app] activity tao (game chua chay)
+11-28 15:34:06.335  2700  2700 I Avatar  : [app] le an toan: trai 0 phai 0 duoi 0 (diem game)
+11-28 15:34:06.336  2700  2700 I Avatar  : [app] khoi dong main.GameMidlet (Android), man 544x258, jar 85523137 byte
+11-28 15:34:06.337  2700  2700 I Avatar  : [app] vao game HD: man 544x258 net x4 (view 2280x1080), kho anh 123 MB
+11-28 15:34:06.337  2700  2700 I Avatar  : [bocuc] canvas 0 0 2280 1080 aa 0 0 game 544 258
+11-28 15:34:06.395  2700  2726 I Avatar  : [app] luong game bat dau
+11-28 15:34:06.399  2700  2726 I Avatar  : [Boot] khoi dong main.GameMidlet
+11-28 15:34:09.527  2700  2733 I Avatar  : index: 25
+11-28 15:34:09.529  2700  2733 I Avatar  : saveLogin
+11-28 15:34:09.783  2700  2734 I Avatar  : [Boot] giai nen san anh lon: 0 ms
+11-28 15:34:19.000  2700  2733 I Avatar  : clickNewGame: false    1
+11-28 15:34:21.495  2700  2726 I Avatar  : [hd] may ve cham (43012 us/khung) -> tat hau ky canh
+11-28 15:34:33.659  2810  2810 I Avatar  : [app] activity tao (game chua chay)
+11-28 15:34:33.782  2810  2810 I Avatar  : [app] khoi dong main.GameMidlet (Android), man 270x570, jar 85523137 byte
+11-28 15:34:33.782  2810  2810 I Avatar  : [app] vao game: man 270x570
+11-28 15:34:33.782  2810  2810 I Avatar  : [bocuc] canvas 0 0 1080 2280 aa 1026 1002 game 270 570
+11-28 15:34:33.847  2810  2837 I Avatar  : [app] luong game bat dau
+11-28 15:34:33.850  2810  2837 I Avatar  : [Boot] khoi dong main.GameMidlet
+11-28 15:34:36.717  2810  2839 I Avatar  : index: 25
+11-28 15:34:36.731  2810  2839 I Avatar  : saveLogin
+11-28 15:34:36.989  2810  2840 I Avatar  : [Boot] giai nen san anh lon: 0 ms

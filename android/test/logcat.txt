@@ -1,0 +1,493 @@
+--------- beginning of main
+11-28 15:34:02.776  2660  2660 W app_process: JNI RegisterNativeMethods: attempt to register 0 native methods for android.media.AudioAttributes
+11-28 15:34:02.779  2660  2660 D AndroidRuntime: Calling main entry com.android.commands.input.Input
+11-28 15:34:02.795  2420  2420 I Avatar  : [bocuc] canvas 0 0 1080 2280 aa 1026 1002 game 270 570
+11-28 15:34:02.804  2660  2660 D AndroidRuntime: Shutting down VM
+11-28 15:34:02.888   299   338 D goldfish-address-space: claimShared: Ask to claim region [0x3f9c8e000 0x3fa59c000]
+--------- beginning of system
+11-28 15:34:05.292   504   532 I ActivityManager: Force stopping vn.avatar.diemky appid=10130 user=0: from pid 2675
+11-28 15:34:05.292   504   532 I ActivityManager: Killing 2420:vn.avatar.diemky/u0a130 (adj 0): stop vn.avatar.diemky due to from pid 2675
+11-28 15:34:05.292   504   532 W ActivityTaskManager: Force removing ActivityRecord{bd01f6e u0 vn.avatar.diemky/.MainActivity t10 f}}: app died, no saved state
+11-28 15:34:05.295   504   532 W InputReader: Device virtio_input_multi_touch_10 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:05.295   504   532 W InputReader: Device virtio_input_multi_touch_7 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:05.295   504   532 W InputReader: Device virtio_input_multi_touch_4 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:05.295   504   532 W InputReader: Device virtio_input_multi_touch_5 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:05.295   504   532 W InputReader: Device virtio_input_multi_touch_2 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:05.295   504   532 W InputReader: Device virtio_input_multi_touch_6 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:05.295   504   532 W InputReader: Device virtio_input_multi_touch_3 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:05.295   504   532 W InputReader: Device virtio_input_multi_touch_8 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:05.295   504   532 W InputReader: Device virtio_input_multi_touch_9 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:05.295   504   532 W InputReader: Device virtio_input_multi_touch_11 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:05.295   504   532 W InputReader: Device virtio_input_multi_touch_10 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:05.295   504   532 W InputReader: Device virtio_input_multi_touch_7 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:05.295   504   532 W InputReader: Device virtio_input_multi_touch_4 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:05.295   504   532 W InputReader: Device virtio_input_multi_touch_5 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:05.295   504   532 W InputReader: Device virtio_input_multi_touch_2 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:05.295   504   532 W InputReader: Device virtio_input_multi_touch_6 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:05.295   504   532 W InputReader: Device virtio_input_multi_touch_3 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:05.295   504   532 W InputReader: Device virtio_input_multi_touch_8 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:05.295   504   532 W InputReader: Device virtio_input_multi_touch_9 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:05.295   504   532 W InputReader: Device virtio_input_multi_touch_11 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:05.297  2675  2677 I cmd     : oneway function results will be dropped but finished with status OK and parcel size 4
+11-28 15:34:05.298  1018  1018 D CarrierSvcBindHelper: No carrier app for: 0
+11-28 15:34:05.299   300   363 W EmuHWC2 : No layers, exit, buffer 0x0
+11-28 15:34:05.303   504   537 W ActivityManager: setHasOverlayUi called on unknown pid: 2420
+11-28 15:34:05.305   279   279 I Zygote  : Process 2420 exited due to signal 9 (Killed)
+--------- beginning of kernel
+11-28 15:34:05.511     0     0 I binder  : undelivered transaction 162346, process died.
+11-28 15:34:05.316   300   363 W EmuHWC2 : No layers, exit, buffer 0x0
+11-28 15:34:05.317   504  2678 D WindowManager: relayoutVisibleWindow: Window{f269e0f u0 com.android.launcher3/com.android.launcher3.uioverrides.QuickstepLauncher EXITING} mAnimatingExit=true, mRemoveOnExit=false, mDestroying=false
+11-28 15:34:05.319   299   338 D goldfish-address-space: claimShared: Ask to claim region [0x3f9380000 0x3f9ce5000]
+11-28 15:34:05.321  2133  2133 I abb     : StartCommandInProcess(73657474696e67730067657400676c6f settings.get.glo [truncated])
+11-28 15:34:05.322   299   338 D goldfish-address-space: claimShared: Ask to claim region [0x3f9ce5000 0x3fa64a000]
+11-28 15:34:05.322  2133  2395 I abb     : oneway function results will be dropped but finished with status OK and parcel size 4
+11-28 15:34:05.323   299   338 D goldfish-address-space: claimShared: Ask to claim region [0x3f8000000 0x3f8965000]
+11-28 15:34:05.336   300   363 W EmuHWC2 : No layers, exit, buffer 0x0
+11-28 15:34:05.337   504   545 I libprocessgroup: Successfully killed process cgroup uid 10130 pid 2420 in 44ms
+11-28 15:34:05.316   504   504 W Binder:504_2: type=1400 audit(0.0:70): avc: denied { getopt } for scontext=u:r:system_server:s0 tcontext=u:r:shell:s0 tclass=unix_stream_socket permissive=0
+11-28 15:34:05.316   504   504 W Binder:504_2: type=1400 audit(0.0:71): avc: denied { getopt } for scontext=u:r:system_server:s0 tcontext=u:r:shell:s0 tclass=unix_stream_socket permissive=0
+11-28 15:34:05.351  2133  2133 I abb     : StartCommandInProcess(7061636b61676500696e7374616c6c2d package.install- [truncated])
+11-28 15:34:05.316   504   504 W Binder:504_2: type=1400 audit(0.0:72): avc: denied { getopt } for scontext=u:r:system_server:s0 tcontext=u:r:shell:s0 tclass=unix_stream_socket permissive=0
+11-28 15:34:05.593     0     0 I binder  : 1334:1334 transaction failed 29189/-22, size 96-0 line 2692
+11-28 15:34:05.463   504   571 I IncrementalService: createStorage: /data/app/vmdl1513402599.tmp | 5
+11-28 15:34:05.469   504   571 I incfs-mounts: [incfs] Loaded incremental-fs mount info: 2 instances, 3 mount points
+11-28 15:34:05.469   504   571 W incfs   : [incfs] couldn't change file mode to 0777: Invalid argument
+11-28 15:34:05.470   168   172 I incfs-mounts: [incfs] Loaded incremental-fs mount info: 2 instances, 3 mount points
+11-28 15:34:05.472   504   571 I incfs-mounts: [incfs] Loaded incremental-fs mount info: 2 instances, 4 mount points
+11-28 15:34:05.473   504   504 I incfs-dataloaderconnector: DataLoader::create1 cmd: 384|/data/incremental/MT_data_app_vmdl151/mount/.pending_reads (deleted)
+11-28 15:34:05.473   504   504 I incfs-dataloaderconnector: DataLoader::create1 pendingReads: 385|/data/incremental/MT_data_app_vmdl151/mount/.pending_reads (deleted)
+11-28 15:34:05.473   504   504 I incfs-dataloaderconnector: DataLoader::create1 log: 386|/data/incremental/MT_data_app_vmdl151/mount/.log (deleted)
+11-28 15:34:05.473   504   504 I incfs-dataloaderconnector: DataLoader::create2: 2|android|com.android.server.pm.PackageManagerShellCommandDataLoader|shellCommandId=373290337
+11-28 15:34:05.473   504   504 I incfs-dataloaderconnector: Reported status back to IncrementalService. DataLoaderId=3, status=2
+11-28 15:34:05.474   504   571 I IncrementalService: created storage 3
+11-28 15:34:05.475   504   571 E PackageManagerShellCommandDataLoader-jni: onPrepareImage: start.
+11-28 15:34:05.475   504   571 E PackageManagerShellCommandDataLoader-jni: onPrepareImage: done, proceeding to streaming.
+11-28 15:34:05.476   504   571 I PackageManagerShellCommandDataLoader-jni: Started streaming...
+11-28 15:34:05.476   504   571 I incfs-dataloaderconnector: Reported status back to IncrementalService. DataLoaderId=3, status=5
+11-28 15:34:05.476   504   571 I incfs-dataloaderconnector: Reported status back to IncrementalService. DataLoaderId=3, status=3
+11-28 15:34:05.531   504   571 W incfs   : [incfs] couldn't change file mode to 0777: Invalid argument
+11-28 15:34:05.544   504   604 W RuleEvaluation: Integrity rule files are not available.
+11-28 15:34:05.544   504   560 I PackageManager: Integrity check passed for file:///data/app/vmdl1513402599.tmp
+11-28 15:34:05.547   168   172 I incfs-mounts: [incfs] Loaded incremental-fs mount info: 2 instances, 4 mount points
+11-28 15:34:05.548   504   560 I incfs-mounts: [incfs] Loaded incremental-fs mount info: 2 instances, 5 mount points
+11-28 15:34:05.549   504   560 I IncrementalService: Removing bind point /data/app/vmdl1513402599.tmp for storage 3
+11-28 15:34:05.549   168   172 W incfs   : IncFs_Unmount: umount(force) failed, detaching '/data/app/vmdl1513402599.tmp': Device or resource busy
+11-28 15:34:05.552   504   560 D CompatibilityChangeReporter: Compat change id reported: 135549675; UID 10131; state: ENABLED
+11-28 15:34:05.563   504   560 D PackageManager: Instant App installer not found with android.intent.action.INSTALL_INSTANT_APP_PACKAGE
+11-28 15:34:05.563   504   560 D PackageManager: Clear ephemeral installer activity
+11-28 15:34:05.586   504   554 I incfs-mounts: [incfs] Loaded incremental-fs mount info: 2 instances, 4 mount points
+11-28 15:34:05.596   504   560 V BackupManagerService: [UserID:0] restoreAtInstall pkg=vn.avatar.diemky.hd token=2 restoreSet=0
+11-28 15:34:05.596   504   560 V BackupManagerService: [UserID:0] Finishing install immediately
+11-28 15:34:05.608   504   560 I IncrementalService: Removing bind point /data/app/vmdl1513402599.tmp for storage 3
+11-28 15:34:05.611  2133  2395 I abb     : oneway function results will be dropped but finished with status OK and parcel size 4
+11-28 15:34:05.820     0     0 W audit   : audit_lost=1 audit_rate_limit=5 audit_backlog_limit=64
+11-28 15:34:05.823     0     0 E audit   : rate limit exceeded
+11-28 15:34:05.604   504   504 W Binder:504_15: type=1400 audit(0.0:73): avc: denied { getopt } for scontext=u:r:system_server:s0 tcontext=u:r:shell:s0 tclass=unix_stream_socket permissive=0
+11-28 15:34:05.630  1647  1647 I MediaProvider: Invalidating LocalCallingIdentity cache for package vn.avatar.diemky.hd. Reason: package android.intent.action.PACKAGE_ADDED
+11-28 15:34:05.631   504   534 I RoleManagerService: Granting default roles...
+11-28 15:34:05.631   504   504 I Telecom : DefaultDialerCache: Refreshing default dialer for user 0: now com.android.dialer: DDC.oR@AIg
+11-28 15:34:05.632   504   599 I InputReader: Reconfiguring input devices, changes=KEYBOARD_LAYOUTS | 
+11-28 15:34:05.632   504   543 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_ADDED dat=package:vn.avatar.diemky.hd flg=0x4000010 (has extras) } to com.android.packageinstaller/.PackageInstalledReceiver
+11-28 15:34:05.632   504   543 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_ADDED dat=package:vn.avatar.diemky.hd flg=0x4000010 (has extras) } to com.android.gallery3d/.app.PackagesMonitor
+11-28 15:34:05.639   504   504 V BackupManagerConstants: getFullBackupIntervalMilliseconds(...) returns 86400000
+11-28 15:34:05.639   504   504 V BackupManagerConstants: getFullBackupRequiredNetworkType(...) returns 2
+11-28 15:34:05.639   504   504 V BackupManagerConstants: getFullBackupRequireCharging(...) returns true
+11-28 15:34:05.640   697   697 V AvrcpMediaPlayerList: mPackageChangedBroadcastReceiver: action: android.intent.action.PACKAGE_ADDED
+11-28 15:34:05.640   697   697 D AvrcpMediaPlayerList: Name of package changed: vn.avatar.diemky.hd
+11-28 15:34:05.604   504   504 W Binder:504_15: type=1400 audit(0.0:74): avc: denied { getopt } for scontext=u:r:system_server:s0 tcontext=u:r:shell:s0 tclass=unix_stream_socket permissive=0
+11-28 15:34:05.655   504   599 I InputReader: Reconfiguring input devices, changes=KEYBOARD_LAYOUTS | 
+11-28 15:34:05.655   697   697 V AvrcpMediaPlayerList: mPackageChangedBroadcastReceiver: action: android.intent.action.PACKAGE_CHANGED
+11-28 15:34:05.655   697   697 D AvrcpMediaPlayerList: Name of package changed: vn.avatar.diemky.hd
+11-28 15:34:05.657   504   504 I Telecom : DefaultDialerCache: Refreshing default dialer for user 0: now com.android.dialer: DDC.oR@AIk
+11-28 15:34:05.659   504   542 W VoiceInteractionManager: no available voice recognition services found for user 0
+11-28 15:34:05.665  1018  1018 D CarrierSvcBindHelper: No carrier app for: 0
+11-28 15:34:05.676   735   753 I PermissionControllerServiceImpl: Updating user sensitive for uid 10131
+11-28 15:34:05.678   735   753 I PermissionControllerServiceImpl: Updating user sensitive for uid 10131
+11-28 15:34:05.698  1018  1018 D CarrierSvcBindHelper: No carrier app for: 0
+11-28 15:34:05.698  1018  1018 D CarrierConfigLoader: mHandler: 9 phoneId: 0
+11-28 15:34:05.722   504   542 W VoiceInteractionManager: no available voice interaction services found for user 0
+11-28 15:34:05.764   504   514 I system_server: Background concurrent copying GC freed 139192(7510KB) AllocSpace objects, 53(3712KB) LOS objects, 49% free, 10162KB/19MB, paused 2.385ms total 161.891ms
+11-28 15:34:05.904   504   537 D EventSequenceValidator: inc AccIntentStartedEvents to 2
+11-28 15:34:05.905   504  1786 I ActivityTaskManager: START u0 {flg=0x10000000 cmp=vn.avatar.diemky.hd/vn.avatar.diemky.MainActivity (has extras)} from uid 2000
+11-28 15:34:05.910   504   537 D CompatibilityChangeReporter: Compat change id reported: 135634846; UID 10131; state: DISABLED
+11-28 15:34:05.910   504   544 D CompatibilityChangeReporter: Compat change id reported: 143937733; UID 10131; state: ENABLED
+11-28 15:34:05.910   421   421 I perfetto: ing_service_impl.cc:758 Configured tracing session 6, #sources:1, duration:5000 ms, #buffers:1, total buffer size:4096 KB, total sessions:1, uid:1071 session name: ""
+11-28 15:34:05.911   414   414 I perfetto: probes_producer.cc:230  Ftrace setup (target_buf=6)
+11-28 15:34:05.918   299   338 D goldfish-address-space: claimShared: Ask to claim region [0x3fb15c000 0x3fbac1000]
+11-28 15:34:05.930   414   414 I perfetto: ftrace_procfs.cc:176    enabled ftrace
+11-28 15:34:05.930   279   279 D Zygote  : Forked child process 2700
+11-28 15:34:06.138     0     0 W perfetto: enabled ftrace
+11-28 15:34:05.977   504   544 W ActivityManager: Slow operation: 67ms so far, now at startProcess: returned from zygote!
+11-28 15:34:05.977   504   544 W ActivityManager: Slow operation: 67ms so far, now at startProcess: done updating battery stats
+11-28 15:34:05.977   504   544 W ActivityManager: Slow operation: 67ms so far, now at startProcess: building log message
+11-28 15:34:05.977   504   544 I ActivityManager: Start proc 2700:vn.avatar.diemky.hd/u0a131 for pre-top-activity {vn.avatar.diemky.hd/vn.avatar.diemky.MainActivity}
+11-28 15:34:05.977   504   544 W ActivityManager: Slow operation: 67ms so far, now at startProcess: starting to update pids map
+11-28 15:34:05.978   504   544 W ActivityManager: Slow operation: 69ms so far, now at startProcess: done updating pids map
+11-28 15:34:06.050  2700  2700 W vatar.diemky.h: Unexpected CPU variant for X86 using defaults: x86_64
+11-28 15:34:06.147   504   786 W InputReader: Device virtio_input_multi_touch_10 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:06.147   504   786 W InputReader: Device virtio_input_multi_touch_7 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:06.147   504   786 W InputReader: Device virtio_input_multi_touch_4 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:06.147   504   786 W InputReader: Device virtio_input_multi_touch_5 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:06.147   504   786 W InputReader: Device virtio_input_multi_touch_2 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:06.147   504   786 W InputReader: Device virtio_input_multi_touch_6 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:06.147   504   786 W InputReader: Device virtio_input_multi_touch_3 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:06.147   504   786 W InputReader: Device virtio_input_multi_touch_8 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:06.147   504   786 W InputReader: Device virtio_input_multi_touch_9 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:06.147   504   786 W InputReader: Device virtio_input_multi_touch_11 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:06.147   504   786 W InputReader: Device virtio_input_multi_touch_10 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:06.147   504   786 W InputReader: Device virtio_input_multi_touch_7 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:06.147   504   786 W InputReader: Device virtio_input_multi_touch_4 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:06.147   504   786 W InputReader: Device virtio_input_multi_touch_5 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:06.147   504   786 W InputReader: Device virtio_input_multi_touch_2 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:06.147   504   786 W InputReader: Device virtio_input_multi_touch_6 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:06.147   504   786 W InputReader: Device virtio_input_multi_touch_3 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:06.147   504   786 W InputReader: Device virtio_input_multi_touch_8 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:06.147   504   786 W InputReader: Device virtio_input_multi_touch_9 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:06.147   504   786 W InputReader: Device virtio_input_multi_touch_11 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:06.159   377   388 I adbd    : jdwp connection from 2700
+11-28 15:34:06.165   504  2684 I PackageManagerShellCommandDataLoader-jni: Stop signal received. Sending exit command (remaining bytes: 0).
+11-28 15:34:06.169  2700  2700 D NetworkSecurityConfig: No Network Security Config specified, using platform default
+11-28 15:34:06.169  2700  2700 D NetworkSecurityConfig: No Network Security Config specified, using platform default
+11-28 15:34:06.182  2700  2700 I Avatar  : [app] activity tao (game chua chay)
+11-28 15:34:06.187  2700  2720 D libEGL  : loaded /vendor/lib64/egl/libEGL_emulation.so
+11-28 15:34:06.188  2700  2720 D libEGL  : loaded /vendor/lib64/egl/libGLESv1_CM_emulation.so
+11-28 15:34:06.189  2700  2720 D libEGL  : loaded /vendor/lib64/egl/libGLESv2_emulation.so
+11-28 15:34:06.226   504   537 W InputReader: Device virtio_input_multi_touch_10 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:06.226   504   537 W InputReader: Device virtio_input_multi_touch_7 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:06.226   504   537 W InputReader: Device virtio_input_multi_touch_4 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:06.226   504   537 W InputReader: Device virtio_input_multi_touch_5 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:06.226   504   537 W InputReader: Device virtio_input_multi_touch_2 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:06.226   504   537 W InputReader: Device virtio_input_multi_touch_6 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:06.226   504   537 W InputReader: Device virtio_input_multi_touch_3 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:06.226   504   537 W InputReader: Device virtio_input_multi_touch_8 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:06.226   504   537 W InputReader: Device virtio_input_multi_touch_9 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:06.226   504   537 W InputReader: Device virtio_input_multi_touch_11 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:06.236   504   537 W ActivityTaskManager: Current config: {1.0 310mcc260mnc [en_US] ldltr sw392dp w392dp h750dp 440dpi nrml long port finger qwerty/v/v -nav/h winConfig={ mBounds=Rect(0, 0 - 1080, 2280) mAppBounds=Rect(0, 0 - 1080, 2148) mWindowingMode=fullscreen mDisplayWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=ROTATION_0} s.25} unchanged for IME proc com.android.inputmethod.latin
+11-28 15:34:06.237   504   537 I ActivityTaskManager: Config changes=20000480 {1.0 310mcc260mnc [en_US] ldltr sw392dp w781dp h362dp 440dpi nrml long land finger qwerty/v/v -nav/h winConfig={ mBounds=Rect(0, 0 - 2280, 1080) mAppBounds=Rect(0, 0 - 2148, 1080) mWindowingMode=fullscreen mDisplayWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=ROTATION_90} s.60}
+11-28 15:34:06.239   504   537 W ActivityTaskManager: Current config: {1.0 310mcc260mnc [en_US] ldltr sw392dp w392dp h750dp 440dpi nrml long port finger qwerty/v/v -nav/h winConfig={ mBounds=Rect(0, 0 - 1080, 2280) mAppBounds=Rect(0, 0 - 1080, 2148) mWindowingMode=fullscreen mDisplayWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=ROTATION_0} s.25} unchanged for IME proc com.android.inputmethod.latin
+11-28 15:34:06.239   504   537 I WindowManager: Override config changes=20000480 {1.0 310mcc260mnc [en_US] ldltr sw392dp w781dp h362dp 440dpi nrml long land finger qwerty/v/v -nav/h winConfig={ mBounds=Rect(0, 0 - 2280, 1080) mAppBounds=Rect(0, 0 - 2148, 1080) mWindowingMode=fullscreen mDisplayWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=ROTATION_90} s.60} for displayId=0
+11-28 15:34:06.240   504   537 V ActivityTaskManager: Sending to IME proc com.android.inputmethod.latin new config {1.0 310mcc260mnc [en_US] ldltr sw392dp w781dp h362dp 440dpi nrml long land finger qwerty/v/v -nav/h winConfig={ mBounds=Rect(0, 0 - 2280, 1080) mAppBounds=Rect(0, 0 - 2148, 1080) mWindowingMode=fullscreen mDisplayWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=ROTATION_90} s.60}
+11-28 15:34:06.240   504   537 W ActivityTaskManager: Current config: {1.0 310mcc260mnc [en_US] ldltr sw392dp w781dp h362dp 440dpi nrml long land finger qwerty/v/v -nav/h winConfig={ mBounds=Rect(0, 0 - 2280, 1080) mAppBounds=Rect(0, 0 - 2148, 1080) mWindowingMode=fullscreen mDisplayWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=ROTATION_90} s.60} unchanged for IME proc com.android.inputmethod.latin
+11-28 15:34:06.273   504   537 I InputManager-JNI: Viewport [0] to add: local:8141241408256768, isActive: true
+11-28 15:34:06.273   504   599 I InputReader: Reconfiguring input devices, changes=DISPLAY_INFO | 
+11-28 15:34:06.273   504   599 I InputReader: Touch device 'virtio_input_multi_touch_10' could not query the properties of its associated display.  The device will be inoperable until the display size becomes available.
+11-28 15:34:06.273   504   599 I InputReader: Touch device 'virtio_input_multi_touch_7' could not query the properties of its associated display.  The device will be inoperable until the display size becomes available.
+11-28 15:34:06.273   504   599 I InputReader: Touch device 'virtio_input_multi_touch_4' could not query the properties of its associated display.  The device will be inoperable until the display size becomes available.
+11-28 15:34:06.273   504   599 I InputReader: Touch device 'virtio_input_multi_touch_5' could not query the properties of its associated display.  The device will be inoperable until the display size becomes available.
+11-28 15:34:06.273   504   599 I InputReader: Touch device 'virtio_input_multi_touch_2' could not query the properties of its associated display.  The device will be inoperable until the display size becomes available.
+11-28 15:34:06.273   504   599 I InputReader: Touch device 'virtio_input_multi_touch_6' could not query the properties of its associated display.  The device will be inoperable until the display size becomes available.
+11-28 15:34:06.273   504   599 I InputReader: Touch device 'virtio_input_multi_touch_3' could not query the properties of its associated display.  The device will be inoperable until the display size becomes available.
+11-28 15:34:06.273   504   599 I InputReader: Device reconfigured: id=4, name='virtio_input_multi_touch_1', size 1080x2280, orientation 1, mode 1, display id 0
+11-28 15:34:06.273   504   599 I InputReader: Touch device 'virtio_input_multi_touch_8' could not query the properties of its associated display.  The device will be inoperable until the display size becomes available.
+11-28 15:34:06.273   504   599 I InputReader: Touch device 'virtio_input_multi_touch_9' could not query the properties of its associated display.  The device will be inoperable until the display size becomes available.
+11-28 15:34:06.273   504   599 I InputReader: Touch device 'virtio_input_multi_touch_11' could not query the properties of its associated display.  The device will be inoperable until the display size becomes available.
+11-28 15:34:06.275   714   714 D StatusBar: disable<e i a s b h r c s > disable2<q i n >
+11-28 15:34:06.295   299   338 D goldfish-address-space: claimShared: Ask to claim region [0x3f9ce5000 0x3fa64a000]
+11-28 15:34:06.335  2700  2700 I Avatar  : [app] le an toan: trai 0 phai 0 duoi 0 (diem game)
+11-28 15:34:06.336  2700  2700 I Avatar  : [app] khoi dong main.GameMidlet (Android), man 544x258, jar 85523137 byte
+11-28 15:34:06.337  2700  2700 I Avatar  : [app] vao game HD: man 544x258 net x4 (view 2280x1080), kho anh 123 MB
+11-28 15:34:06.337  2700  2700 I Avatar  : [bocuc] canvas 0 0 2280 1080 aa 0 0 game 544 258
+11-28 15:34:06.342  2700  2719 D HostConnection: HostConnection::get() New Host Connection established 0x7cd3259ea410, tid 2719
+11-28 15:34:06.344  2700  2719 D HostConnection: HostComposition ext ANDROID_EMU_CHECKSUM_HELPER_v1 ANDROID_EMU_native_sync_v2 ANDROID_EMU_dma_v1 ANDROID_EMU_direct_mem ANDROID_EMU_host_composition_v1 ANDROID_EMU_host_composition_v2 ANDROID_EMU_vulkan ANDROID_EMU_deferred_vulkan_commands ANDROID_EMU_vulkan_null_optional_strings ANDROID_EMU_vulkan_create_resources_with_requirements ANDROID_EMU_YUV_Cache ANDROID_EMU_vulkan_ignored_handles ANDROID_EMU_has_shared_slots_host_memory_allocator ANDROID_EMU_vulkan_free_memory_sync ANDROID_EMU_vulkan_shader_float16_int8 ANDROID_EMU_vulkan_async_queue_submit ANDROID_EMU_sync_buffer_data ANDROID_EMU_vulkan_async_qsri ANDROID_EMU_read_color_buffer_dma ANDROID_EMU_hwc_color_transform ANDROID_EMU_hwc_display_power_mode GL_OES_EGL_image_external_essl3 GL_OES_vertex_array_object GL_KHR_texture_compression_astc_ldr ANDROID_EMU_host_side_tracing ANDROID_EMU_gles_max_version_3_0 
+11-28 15:34:06.369   714   825 D EglHelper: createEglContext start
+11-28 15:34:06.372   162   162 I hwservicemanager: getTransport: Cannot find entry android.hardware.configstore@1.0::ISurfaceFlingerConfigs/default in either framework or device manifest.
+11-28 15:34:06.395  2700  2726 I Avatar  : [app] luong game bat dau
+11-28 15:34:06.399  2700  2726 I Avatar  : [Boot] khoi dong main.GameMidlet
+11-28 15:34:06.409  2700  2719 D EGL_emulation: eglCreateContext: 0x7cd315a3a480: maj 3 min 0 rcv 3
+11-28 15:34:06.410  2700  2719 D EGL_emulation: eglMakeCurrent: 0x7cd315a3a480: ver 3 0 (tinfo 0x7cd2b5a144c0) (first time)
+11-28 15:34:06.425   299   338 D goldfish-address-space: claimShared: Ask to claim region [0x3f8000000 0x3f8965000]
+11-28 15:34:06.427   714   825 D EGL_emulation: eglCreateContext: 0x7cd315a46b30: maj 3 min 0 rcv 3
+11-28 15:34:06.428   714   825 D EglHelper: createEglContext done
+11-28 15:34:06.428   714   825 D EglHelper: createEglSurface start
+11-28 15:34:06.428   162   162 I hwservicemanager: getTransport: Cannot find entry android.hardware.graphics.mapper@4.0::IMapper/default in either framework or device manifest.
+11-28 15:34:06.428  2700  2719 I Gralloc4: mapper 4.x is not supported
+11-28 15:34:06.428   299   338 D goldfish-address-space: claimShared: Ask to claim region [0x3fa64a000 0x3fab25000]
+11-28 15:34:06.428  2700  2719 D HostConnection: createUnique: call
+11-28 15:34:06.428  2700  2719 D HostConnection: HostConnection::get() New Host Connection established 0x7cd3259e9b10, tid 2719
+11-28 15:34:06.429  2700  2719 D goldfish-address-space: allocate: Ask for block of size 0x100
+11-28 15:34:06.444  2700  2719 D goldfish-address-space: allocate: ioctl allocate returned offset 0x3f7ffe000 size 0x2000
+11-28 15:34:06.450  2700  2719 D HostConnection: HostComposition ext ANDROID_EMU_CHECKSUM_HELPER_v1 ANDROID_EMU_native_sync_v2 ANDROID_EMU_dma_v1 ANDROID_EMU_direct_mem ANDROID_EMU_host_composition_v1 ANDROID_EMU_host_composition_v2 ANDROID_EMU_vulkan ANDROID_EMU_deferred_vulkan_commands ANDROID_EMU_vulkan_null_optional_strings ANDROID_EMU_vulkan_create_resources_with_requirements ANDROID_EMU_YUV_Cache ANDROID_EMU_vulkan_ignored_handles ANDROID_EMU_has_shared_slots_host_memory_allocator ANDROID_EMU_vulkan_free_memory_sync ANDROID_EMU_vulkan_shader_float16_int8 ANDROID_EMU_vulkan_async_queue_submit ANDROID_EMU_sync_buffer_data ANDROID_EMU_vulkan_async_qsri ANDROID_EMU_read_color_buffer_dma ANDROID_EMU_hwc_color_transform ANDROID_EMU_hwc_display_power_mode GL_OES_EGL_image_external_essl3 GL_OES_vertex_array_object GL_KHR_texture_compression_astc_ldr ANDROID_EMU_host_side_tracing ANDROID_EMU_gles_max_version_3_0 
+11-28 15:34:06.455   299   338 D goldfish-address-space: claimShared: Ask to claim region [0x3f8965000 0x3f92ca000]
+11-28 15:34:06.466   299   338 D goldfish-address-space: claimShared: Ask to claim region [0x3fc965000 0x3fd2ca000]
+11-28 15:34:06.497   504   504 W NotificationHistory: Attempted to add notif for locked/gone/disabled user 0
+11-28 15:34:06.552   714   825 D EglHelper: createEglSurface done
+11-28 15:34:06.560   299   299 D goldfish-address-space: claimShared: Ask to claim region [0x3fbfc3000 0x3fbfca000]
+11-28 15:34:06.573   299   338 D goldfish-address-space: claimShared: Ask to claim region [0x3fbac1000 0x3fbb4d000]
+11-28 15:34:06.574   714  1462 D HostConnection: HostConnection::get() New Host Connection established 0x7cd325a150d0, tid 1462
+11-28 15:34:06.586   324   355 W ServiceManager: Permission failure: android.permission.ACCESS_SURFACE_FLINGER from uid=10131 pid=2700
+11-28 15:34:06.586   324   355 D PermissionCache: checking android.permission.ACCESS_SURFACE_FLINGER for uid=10131 => denied (159 us)
+11-28 15:34:06.586   504   537 D EventSequenceValidator: dec AccIntentStartedEvents to 1
+11-28 15:34:06.586  2692  2695 I cmd     : oneway function results will be dropped but finished with status OK and parcel size 4
+11-28 15:34:06.589   504   542 D ArtManagerInternalImpl: /data/misc/iorapd/vn.avatar.diemky.hd/146/vn.avatar.diemky.MainActivity/compiled_traces/compiled_trace.pb doesn't exist
+11-28 15:34:06.592   714  1462 D HostConnection: HostComposition ext ANDROID_EMU_CHECKSUM_HELPER_v1 ANDROID_EMU_native_sync_v2 ANDROID_EMU_dma_v1 ANDROID_EMU_direct_mem ANDROID_EMU_host_composition_v1 ANDROID_EMU_host_composition_v2 ANDROID_EMU_vulkan ANDROID_EMU_deferred_vulkan_commands ANDROID_EMU_vulkan_null_optional_strings ANDROID_EMU_vulkan_create_resources_with_requirements ANDROID_EMU_YUV_Cache ANDROID_EMU_vulkan_ignored_handles ANDROID_EMU_has_shared_slots_host_memory_allocator ANDROID_EMU_vulkan_free_memory_sync ANDROID_EMU_vulkan_shader_float16_int8 ANDROID_EMU_vulkan_async_queue_submit ANDROID_EMU_sync_buffer_data ANDROID_EMU_vulkan_async_qsri ANDROID_EMU_read_color_buffer_dma ANDROID_EMU_hwc_color_transform ANDROID_EMU_hwc_display_power_mode GL_OES_EGL_image_external_essl3 GL_OES_vertex_array_object GL_KHR_texture_compression_astc_ldr ANDROID_EMU_host_side_tracing ANDROID_EMU_gles_max_version_3_0 
+11-28 15:34:06.593   714  1462 D EGL_emulation: eglCreateContext: 0x7cd315a718a0: maj 3 min 0 rcv 3
+11-28 15:34:06.595   714  1462 D EGL_emulation: eglMakeCurrent: 0x7cd315a718a0: ver 3 0 (tinfo 0x7cd2b5a53cd0) (first time)
+11-28 15:34:06.607   504   542 I ActivityTaskManager: Displayed vn.avatar.diemky.hd/vn.avatar.diemky.MainActivity: +681ms
+11-28 15:34:06.656   299   299 D goldfish-address-space: claimShared: Ask to claim region [0x3f9ce5000 0x3fa64a000]
+11-28 15:34:06.660   299   299 D goldfish-address-space: claimShared: Ask to claim region [0x3fbfca000 0x3fbfd1000]
+11-28 15:34:06.870     0     0 D logd    : logdr: UID=2000 GID=2000 PID=2729 n tail=0 logMask=99 pid=0 start=0ns timeout=0ns
+11-28 15:34:06.669   299   299 D goldfish-address-space: claimShared: Ask to claim region [0x3fb15c000 0x3fbac1000]
+11-28 15:34:06.677   299   299 D goldfish-address-space: claimShared: Ask to claim region [0x3fbfd1000 0x3fbfd8000]
+11-28 15:34:06.678   299   299 D goldfish-address-space: claimShared: Ask to claim region [0x3fbfd8000 0x3fbfdf000]
+11-28 15:34:06.697   299   299 D goldfish-address-space: claimShared: Ask to claim region [0x3fbb4d000 0x3fbbd9000]
+11-28 15:34:06.739   714   714 D StatusBar: disable<e i a s b h r c s > disable2<q i n >
+11-28 15:34:06.919   299   299 D goldfish-address-space: claimShared: Ask to claim region [0x3f9380000 0x3f985b000]
+11-28 15:34:06.936   299   299 D goldfish-address-space: claimShared: Ask to claim region [0x3fbb4d000 0x3fbbd9000]
+11-28 15:34:06.949   299   299 D goldfish-address-space: claimShared: Ask to claim region [0x3fbbd9000 0x3fbc65000]
+11-28 15:34:07.071   299   299 D goldfish-address-space: claimShared: Ask to claim region [0x3fbc65000 0x3fbd1e000]
+11-28 15:34:07.133   299   299 D goldfish-address-space: claimShared: Ask to claim region [0x3f8000000 0x3f8965000]
+11-28 15:34:07.163   299   338 D goldfish-address-space: claimShared: Ask to claim region [0x3fbd1e000 0x3fbdd7000]
+11-28 15:34:07.290   299   338 D goldfish-address-space: claimShared: Ask to claim region [0x3fbdd7000 0x3fbe90000]
+11-28 15:34:07.356   299   338 D goldfish-address-space: claimShared: Ask to claim region [0x3fbac1000 0x3fbb4d000]
+11-28 15:34:07.409   714   714 D InterruptionStateProvider: No bubble up: not allowed to bubble: -1|android|19|null|1000
+11-28 15:34:07.409   714   714 D InterruptionStateProvider: No heads up: unimportant notification: -1|android|19|null|1000
+11-28 15:34:08.996   504  1477 E TaskPersister: File error accessing recents directory (directory doesn't exist?).
+11-28 15:34:09.527  2700  2733 I Avatar  : index: 25
+11-28 15:34:09.529  2700  2733 I Avatar  : saveLogin
+11-28 15:34:09.783  2700  2734 I Avatar  : [Boot] giai nen san anh lon: 0 ms
+11-28 15:34:10.916   414   414 I perfetto: probes_producer.cc:329  Producer stop (id=6)
+11-28 15:34:10.918   414   414 I perfetto: ftrace_procfs.cc:183    disabled ftrace
+11-28 15:34:11.126     0     0 W perfetto: disabled ftrace
+11-28 15:34:10.930   421   421 I perfetto: ng_service_impl.cc:1948 Tracing session 6 ended, total sessions:0
+11-28 15:34:16.841   299   338 D goldfish-address-space: claimShared: Ask to claim region [0x3f9380000 0x3f9ce5000]
+11-28 15:34:16.917   162   162 I hwservicemanager: getTransport: Cannot find entry android.hardware.graphics.mapper@4.0::IMapper/default in either framework or device manifest.
+11-28 15:34:16.917  2738  2738 I Gralloc4: mapper 4.x is not supported
+11-28 15:34:16.929  2738  2738 D HostConnection: createUnique: call
+11-28 15:34:16.956  2738  2738 D HostConnection: HostConnection::get() New Host Connection established 0x7f77d853cd90, tid 2738
+11-28 15:34:16.956  2738  2738 D goldfish-address-space: allocate: Ask for block of size 0x100
+11-28 15:34:16.956  2738  2738 D goldfish-address-space: allocate: ioctl allocate returned offset 0x3f7ffe000 size 0x2000
+11-28 15:34:17.029  2738  2738 D HostConnection: HostComposition ext ANDROID_EMU_CHECKSUM_HELPER_v1 ANDROID_EMU_native_sync_v2 ANDROID_EMU_dma_v1 ANDROID_EMU_direct_mem ANDROID_EMU_host_composition_v1 ANDROID_EMU_host_composition_v2 ANDROID_EMU_vulkan ANDROID_EMU_deferred_vulkan_commands ANDROID_EMU_vulkan_null_optional_strings ANDROID_EMU_vulkan_create_resources_with_requirements ANDROID_EMU_YUV_Cache ANDROID_EMU_vulkan_ignored_handles ANDROID_EMU_has_shared_slots_host_memory_allocator ANDROID_EMU_vulkan_free_memory_sync ANDROID_EMU_vulkan_shader_float16_int8 ANDROID_EMU_vulkan_async_queue_submit ANDROID_EMU_sync_buffer_data ANDROID_EMU_vulkan_async_qsri ANDROID_EMU_read_color_buffer_dma ANDROID_EMU_hwc_color_transform ANDROID_EMU_hwc_display_power_mode GL_OES_EGL_image_external_essl3 GL_OES_vertex_array_object GL_KHR_texture_compression_astc_ldr ANDROID_EMU_host_side_tracing ANDROID_EMU_gles_max_version_3_0 
+11-28 15:34:18.886  2744  2744 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-28 15:34:18.900  2744  2744 E libc    : Access denied finding property "persist.device_config.runtime_native_boot.profilebootclasspath"
+11-28 15:34:18.900  2744  2744 E libc    : Access denied finding property "persist.device_config.runtime_native_boot.enable_apex_image"
+11-28 15:34:18.900  2744  2744 I AndroidRuntime: Using default boot image
+11-28 15:34:18.900  2744  2744 E libc    : Access denied finding property "persist.device_config.runtime_native_boot.disable_lock_profiling"
+11-28 15:34:18.900  2744  2744 I AndroidRuntime: Leaving lock profiling enabled
+11-28 15:34:18.900  2744  2744 E libc    : Access denied finding property "persist.device_config.runtime_native_boot.enable_generational_cc"
+11-28 15:34:18.902  2744  2744 I app_process: Core platform API reporting enabled, enforcing=false
+11-28 15:34:18.947  2744  2744 D app_process: Time zone APEX ICU file found: /apex/com.android.tzdata/etc/icu/icu_tzdata.dat
+11-28 15:34:18.947  2744  2744 D app_process: I18n APEX ICU file found: /apex/com.android.i18n/etc/icu/icudt66l.dat
+11-28 15:34:18.949  2744  2744 W app_process: Unexpected CPU variant for X86 using defaults: x86_64
+11-28 15:34:18.950  2744  2744 I app_process: The ClassLoaderContext is a special shared library.
+11-28 15:34:18.956  2744  2744 W app_process: JNI RegisterNativeMethods: attempt to register 0 native methods for android.media.AudioAttributes
+11-28 15:34:18.959  2744  2744 D AndroidRuntime: Calling main entry com.android.commands.input.Input
+11-28 15:34:18.884  2744  2744 W app_process: type=1400 audit(0.0:76): avc: denied { read } for name="u:object_r:device_config_runtime_native_boot_prop:s0" dev="tmpfs" ino=1480 scontext=u:r:shell:s0 tcontext=u:object_r:device_config_runtime_native_boot_prop:s0 tclass=file permissive=0
+11-28 15:34:18.896  2744  2744 I chatty  : uid=2000(shell) app_process identical 2 lines
+11-28 15:34:18.896  2744  2744 W app_process: type=1400 audit(0.0:79): avc: denied { read } for name="u:object_r:device_config_runtime_native_boot_prop:s0" dev="tmpfs" ino=1480 scontext=u:r:shell:s0 tcontext=u:object_r:device_config_runtime_native_boot_prop:s0 tclass=file permissive=0
+11-28 15:34:18.991  2744  2744 D AndroidRuntime: Shutting down VM
+11-28 15:34:19.000  2700  2733 I Avatar  : clickNewGame: false    1
+11-28 15:34:21.495  2700  2726 I Avatar  : [hd] may ve cham (43012 us/khung) -> tat hau ky canh
+11-28 15:34:22.662   299   338 D goldfish-address-space: claimShared: Ask to claim region [0x3f9380000 0x3f9ce5000]
+11-28 15:34:22.677   162   162 I hwservicemanager: getTransport: Cannot find entry android.hardware.graphics.mapper@4.0::IMapper/default in either framework or device manifest.
+11-28 15:34:22.677  2759  2759 I Gralloc4: mapper 4.x is not supported
+11-28 15:34:22.681  2759  2759 D HostConnection: createUnique: call
+11-28 15:34:22.682  2759  2759 D HostConnection: HostConnection::get() New Host Connection established 0x7c70ebf73110, tid 2759
+11-28 15:34:22.682  2759  2759 D goldfish-address-space: allocate: Ask for block of size 0x100
+11-28 15:34:22.682  2759  2759 D goldfish-address-space: allocate: ioctl allocate returned offset 0x3f7ffe000 size 0x2000
+11-28 15:34:22.693  2759  2759 D HostConnection: HostComposition ext ANDROID_EMU_CHECKSUM_HELPER_v1 ANDROID_EMU_native_sync_v2 ANDROID_EMU_dma_v1 ANDROID_EMU_direct_mem ANDROID_EMU_host_composition_v1 ANDROID_EMU_host_composition_v2 ANDROID_EMU_vulkan ANDROID_EMU_deferred_vulkan_commands ANDROID_EMU_vulkan_null_optional_strings ANDROID_EMU_vulkan_create_resources_with_requirements ANDROID_EMU_YUV_Cache ANDROID_EMU_vulkan_ignored_handles ANDROID_EMU_has_shared_slots_host_memory_allocator ANDROID_EMU_vulkan_free_memory_sync ANDROID_EMU_vulkan_shader_float16_int8 ANDROID_EMU_vulkan_async_queue_submit ANDROID_EMU_sync_buffer_data ANDROID_EMU_vulkan_async_qsri ANDROID_EMU_read_color_buffer_dma ANDROID_EMU_hwc_color_transform ANDROID_EMU_hwc_display_power_mode GL_OES_EGL_image_external_essl3 GL_OES_vertex_array_object GL_KHR_texture_compression_astc_ldr ANDROID_EMU_host_side_tracing ANDROID_EMU_gles_max_version_3_0 
+11-28 15:34:24.048  2761  2761 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-28 15:34:24.078  2761  2761 E libc    : Access denied finding property "persist.device_config.runtime_native_boot.profilebootclasspath"
+11-28 15:34:24.078  2761  2761 E libc    : Access denied finding property "persist.device_config.runtime_native_boot.enable_apex_image"
+11-28 15:34:24.078  2761  2761 I AndroidRuntime: Using default boot image
+11-28 15:34:24.078  2761  2761 E libc    : Access denied finding property "persist.device_config.runtime_native_boot.disable_lock_profiling"
+11-28 15:34:24.078  2761  2761 I AndroidRuntime: Leaving lock profiling enabled
+11-28 15:34:24.078  2761  2761 E libc    : Access denied finding property "persist.device_config.runtime_native_boot.enable_generational_cc"
+11-28 15:34:24.079  2761  2761 I app_process: Core platform API reporting enabled, enforcing=false
+11-28 15:34:24.068  2761  2761 W app_process: type=1400 audit(0.0:80): avc: denied { read } for name="u:object_r:device_config_runtime_native_boot_prop:s0" dev="tmpfs" ino=1480 scontext=u:r:shell:s0 tcontext=u:object_r:device_config_runtime_native_boot_prop:s0 tclass=file permissive=0
+11-28 15:34:24.153  2761  2761 D app_process: Time zone APEX ICU file found: /apex/com.android.tzdata/etc/icu/icu_tzdata.dat
+11-28 15:34:24.153  2761  2761 D app_process: I18n APEX ICU file found: /apex/com.android.i18n/etc/icu/icudt66l.dat
+11-28 15:34:24.156  2761  2761 W app_process: Unexpected CPU variant for X86 using defaults: x86_64
+11-28 15:34:24.156  2761  2761 I app_process: The ClassLoaderContext is a special shared library.
+11-28 15:34:24.166  2761  2761 W app_process: JNI RegisterNativeMethods: attempt to register 0 native methods for android.media.AudioAttributes
+11-28 15:34:24.168  2761  2761 D AndroidRuntime: Calling main entry com.android.commands.input.Input
+11-28 15:34:24.076  2761  2761 W app_process: type=1400 audit(0.0:81): avc: denied { read } for name="u:object_r:device_config_runtime_native_boot_prop:s0" dev="tmpfs" ino=1480 scontext=u:r:shell:s0 tcontext=u:object_r:device_config_runtime_native_boot_prop:s0 tclass=file permissive=0
+11-28 15:34:24.225  2761  2761 D AndroidRuntime: Shutting down VM
+11-28 15:34:24.076  2761  2761 W app_process: type=1400 audit(0.0:82): avc: denied { read } for name="u:object_r:device_config_runtime_native_boot_prop:s0" dev="tmpfs" ino=1480 scontext=u:r:shell:s0 tcontext=u:object_r:device_config_runtime_native_boot_prop:s0 tclass=file permissive=0
+11-28 15:34:24.076  2761  2761 W app_process: type=1400 audit(0.0:83): avc: denied { read } for name="u:object_r:device_config_runtime_native_boot_prop:s0" dev="tmpfs" ino=1480 scontext=u:r:shell:s0 tcontext=u:object_r:device_config_runtime_native_boot_prop:s0 tclass=file permissive=0
+11-28 15:34:27.784   299   338 D goldfish-address-space: claimShared: Ask to claim region [0x3f9380000 0x3f9ce5000]
+11-28 15:34:27.821   162   162 I hwservicemanager: getTransport: Cannot find entry android.hardware.graphics.mapper@4.0::IMapper/default in either framework or device manifest.
+11-28 15:34:27.821  2776  2776 I Gralloc4: mapper 4.x is not supported
+11-28 15:34:27.825  2776  2776 D HostConnection: createUnique: call
+11-28 15:34:27.825  2776  2776 D HostConnection: HostConnection::get() New Host Connection established 0x7f0b894b34d0, tid 2776
+11-28 15:34:27.825  2776  2776 D goldfish-address-space: allocate: Ask for block of size 0x100
+11-28 15:34:27.825  2776  2776 D goldfish-address-space: allocate: ioctl allocate returned offset 0x3f7ffe000 size 0x2000
+11-28 15:34:27.832  2776  2776 D HostConnection: HostComposition ext ANDROID_EMU_CHECKSUM_HELPER_v1 ANDROID_EMU_native_sync_v2 ANDROID_EMU_dma_v1 ANDROID_EMU_direct_mem ANDROID_EMU_host_composition_v1 ANDROID_EMU_host_composition_v2 ANDROID_EMU_vulkan ANDROID_EMU_deferred_vulkan_commands ANDROID_EMU_vulkan_null_optional_strings ANDROID_EMU_vulkan_create_resources_with_requirements ANDROID_EMU_YUV_Cache ANDROID_EMU_vulkan_ignored_handles ANDROID_EMU_has_shared_slots_host_memory_allocator ANDROID_EMU_vulkan_free_memory_sync ANDROID_EMU_vulkan_shader_float16_int8 ANDROID_EMU_vulkan_async_queue_submit ANDROID_EMU_sync_buffer_data ANDROID_EMU_vulkan_async_qsri ANDROID_EMU_read_color_buffer_dma ANDROID_EMU_hwc_color_transform ANDROID_EMU_hwc_display_power_mode GL_OES_EGL_image_external_essl3 GL_OES_vertex_array_object GL_KHR_texture_compression_astc_ldr ANDROID_EMU_host_side_tracing ANDROID_EMU_gles_max_version_3_0 
+11-28 15:34:30.073   504   877 D WifiNl80211Manager: Scan result ready event
+11-28 15:34:30.073   504   877 D WifiNative: Scan result ready event
+11-28 15:34:33.072  2700  2731 I vatar.diemky.h: Explicit concurrent copying GC freed 1067(70KB) AllocSpace objects, 2(40KB) LOS objects, 49% free, 1862KB/3725KB, paused 17us total 3.991ms
+11-28 15:34:33.345     0     0 D logd    : logdr: UID=2000 GID=2000 PID=2786 n tail=0 logMask=99 pid=0 start=0ns timeout=0ns
+11-28 15:34:33.379     0     0 D logd    : logdr: UID=2000 GID=2000 PID=2789 n tail=0 logMask=99 pid=0 start=0ns timeout=0ns
+11-28 15:34:33.311   504   877 I ActivityManager: Force stopping vn.avatar.diemky.hd appid=10131 user=0: from pid 2796
+11-28 15:34:33.311   504   877 I ActivityManager: Killing 2700:vn.avatar.diemky.hd/u0a131 (adj 0): stop vn.avatar.diemky.hd due to from pid 2796
+11-28 15:34:33.314   504   877 W ActivityTaskManager: Force removing ActivityRecord{368db9f u0 vn.avatar.diemky.hd/vn.avatar.diemky.MainActivity t11 f}}: app died, no saved state
+11-28 15:34:33.317   279   279 I Zygote  : Process 2700 exited due to signal 9 (Killed)
+11-28 15:34:33.526     0     0 I binder  : undelivered transaction 175430, process died.
+11-28 15:34:33.323   504   877 W InputReader: Device virtio_input_multi_touch_10 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:33.323   504   877 W InputReader: Device virtio_input_multi_touch_7 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:33.323   504   877 W InputReader: Device virtio_input_multi_touch_4 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:33.323   504   877 W InputReader: Device virtio_input_multi_touch_5 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:33.323   504   877 W InputReader: Device virtio_input_multi_touch_2 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:33.323   504   877 W InputReader: Device virtio_input_multi_touch_6 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:33.323   504   877 W InputReader: Device virtio_input_multi_touch_3 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:33.323   504   877 W InputReader: Device virtio_input_multi_touch_8 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:33.323   504   877 W InputReader: Device virtio_input_multi_touch_9 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:33.323   504   877 W InputReader: Device virtio_input_multi_touch_11 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:33.323   504   877 W InputReader: Device virtio_input_multi_touch_10 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:33.323   504   877 W InputReader: Device virtio_input_multi_touch_7 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:33.323   504   877 W InputReader: Device virtio_input_multi_touch_4 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:33.323   504   877 W InputReader: Device virtio_input_multi_touch_5 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:33.323   504   877 W InputReader: Device virtio_input_multi_touch_2 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:33.323   504   877 W InputReader: Device virtio_input_multi_touch_6 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:33.323   504   877 W InputReader: Device virtio_input_multi_touch_3 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:33.323   504   877 W InputReader: Device virtio_input_multi_touch_8 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:33.323   504   877 W InputReader: Device virtio_input_multi_touch_9 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:33.323   504   877 W InputReader: Device virtio_input_multi_touch_11 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:33.327  2796  2798 I cmd     : oneway function results will be dropped but finished with status OK and parcel size 4
+11-28 15:34:33.328  1018  1018 D CarrierSvcBindHelper: No carrier app for: 0
+11-28 15:34:33.332   300   345 W EmuHWC2 : No layers, exit, buffer 0x0
+11-28 15:34:33.336   504   537 W ActivityManager: setHasOverlayUi called on unknown pid: 2700
+11-28 15:34:33.348   504  1787 I ActivityTaskManager: START u0 {flg=0x10000000 cmp=vn.avatar.diemky/.MainActivity (has extras)} from uid 2000
+11-28 15:34:33.348   504   537 D EventSequenceValidator: inc AccIntentStartedEvents to 2
+11-28 15:34:33.348   300   345 W EmuHWC2 : No layers, exit, buffer 0x0
+11-28 15:34:33.353   504   537 D CompatibilityChangeReporter: Compat change id reported: 135634846; UID 10130; state: DISABLED
+11-28 15:34:33.353   504   544 D CompatibilityChangeReporter: Compat change id reported: 143937733; UID 10130; state: ENABLED
+11-28 15:34:33.353   421   421 I perfetto: ing_service_impl.cc:758 Configured tracing session 7, #sources:1, duration:5000 ms, #buffers:1, total buffer size:4096 KB, total sessions:1, uid:1071 session name: ""
+11-28 15:34:33.354   414   414 I perfetto: probes_producer.cc:230  Ftrace setup (target_buf=7)
+11-28 15:34:33.355   299   338 D goldfish-address-space: claimShared: Ask to claim region [0x3fb15c000 0x3fbac1000]
+11-28 15:34:33.356   504   545 I libprocessgroup: Successfully killed process cgroup uid 10131 pid 2700 in 44ms
+11-28 15:34:33.358   299   338 D goldfish-address-space: claimShared: Ask to claim region [0x3f9380000 0x3f9ce5000]
+11-28 15:34:33.359   299   338 D goldfish-address-space: claimShared: Ask to claim region [0x3f9ce5000 0x3fa64a000]
+11-28 15:34:33.366   300   345 W EmuHWC2 : No layers, exit, buffer 0x0
+11-28 15:34:33.377   299   338 D goldfish-address-space: claimShared: Ask to claim region [0x3f8000000 0x3f8965000]
+11-28 15:34:33.380   279   279 D Zygote  : Forked child process 2810
+11-28 15:34:33.381   504   544 I ActivityManager: Start proc 2810:vn.avatar.diemky/u0a130 for pre-top-activity {vn.avatar.diemky/vn.avatar.diemky.MainActivity}
+11-28 15:34:33.384   300   345 W EmuHWC2 : No layers, exit, buffer 0x0
+11-28 15:34:33.393   414   414 I perfetto: ftrace_procfs.cc:176    enabled ftrace
+11-28 15:34:33.601     0     0 W perfetto: enabled ftrace
+11-28 15:34:33.396   504  2406 V WindowManager: Orientation start waiting for draw, mDrawState=DRAW_PENDING in Window{d8260f6 u0 Splash Screen vn.avatar.diemky}, surfaceController Surface(name=Splash Screen vn.avatar.diemky)/@0xdb6e193
+11-28 15:34:33.411   299   338 D goldfish-address-space: claimShared: Ask to claim region [0x3f9380000 0x3f9ce5000]
+11-28 15:34:33.458   299   338 D goldfish-address-space: claimShared: Ask to claim region [0x3f9ce5000 0x3fa64a000]
+11-28 15:34:33.481  2810  2810 W n.avatar.diemk: Unexpected CPU variant for X86 using defaults: x86_64
+11-28 15:34:33.523   377   388 I adbd    : jdwp connection from 2810
+11-28 15:34:33.527   504  2406 W InputReader: Device virtio_input_multi_touch_10 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:33.527   504  2406 W InputReader: Device virtio_input_multi_touch_7 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:33.527   504  2406 W InputReader: Device virtio_input_multi_touch_4 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:33.527   504  2406 W InputReader: Device virtio_input_multi_touch_5 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:33.527   504  2406 W InputReader: Device virtio_input_multi_touch_2 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:33.527   504  2406 W InputReader: Device virtio_input_multi_touch_6 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:33.527   504  2406 W InputReader: Device virtio_input_multi_touch_3 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:33.527   504  2406 W InputReader: Device virtio_input_multi_touch_8 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:33.527   504  2406 W InputReader: Device virtio_input_multi_touch_9 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:33.527   504  2406 W InputReader: Device virtio_input_multi_touch_11 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:33.527   504  2406 W InputReader: Device virtio_input_multi_touch_10 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:33.527   504  2406 W InputReader: Device virtio_input_multi_touch_7 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:33.527   504  2406 W InputReader: Device virtio_input_multi_touch_4 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:33.527   504  2406 W InputReader: Device virtio_input_multi_touch_5 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:33.527   504  2406 W InputReader: Device virtio_input_multi_touch_2 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:33.527   504  2406 W InputReader: Device virtio_input_multi_touch_6 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:33.527   504  2406 W InputReader: Device virtio_input_multi_touch_3 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:33.527   504  2406 W InputReader: Device virtio_input_multi_touch_8 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:33.527   504  2406 W InputReader: Device virtio_input_multi_touch_9 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:33.527   504  2406 W InputReader: Device virtio_input_multi_touch_11 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:33.537   504   538 V WindowManager: Orientation start waiting for draw, mDrawState=DRAW_PENDING in Window{968a8eb u0 com.android.systemui.ImageWallpaper}, surfaceController Surface(name=com.android.systemui.ImageWallpaper)/@0x20f018c
+11-28 15:34:33.539   714   825 D EglHelper: createEglContext start
+11-28 15:34:33.571   714   825 D EGL_emulation: eglCreateContext: 0x7cd315a36070: maj 3 min 0 rcv 3
+11-28 15:34:33.571   714   825 D EglHelper: createEglContext done
+11-28 15:34:33.572   714   825 D EglHelper: createEglSurface start
+11-28 15:34:33.596   299   338 D goldfish-address-space: claimShared: Ask to claim region [0x3fb15c000 0x3fb637000]
+11-28 15:34:33.621  2810  2810 D NetworkSecurityConfig: No Network Security Config specified, using platform default
+11-28 15:34:33.622  2810  2810 D NetworkSecurityConfig: No Network Security Config specified, using platform default
+11-28 15:34:33.625   299   299 D goldfish-address-space: claimShared: Ask to claim region [0x3f8965000 0x3f92ca000]
+11-28 15:34:33.659  2810  2810 I Avatar  : [app] activity tao (game chua chay)
+11-28 15:34:33.705  2810  2836 D libEGL  : loaded /vendor/lib64/egl/libEGL_emulation.so
+11-28 15:34:33.706  2810  2836 D libEGL  : loaded /vendor/lib64/egl/libGLESv1_CM_emulation.so
+11-28 15:34:33.706  2810  2836 D libEGL  : loaded /vendor/lib64/egl/libGLESv2_emulation.so
+11-28 15:34:33.779  2810  2831 D HostConnection: HostConnection::get() New Host Connection established 0x7cd3259ea950, tid 2831
+11-28 15:34:33.782  2810  2810 I Avatar  : [app] khoi dong main.GameMidlet (Android), man 270x570, jar 85523137 byte
+11-28 15:34:33.782  2810  2810 I Avatar  : [app] vao game: man 270x570
+11-28 15:34:33.782  2810  2810 I Avatar  : [bocuc] canvas 0 0 1080 2280 aa 1026 1002 game 270 570
+11-28 15:34:33.783  2810  2831 D HostConnection: HostComposition ext ANDROID_EMU_CHECKSUM_HELPER_v1 ANDROID_EMU_native_sync_v2 ANDROID_EMU_dma_v1 ANDROID_EMU_direct_mem ANDROID_EMU_host_composition_v1 ANDROID_EMU_host_composition_v2 ANDROID_EMU_vulkan ANDROID_EMU_deferred_vulkan_commands ANDROID_EMU_vulkan_null_optional_strings ANDROID_EMU_vulkan_create_resources_with_requirements ANDROID_EMU_YUV_Cache ANDROID_EMU_vulkan_ignored_handles ANDROID_EMU_has_shared_slots_host_memory_allocator ANDROID_EMU_vulkan_free_memory_sync ANDROID_EMU_vulkan_shader_float16_int8 ANDROID_EMU_vulkan_async_queue_submit ANDROID_EMU_sync_buffer_data ANDROID_EMU_vulkan_async_qsri ANDROID_EMU_read_color_buffer_dma ANDROID_EMU_hwc_color_transform ANDROID_EMU_hwc_display_power_mode GL_OES_EGL_image_external_essl3 GL_OES_vertex_array_object GL_KHR_texture_compression_astc_ldr ANDROID_EMU_host_side_tracing ANDROID_EMU_gles_max_version_3_0 
+11-28 15:34:33.785   162   162 I hwservicemanager: getTransport: Cannot find entry android.hardware.configstore@1.0::ISurfaceFlingerConfigs/default in either framework or device manifest.
+11-28 15:34:33.785   714   825 D EglHelper: createEglSurface done
+11-28 15:34:33.845  2810  2831 D EGL_emulation: eglCreateContext: 0x7cd315a389b0: maj 3 min 0 rcv 3
+11-28 15:34:33.845  2810  2831 D EGL_emulation: eglMakeCurrent: 0x7cd315a389b0: ver 3 0 (tinfo 0x7cd2b5a14670) (first time)
+11-28 15:34:33.847  2810  2837 I Avatar  : [app] luong game bat dau
+11-28 15:34:33.850  2810  2837 I Avatar  : [Boot] khoi dong main.GameMidlet
+11-28 15:34:33.866   299   299 D goldfish-address-space: claimShared: Ask to claim region [0x3fc965000 0x3fd2ca000]
+11-28 15:34:33.868   299   299 D goldfish-address-space: claimShared: Ask to claim region [0x3fd2ca000 0x3fdc2f000]
+11-28 15:34:33.869   162   162 I hwservicemanager: getTransport: Cannot find entry android.hardware.graphics.mapper@4.0::IMapper/default in either framework or device manifest.
+11-28 15:34:33.869  2810  2831 I Gralloc4: mapper 4.x is not supported
+11-28 15:34:33.869  2810  2831 D HostConnection: createUnique: call
+11-28 15:34:33.870  2810  2831 D HostConnection: HostConnection::get() New Host Connection established 0x7cd3259e8250, tid 2831
+11-28 15:34:33.870  2810  2831 D goldfish-address-space: allocate: Ask for block of size 0x100
+11-28 15:34:33.884  2810  2831 D goldfish-address-space: allocate: ioctl allocate returned offset 0x3f7ffe000 size 0x2000
+11-28 15:34:33.899  2810  2831 D HostConnection: HostComposition ext ANDROID_EMU_CHECKSUM_HELPER_v1 ANDROID_EMU_native_sync_v2 ANDROID_EMU_dma_v1 ANDROID_EMU_direct_mem ANDROID_EMU_host_composition_v1 ANDROID_EMU_host_composition_v2 ANDROID_EMU_vulkan ANDROID_EMU_deferred_vulkan_commands ANDROID_EMU_vulkan_null_optional_strings ANDROID_EMU_vulkan_create_resources_with_requirements ANDROID_EMU_YUV_Cache ANDROID_EMU_vulkan_ignored_handles ANDROID_EMU_has_shared_slots_host_memory_allocator ANDROID_EMU_vulkan_free_memory_sync ANDROID_EMU_vulkan_shader_float16_int8 ANDROID_EMU_vulkan_async_queue_submit ANDROID_EMU_sync_buffer_data ANDROID_EMU_vulkan_async_qsri ANDROID_EMU_read_color_buffer_dma ANDROID_EMU_hwc_color_transform ANDROID_EMU_hwc_display_power_mode GL_OES_EGL_image_external_essl3 GL_OES_vertex_array_object GL_KHR_texture_compression_astc_ldr ANDROID_EMU_host_side_tracing ANDROID_EMU_gles_max_version_3_0 
+11-28 15:34:33.900   299   299 D goldfish-address-space: claimShared: Ask to claim region [0x3fdc2f000 0x3fe594000]
+11-28 15:34:33.901   299   299 D goldfish-address-space: claimShared: Ask to claim region [0x3fe594000 0x3feef9000]
+11-28 15:34:33.992   504   537 W InputReader: Device virtio_input_multi_touch_10 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:33.992   504   537 W InputReader: Device virtio_input_multi_touch_7 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:33.992   504   537 W InputReader: Device virtio_input_multi_touch_4 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:33.992   504   537 W InputReader: Device virtio_input_multi_touch_5 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:33.992   504   537 W InputReader: Device virtio_input_multi_touch_2 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:33.992   504   537 W InputReader: Device virtio_input_multi_touch_6 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:33.992   504   537 W InputReader: Device virtio_input_multi_touch_3 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:33.992   504   537 W InputReader: Device virtio_input_multi_touch_8 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:33.992   504   537 W InputReader: Device virtio_input_multi_touch_9 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:33.992   504   537 W InputReader: Device virtio_input_multi_touch_11 is associated with display ADISPLAY_ID_NONE.
+11-28 15:34:33.993   504   537 W ActivityTaskManager: Current config: {1.0 310mcc260mnc [en_US] ldltr sw392dp w781dp h362dp 440dpi nrml long land finger qwerty/v/v -nav/h winConfig={ mBounds=Rect(0, 0 - 2280, 1080) mAppBounds=Rect(0, 0 - 2148, 1080) mWindowingMode=fullscreen mDisplayWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=ROTATION_90} s.60} unchanged for IME proc com.android.inputmethod.latin
+11-28 15:34:33.993   504   537 I ActivityTaskManager: Config changes=20000480 {1.0 310mcc260mnc [en_US] ldltr sw392dp w392dp h750dp 440dpi nrml long port finger qwerty/v/v -nav/h winConfig={ mBounds=Rect(0, 0 - 1080, 2280) mAppBounds=Rect(0, 0 - 1080, 2148) mWindowingMode=fullscreen mDisplayWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=ROTATION_0} s.92}
+11-28 15:34:33.995   504   537 W ActivityTaskManager: Current config: {1.0 310mcc260mnc [en_US] ldltr sw392dp w781dp h362dp 440dpi nrml long land finger qwerty/v/v -nav/h winConfig={ mBounds=Rect(0, 0 - 2280, 1080) mAppBounds=Rect(0, 0 - 2148, 1080) mWindowingMode=fullscreen mDisplayWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=ROTATION_90} s.60} unchanged for IME proc com.android.inputmethod.latin
+11-28 15:34:33.995   504   537 I WindowManager: Override config changes=20000480 {1.0 310mcc260mnc [en_US] ldltr sw392dp w392dp h750dp 440dpi nrml long port finger qwerty/v/v -nav/h winConfig={ mBounds=Rect(0, 0 - 1080, 2280) mAppBounds=Rect(0, 0 - 1080, 2148) mWindowingMode=fullscreen mDisplayWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=ROTATION_0} s.92} for displayId=0
+11-28 15:34:34.000   504   537 V ActivityTaskManager: Sending to IME proc com.android.inputmethod.latin new config {1.0 310mcc260mnc [en_US] ldltr sw392dp w392dp h750dp 440dpi nrml long port finger qwerty/v/v -nav/h winConfig={ mBounds=Rect(0, 0 - 1080, 2280) mAppBounds=Rect(0, 0 - 1080, 2148) mWindowingMode=fullscreen mDisplayWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=ROTATION_0} s.92}
+11-28 15:34:34.000   504   537 W ActivityTaskManager: Current config: {1.0 310mcc260mnc [en_US] ldltr sw392dp w392dp h750dp 440dpi nrml long port finger qwerty/v/v -nav/h winConfig={ mBounds=Rect(0, 0 - 1080, 2280) mAppBounds=Rect(0, 0 - 1080, 2148) mWindowingMode=fullscreen mDisplayWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=ROTATION_0} s.92} unchanged for IME proc com.android.inputmethod.latin
+11-28 15:34:34.004   504   537 I InputManager-JNI: Viewport [0] to add: local:8141241408256768, isActive: true
+11-28 15:34:34.006   504   599 I InputReader: Reconfiguring input devices, changes=DISPLAY_INFO | 
+11-28 15:34:34.006   504   599 I InputReader: Touch device 'virtio_input_multi_touch_10' could not query the properties of its associated display.  The device will be inoperable until the display size becomes available.
+11-28 15:34:34.006   504   599 I InputReader: Touch device 'virtio_input_multi_touch_7' could not query the properties of its associated display.  The device will be inoperable until the display size becomes available.
+11-28 15:34:34.006   504   599 I InputReader: Touch device 'virtio_input_multi_touch_4' could not query the properties of its associated display.  The device will be inoperable until the display size becomes available.
+11-28 15:34:34.006   504   599 I InputReader: Touch device 'virtio_input_multi_touch_5' could not query the properties of its associated display.  The device will be inoperable until the display size becomes available.
+11-28 15:34:34.006   504   599 I InputReader: Touch device 'virtio_input_multi_touch_2' could not query the properties of its associated display.  The device will be inoperable until the display size becomes available.
+11-28 15:34:34.006   504   599 I InputReader: Touch device 'virtio_input_multi_touch_6' could not query the properties of its associated display.  The device will be inoperable until the display size becomes available.
+11-28 15:34:34.006   504   599 I InputReader: Touch device 'virtio_input_multi_touch_3' could not query the properties of its associated display.  The device will be inoperable until the display size becomes available.
+11-28 15:34:34.006   504   599 I InputReader: Device reconfigured: id=4, name='virtio_input_multi_touch_1', size 1080x2280, orientation 0, mode 1, display id 0
+11-28 15:34:34.006   504   599 I InputReader: Touch device 'virtio_input_multi_touch_8' could not query the properties of its associated display.  The device will be inoperable until the display size becomes available.
+11-28 15:34:34.006   504   599 I InputReader: Touch device 'virtio_input_multi_touch_9' could not query the properties of its associated display.  The device will be inoperable until the display size becomes available.
+11-28 15:34:34.006   504   599 I InputReader: Touch device 'virtio_input_multi_touch_11' could not query the properties of its associated display.  The device will be inoperable until the display size becomes available.
+11-28 15:34:34.008   714   714 D StatusBar: disable<e i a s b h r c s > disable2<q i n >
+11-28 15:34:34.028   299   299 D goldfish-address-space: claimShared: Ask to claim region [0x3feef9000 0x3ff85e000]
+11-28 15:34:34.140   299   338 D goldfish-address-space: claimShared: Ask to claim region [0x3fbee6000 0x3fbf72000]
+11-28 15:34:34.348  2810  2810 I Choreographer: Skipped 33 frames!  The application may be doing too much work on its main thread.
+11-28 15:34:34.386   299   338 D goldfish-address-space: claimShared: Ask to claim region [0x3fb637000 0x3fbb12000]
+11-28 15:34:34.391   299   338 D goldfish-address-space: claimShared: Ask to claim region [0x3fbfdf000 0x3fbfe6000]
+11-28 15:34:34.396   714  1462 D HostConnection: HostConnection::get() New Host Connection established 0x7cd325a07c90, tid 1462
+11-28 15:34:34.406   714  1462 D HostConnection: HostComposition ext ANDROID_EMU_CHECKSUM_HELPER_v1 ANDROID_EMU_native_sync_v2 ANDROID_EMU_dma_v1 ANDROID_EMU_direct_mem ANDROID_EMU_host_composition_v1 ANDROID_EMU_host_composition_v2 ANDROID_EMU_vulkan ANDROID_EMU_deferred_vulkan_commands ANDROID_EMU_vulkan_null_optional_strings ANDROID_EMU_vulkan_create_resources_with_requirements ANDROID_EMU_YUV_Cache ANDROID_EMU_vulkan_ignored_handles ANDROID_EMU_has_shared_slots_host_memory_allocator ANDROID_EMU_vulkan_free_memory_sync ANDROID_EMU_vulkan_shader_float16_int8 ANDROID_EMU_vulkan_async_queue_submit ANDROID_EMU_sync_buffer_data ANDROID_EMU_vulkan_async_qsri ANDROID_EMU_read_color_buffer_dma ANDROID_EMU_hwc_color_transform ANDROID_EMU_hwc_display_power_mode GL_OES_EGL_image_external_essl3 GL_OES_vertex_array_object GL_KHR_texture_compression_astc_ldr ANDROID_EMU_host_side_tracing ANDROID_EMU_gles_max_version_3_0 
+11-28 15:34:34.407   714  1462 D EGL_emulation: eglCreateContext: 0x7cd315a0fdf0: maj 3 min 0 rcv 3
+11-28 15:34:34.408   714  1462 D EGL_emulation: eglMakeCurrent: 0x7cd315a0fdf0: ver 3 0 (tinfo 0x7cd2b5a53cd0) (first time)
+11-28 15:34:34.528   299   338 D goldfish-address-space: claimShared: Ask to claim region [0x3fac10000 0x3fb0eb000]
+11-28 15:34:34.595  2810  2831 I OpenGLRenderer: Davey! duration=814ms; Flags=0, IntendedVsync=122173100147, Vsync=122723100125, OldestInputEvent=9223372036854775807, NewestInputEvent=0, HandleInputStart=122739651322, AnimationStart=122739651863, PerformTraversalsStart=122740071828, DrawStart=122740100350, SyncQueued=122740181340, SyncStart=122740443300, IssueDrawCommandsStart=122806960622, SwapBuffers=122959757868, FrameCompleted=122987392600, DequeueBufferDuration=19860, QueueBufferDuration=182722, GpuCompleted=32772522036388713, 
+11-28 15:34:34.601   504   542 D ArtManagerInternalImpl: /data/misc/iorapd/vn.avatar.diemky/146/vn.avatar.diemky.MainActivity/compiled_traces/compiled_trace.pb doesn't exist
+11-28 15:34:34.612   504   542 I ActivityTaskManager: Displayed vn.avatar.diemky/.MainActivity: +1s252ms
+11-28 15:34:34.616   504   537 D EventSequenceValidator: dec AccIntentStartedEvents to 1
+11-28 15:34:34.658   299   338 D goldfish-address-space: claimShared: Ask to claim region [0x3fbf72000 0x3fbf79000]
+11-28 15:34:34.665   299   299 D goldfish-address-space: claimShared: Ask to claim region [0x3f8000000 0x3f8965000]
+11-28 15:34:34.686   299   299 D goldfish-address-space: claimShared: Ask to claim region [0x3fd2ca000 0x3fdc2f000]
+11-28 15:34:34.721   299   299 D goldfish-address-space: claimShared: Ask to claim region [0x3fbf79000 0x3fbf80000]
+11-28 15:34:34.754   299   299 D goldfish-address-space: claimShared: Ask to claim region [0x3fbf80000 0x3fbf87000]
+11-28 15:34:34.912     0     0 I binder  : 1334:1334 transaction failed 29189/-22, size 96-0 line 2692
+11-28 15:34:34.760   299   299 D goldfish-address-space: claimShared: Ask to claim region [0x3fdc2f000 0x3fe594000]
+11-28 15:34:34.853   299   299 D goldfish-address-space: claimShared: Ask to claim region [0x3fbb12000 0x3fbb9e000]
+11-28 15:34:34.857   714  1162 I OpenGLRenderer: Davey! duration=829ms; Flags=1, IntendedVsync=122414818992, Vsync=122448152324, OldestInputEvent=9223372036854775807, NewestInputEvent=0, HandleInputStart=122463474703, AnimationStart=122463476085, PerformTraversalsStart=122463632317, DrawStart=122776825692, SyncQueued=123147156468, SyncStart=123151419518, IssueDrawCommandsStart=123151477534, SwapBuffers=123224635623, FrameCompleted=123248448440, DequeueBufferDuration=3739452, QueueBufferDuration=4897654, GpuCompleted=0, 
+11-28 15:34:34.864   714   714 D StatusBar: disable<e i a s b h r c s > disable2<q i n >
+11-28 15:34:34.895   299   299 D goldfish-address-space: claimShared: Ask to claim region [0x3fb0eb000 0x3fb143000]
+11-28 15:34:34.962   299   299 D goldfish-address-space: claimShared: Ask to claim region [0x3fbd1e000 0x3fbd76000]
+11-28 15:34:34.965   714  1162 I OpenGLRenderer: Davey! duration=926ms; Flags=1, IntendedVsync=122414818992, Vsync=122448152324, OldestInputEvent=9223372036854775807, NewestInputEvent=0, HandleInputStart=122463474703, AnimationStart=122463476085, PerformTraversalsStart=122463632317, DrawStart=123327812048, SyncQueued=123328758285, SyncStart=123343521483, IssueDrawCommandsStart=123343628893, SwapBuffers=123351468072, FrameCompleted=123356434889, DequeueBufferDuration=2161915, QueueBufferDuration=181450, GpuCompleted=0, 
+11-28 15:34:34.973   714   714 I Choreographer: Skipped 54 frames!  The application may be doing too much work on its main thread.
+11-28 15:34:35.037   299   299 D goldfish-address-space: claimShared: Ask to claim region [0x3fbd76000 0x3fbe02000]
+11-28 15:34:35.039   714  1162 I OpenGLRenderer: Davey! duration=937ms; Flags=1, IntendedVsync=122464829559, Vsync=123364829523, OldestInputEvent=9223372036854775807, NewestInputEvent=0, HandleInputStart=123365506631, AnimationStart=123365508114, PerformTraversalsStart=123365517528, DrawStart=123367465024, SyncQueued=123367665883, SyncStart=123395757223, IssueDrawCommandsStart=123395825265, SwapBuffers=123400459788, FrameCompleted=123430507388, DequeueBufferDuration=2084810, QueueBufferDuration=243041, GpuCompleted=0, 
+11-28 15:34:35.044   299   299 D goldfish-address-space: claimShared: Ask to claim region [0x3fbe02000 0x3fbe5a000]
+11-28 15:34:35.046   714  1162 I OpenGLRenderer: Davey! duration=972ms; Flags=1, IntendedVsync=122464829559, Vsync=123364829523, OldestInputEvent=9223372036854775807, NewestInputEvent=0, HandleInputStart=123365506631, AnimationStart=123365508114, PerformTraversalsStart=123365517528, DrawStart=123432996980, SyncQueued=123433061486, SyncStart=123433575841, IssueDrawCommandsStart=123433613227, SwapBuffers=123435515386, FrameCompleted=123437804431, DequeueBufferDuration=844175, QueueBufferDuration=225785, GpuCompleted=0, 
+11-28 15:34:36.717  2810  2839 I Avatar  : index: 25
+11-28 15:34:36.731  2810  2839 I Avatar  : saveLogin
+11-28 15:34:36.989  2810  2840 I Avatar  : [Boot] giai nen san anh lon: 0 ms
+11-28 15:34:37.443   504  1477 E TaskPersister: File error accessing recents directory (directory doesn't exist?).
+11-28 15:34:37.858     0     0 D logd    : logdr: UID=2000 GID=2000 PID=2844 n tail=0 logMask=99 pid=0 start=0ns timeout=0ns
