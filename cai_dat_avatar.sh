@@ -239,6 +239,12 @@ gan "$SJ" "$W/Avatar250.jar" jar \
 ln -sf Avatar250.jar "$W/Avatar258.jar"   # link tai JAR cu van tai duoc ban moi
 gan "$SI" "$W/Avatar.ipa" ipa \
   || { vang "  khong ghi duoc dia chi vao IPA: dung IPA goc"; cp "$SI" "$W/Avatar.ipa"; }
+# ban HD (man ngang, app rieng "Avatar 250 HD"): goi co thi dua len trang web (muc "Ban HD" o phan Tai game)
+for HDF in AvatarHD.apk AvatarHD.ipa; do
+  [ -f "$DIR/client/$HDF" ] || continue
+  gan "$DIR/client/$HDF" "$W/$HDF" "${HDF##*.}" \
+    || { vang "  khong ghi duoc dia chi vao $HDF: dung ban goc"; cp "$DIR/client/$HDF" "$W/$HDF"; }
+done
 rm -f "$TMP"/vao.*
 # khong ghi dia chi may chu len trang web (app da gan san, tranh lo IP); giu ten game + link nhom / Zalo / Facebook chu server da dien
 python3 - "$DIR/web/cau-hinh.js" "$W/cau-hinh.js" <<'PY' 2>/dev/null || true
