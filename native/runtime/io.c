@@ -796,7 +796,18 @@ int32_t N_j2n_Net_localPort(jctx *t, int32_t fd) {
 
 /* ============================================================ he thong */
 jobj N_j2n_Sys_property0(jctx *t, jobj key) {
+#if defined(__linux__) && !defined(__ANDROID__)
+    /* ban thu tren Linux: System.getProperty("j2n.env:TEN") = bien moi truong TEN (bat cong cu go loi cua client) */
+    if (key) {
+        const char *k = rt_str_cstr(key);
+        if (k && !strncmp(k, "j2n.env:", 8)) {
+            const char *v = getenv(k + 8);
+            return v ? rt_str_utf8(t, v) : 0;
+        }
+    }
+#else
     (void)t; (void)key;
+#endif
     return 0;
 }
 

@@ -315,6 +315,7 @@ static inline uint32_t blend(uint32_t s, uint32_t d) {
 
 /* dem diem anh ve theo loai (thu nghiem, J2N_HDLOG): 0 dac, 1 khoa mau, 2 tron, 3 to mau */
 int64_t gfx_dem[4];
+int gfx_dem_canh;        /* so lan bat dau ve the gioi (go loi: 1 khung ve the gioi may lan) */
 
 /* to 1 hang cung mau (nhanh) */
 static inline void row_fill(uint32_t *d, uint32_t c, int n) {
@@ -888,8 +889,8 @@ void N_javax_microedition_lcdui_Graphics_hdCanh(jctx *t, jobj self, int32_t pha)
     if (((uint32_t)pha >> 24) == 0x4D) {
         /* le trong 2 ben ban do hep hon man hinh: trai (12 bit) | phai (12 bit), diem logic */
         int l = (pha >> 12) & 0xFFF, r = pha & 0xFFF;
-        gfx_le_trai = l > 80 ? 0 : l;
-        gfx_le_phai = r > 80 ? 0 : r;
+        gfx_le_trai = l > 160 ? 0 : l;
+        gfx_le_phai = r > 160 ? 0 : r;
         return;
     }
     if (((uint32_t)pha >> 24) == 0x4C) {
@@ -916,6 +917,7 @@ void N_javax_microedition_lcdui_Graphics_hdCanh(jctx *t, jobj self, int32_t pha)
     }
     int th = gfx_hd_fx >= 1 ? gfx_theme : 0;
     if (pha == 3) {
+        gfx_dem_canh++;
         /* sap ve nen (o gach, phong nen): nhuom mau theo chu de + van noi; chuan bi bang danh dau bong do */
         gfx_world = 0;
         gfx_hd_mode = gfx_hd_fx >= 1 ? ((th << 2) | 32 | 128) : 0;

@@ -132,9 +132,9 @@ public class Graphics {
             hdLac = s - 0x4880;
             return;
         }
-        if (s >= 0x4861 && s <= 0x4868) {
+        if (s >= 0x4861 && s <= 0x486F) {
             // May HD: lan fillRoundRect ke tiep ve theo kieu giao dien 3D (1 bong do khung, 2 lop bong sang, 3 nut kinh,
-            // 4 nut mau vien trang)
+            // 4 nut mau vien trang, 5 quang sang, 6 ban ni, 7 lam sau nen, 8 vong ghe, 9 bang sang, 10 dai mau)
             hdKieu = s - 0x4860;
             return;
         }

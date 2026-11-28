@@ -275,10 +275,12 @@ void N_j2n_Disp_hdMoc(jctx *t, int32_t pha) {
                 hdm_n = 0;
                 if (getenv("J2N_HDLOG")) {
                     extern int64_t gfx_dem[4];
-                    fprintf(stderr, "[hd] khung %d us (game ve %d us), kho %d MB / %d MB, %d anh; nghin diem / khung: dac %d, khoa %d, tron %d, to %d\n",
+                    extern int gfx_dem_canh;
+                    fprintf(stderr, "[hd] khung %d us (game ve %d us), kho %d MB / %d MB, %d anh; nghin diem / khung: dac %d, khoa %d, tron %d, to %d; the gioi %d lan / 90 khung\n",
                             hdm_avg, (int)(ve_sum / 90), gfx_hd_info(1), gfx_hd_info(3), gfx_hd_info(2), (int)(gfx_dem[0] / 90000),
-                            (int)(gfx_dem[1] / 90000), (int)(gfx_dem[2] / 90000), (int)(gfx_dem[3] / 90000));
+                            (int)(gfx_dem[1] / 90000), (int)(gfx_dem[2] / 90000), (int)(gfx_dem[3] / 90000), gfx_dem_canh);
                     gfx_dem[0] = gfx_dem[1] = gfx_dem[2] = gfx_dem[3] = 0;
+                    gfx_dem_canh = 0;
                 }
                 ve_sum = 0;
             }

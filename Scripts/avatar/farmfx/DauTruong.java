@@ -465,6 +465,8 @@ public final class DauTruong {
                         hat(me.aw * js.ay, me.ax * js.ay - 20, rnd(-40, 41), rnd(-70, -30), 900, 2, rnd(1, 3), 0);
                     }
                 }
+            } else if (sub == 10) {
+                TpMo.nhan(d);                        // thanh pho dang mo (trang quan tri)
             } else if (sub == 9) {
                 HdUi.chuDe = d.readByte();           // chu de quan tri chon (ban HD ve hieu ung)
             } else if (sub == 5) {
@@ -542,6 +544,7 @@ public final class DauTruong {
         if (!bat()) {
             if (trong) {
                 trong = false;
+                mo = false;
                 xoaHieuUng();
             }
             hienBanPhim();
@@ -584,7 +587,8 @@ public final class DauTruong {
         if (sanMoi()) {
             // goc nhin doc co dinh: mep duoi san (hang cuoi + bong chan boss) nam ngay tren bang dieu khien
             // (truoc day camera canh day ban do theo day man hinh -> 2 hang duoi cung nam sau bang, boss / hieu ung bi che)
-            Cam.datDoc(DAY_SAN - (main.a.n - SOFT - PANEL));
+            // bo cuc gon: mep duoi tuong gach phia truoc nam sat day man hinh
+            Cam.datDoc(gon() ? DAY_GON - main.a.n : DAY_SAN - (main.a.n - SOFT - PANEL));
             khungNgang();
         }
         if (t < rungDen) {
@@ -2111,6 +2115,17 @@ public final class DauTruong {
     // ================================================================ HUD (truoc return cua ae.b, toa do man hinh) - kieu ban demo
     static int pY, the0x, nutY, chX, chY, bnX, bnY, bnW, bnH;
     static final int SOFT = 26, PANEL = 86, THE_W = 54, THE_H = 44;
+    // ---- bo cuc GON (ban HD man ngang): khong con bang duoi che nua man hinh. Nut cong cu SUNG o mep trai; bam moi hien dai
+    // sung (4 the + Tu danh / Ban bang / Nang cap), chon sung xong dai tu an -> san dau full man hinh
+    static final int CC_W = 58, CC_H = 46, DAI_W = 248, DAI_H = 94, DAY_GON = 238;
+    static boolean mo;
+    static long moLuc = -100000, tuDongLuc;
+    static int ccX, ccY, daiX, daiY, chieuX, chieuY;
+
+    static boolean gon() {
+        return HdUi.hd() && main.a.m >= 400;
+    }
+
     static final int DAY_SAN = 232;       // y the gioi mep duoi san dau truong (hang 8 + vong / bong chan boss)
 
     public static void veHud(Graphics g) {
@@ -2136,7 +2151,8 @@ public final class DauTruong {
         g.setClip(0, 0, W, main.a.q);
         int cx = W / 2;
         // ---- thanh boss + chip tien (duoi 2 icon cua game goc tren trai)
-        int by = 40, bx = cx - 116;
+        boolean gon = gon();
+        int by = gon ? 5 : 40, bx = cx - 116;
         if (muc >= 0 && muc < nB) {
             int k = muc;
             ve(g, "h_boss", bx, by, 20);
@@ -2161,22 +2177,94 @@ public final class DauTruong {
         chip(g, chX, chY, "h_ixu", gon(xu));
         chip(g, chX + 79, chY, "h_iluong", gon(luong));
         chip(g, chX + 158, chY, "h_ida", String.valueOf(dns));
-        // ---- bang duoi
-        pY = H - SOFT - PANEL;
-        ve(g, "h_nen", cx - 120, pY, 20);
-        if (W > 240) {
-            g.setColor(0x0F3438);
-            g.fillRect(0, pY + 2, cx - 120, PANEL);
-            g.fillRect(cx + 120, pY + 2, W - cx - 120, PANEL);
+        // ---- bang duoi (man doc / ban JAR) hoac nut cong cu + dai sung noi (bo cuc gon)
+        if (gon) {
+            veGon(g, W, H, t);
+        } else {
+            pY = H - SOFT - PANEL;
+            ve(g, "h_nen", cx - 120, pY, 20);
+            if (W > 240) {
+                g.setColor(0x0F3438);
+                g.fillRect(0, pY + 2, cx - 120, PANEL);
+                g.fillRect(cx + 120, pY + 2, W - cx - 120, PANEL);
+            }
+            // dai phim mem (Menu / Chon / ...) lien khoi voi bang: truoc day lo nen ban do phia sau chu -> roi mat
+            if (!ve(g, "h_day", cx - 120, pY + PANEL, 20) || W > 240) {
+                g.setColor(0x0B2629);
+                g.fillRect(0, pY + PANEL, W, SOFT + 2);
+                g.setColor(0x2B6F6E);
+                g.fillRect(0, pY + PANEL, W, 1);
+            }
+            the0x = cx - (THE_W * 4 + 12) / 2;
+            veThe(g);
         }
-        // dai phim mem (Menu / Chon / ...) lien khoi voi bang: truoc day lo nen ban do phia sau chu -> roi mat
-        if (!ve(g, "h_day", cx - 120, pY + PANEL, 20) || W > 240) {
-            g.setColor(0x0B2629);
-            g.fillRect(0, pY + PANEL, W, SOFT + 2);
-            g.setColor(0x2B6F6E);
-            g.fillRect(0, pY + PANEL, W, 1);
+        // ---- nut chieu tron (tren bang, ben phai)
+        int kx = W - 24, ky = pY - 26;
+        if (gon) {
+            HdUi.docLe();
+            kx = W - HdUi.leP - 20;
+            ky = H - HdUi.leD - 64;
         }
-        the0x = cx - (THE_W * 4 + 12) / 2;
+        chieuX = kx;
+        chieuY = ky;
+        ve(g, "h_chieu" + sung, kx, ky, 3);
+        long conL = chieuCd - (t - chieuLuc);              // tinh bang long: chua dung chieu lan nao -> am rat lon (truoc day ep int bi tran -> hien so rac)
+        int con = conL <= 0 ? 0 : conL > chieuCd ? chieuCd : (int) conL;
+        if (con > 0) {
+            g.setColor(0x140A20);
+            int goc = con * 360 / Math.max(1, chieuCd);
+            g.fillArc(kx - 15, ky - 15, 30, 30, 90, goc);
+            chu(g, String.valueOf((con + 999) / 1000), kx, ky - 4, true);
+        } else if ((t / 250) % 2 == 0) {
+            g.setColor(0xFFF07A);
+            g.drawArc(kx - 18, ky - 18, 36, 36, 0, 360);
+        }
+        // ---- bang chu lon
+        if (bang != null) {
+            int e = (int) (t - bangLuc);
+            if (e > 2400) {
+                bang = null;
+            } else {
+                int y = (gon ? H / 2 - 4 : 150) - (e < 200 ? (200 - e) / 10 : 0);
+                ve(g, "h_bang", cx - 120, y - 14, 20);
+                if (bangAnh != null && h(bangAnh) != null) {
+                    ve(g, bangAnh, cx - 120, y - 12, 20);
+                } else if (bang.length() > 0) {
+                    main.a.R.a(g, bang, cx, y - 10, 2);
+                }
+                if (bang2 != null && bang2.length() > 0) {
+                    main.a.L.a(g, bang2, cx, y + 6, 2);
+                }
+            }
+        }
+        // ---- thong bao nho (toi da 2 dong) - duoi hang chip tien, khong che tran dau
+        int yy = chY + 16 + 15;
+        while (tinNho.size() > 2) {
+            tinNho.removeElementAt(0);
+            tinLuc.removeElementAt(0);
+        }
+        for (int i = tinNho.size() - 1; i >= 0; i--) {
+            long[] lt = (long[]) tinLuc.elementAt(i);
+            int e = (int) (t - lt[0]);
+            if (e > 2200) {
+                tinNho.removeElementAt(i);
+                tinLuc.removeElementAt(i);
+                continue;
+            }
+            String s2 = (String) tinNho.elementAt(i);
+            int ww = main.a.L.a(s2) + 12;
+            g.setColor(0x180C28);
+            g.fillRoundRect(cx - ww / 2, yy - 2, ww, 14, 8, 8);
+            main.a.L.a(g, s2, cx, yy, 2);
+            yy -= 15;
+        }
+        if (bangNang) {
+            veBangNang(g, W, H);
+        }
+    }
+
+    /** 4 the sung + 3 nut (Tu danh / Ban bang / Nang cap) tai the0x, pY - dung chung cho bang duoi va dai sung noi */
+    static void veThe(Graphics g) {
         int cy = pY + 5;
         for (int i = 0; i < 4; i++) {
             int x = the0x + i * (THE_W + 4);
@@ -2219,62 +2307,49 @@ public final class DauTruong {
             xx += c2.length() * 5 + 1;
             ve(g, "h_ida", xx, nutY + 14, 20);
         }
-        // ---- nut chieu tron (tren bang, ben phai)
-        int kx = W - 24, ky = pY - 26;
-        ve(g, "h_chieu" + sung, kx, ky, 3);
-        long conL = chieuCd - (t - chieuLuc);              // tinh bang long: chua dung chieu lan nao -> am rat lon (truoc day ep int bi tran -> hien so rac)
-        int con = conL <= 0 ? 0 : conL > chieuCd ? chieuCd : (int) conL;
-        if (con > 0) {
-            g.setColor(0x140A20);
-            int goc = con * 360 / Math.max(1, chieuCd);
-            g.fillArc(kx - 15, ky - 15, 30, 30, 90, goc);
-            chu(g, String.valueOf((con + 999) / 1000), kx, ky - 4, true);
-        } else if ((t / 250) % 2 == 0) {
-            g.setColor(0xFFF07A);
-            g.drawArc(kx - 18, ky - 18, 36, 36, 0, 360);
+    }
+
+    /** bo cuc gon: nut cong cu SUNG (sung dang cam + cap) o mep trai; dang mo thi ve dai sung noi ben phai nut (truot ra) */
+    static void veGon(Graphics g, int W, int H, long t) {
+        HdUi.docLe();
+        ccX = HdUi.leT - 6 < 6 ? 6 : HdUi.leT - 6;
+        ccY = H - HdUi.leD - 34 - CC_H;
+        daiX = ccX + CC_W + 5;
+        daiY = ccY + CC_H / 2 - DAI_H / 2;
+        if (daiY + DAI_H > H - HdUi.leD - 3) {
+            daiY = H - HdUi.leD - 3 - DAI_H;
         }
-        // ---- bang chu lon
-        if (bang != null) {
-            int e = (int) (t - bangLuc);
-            if (e > 2400) {
-                bang = null;
-            } else {
-                int y = 150 - (e < 200 ? (200 - e) / 10 : 0);
-                ve(g, "h_bang", cx - 120, y - 14, 20);
-                if (bangAnh != null && h(bangAnh) != null) {
-                    ve(g, bangAnh, cx - 120, y - 12, 20);
-                } else if (bang.length() > 0) {
-                    main.a.R.a(g, bang, cx, y - 10, 2);
-                }
-                if (bang2 != null && bang2.length() > 0) {
-                    main.a.L.a(g, bang2, cx, y + 6, 2);
-                }
-            }
+        if (daiY < 50) {
+            daiY = 50;
         }
-        // ---- thong bao nho (toi da 2 dong) - duoi hang chip tien, khong che tran dau
-        int yy = chY + 16 + 15;
-        while (tinNho.size() > 2) {
-            tinNho.removeElementAt(0);
-            tinLuc.removeElementAt(0);
+        if (mo && tuDongLuc > 0 && t >= tuDongLuc) {
+            mo = false;                 // vua chon sung xong: tu an dai de tra lai man hinh
+            moLuc = t;
+            tuDongLuc = 0;
         }
-        for (int i = tinNho.size() - 1; i >= 0; i--) {
-            long[] lt = (long[]) tinLuc.elementAt(i);
-            int e = (int) (t - lt[0]);
-            if (e > 2200) {
-                tinNho.removeElementAt(i);
-                tinLuc.removeElementAt(i);
-                continue;
-            }
-            String s2 = (String) tinNho.elementAt(i);
-            int ww = main.a.L.a(s2) + 12;
-            g.setColor(0x180C28);
-            g.fillRoundRect(cx - ww / 2, yy - 2, ww, 14, 8, 8);
-            main.a.L.a(g, s2, cx, yy, 2);
-            yy -= 15;
+        ve(g, mo ? "h_cc1" : "h_cc0", ccX, ccY, 20);
+        int lv = capS[sung];
+        if (imSung != null) {
+            g.drawRegion(imSung, (lv - 1) * 52, khungVay(sung) * 124 + sung * 31, 52, 31, 0, ccX + 2, ccY + 3, 20);
         }
-        if (bangNang) {
-            veBangNang(g, W, H);
+        ve(g, "h_lv" + lv, ccX + CC_W - 5, ccY + 4, 24);
+        g.setColor(tuDanh ? 0x3BE080 : 0x7A8C93);       // cham xanh: dang tu danh
+        g.fillArc(ccX + 6, ccY + 35, 6, 6, 0, 360);
+        int e = (int) (t - moLuc);
+        int hien = e >= 140 || e < 0 ? 256 : e * 256 / 140;
+        if (!mo) {
+            hien = 256 - hien;
         }
+        if (hien <= 0) {
+            return;
+        }
+        int lech = (256 - hien) * 18 / 256;
+        g.setClip(daiX, daiY - 2, DAI_W * hien / 256, DAI_H + 4);
+        ve(g, "h_dai", daiX - lech, daiY, 20);
+        pY = daiY + 2;
+        the0x = daiX - lech + (DAI_W - (THE_W * 4 + 12)) / 2 - 1;
+        veThe(g);
+        g.setClip(0, 0, W, main.a.q);
     }
 
     /** chu so trang (h_so.png: 0123456789./,+-kKtrỷ%) */
@@ -2316,7 +2391,7 @@ public final class DauTruong {
         bnW = 228;
         bnH = 206;
         bnX = (W - bnW) / 2;
-        bnY = Math.max(50, (H - SOFT - PANEL - bnH) / 2 + 30);
+        bnY = gon() ? Math.max(2, (H - bnH) / 2) : Math.max(50, (H - SOFT - PANEL - bnH) / 2 + 30);
         ve(g, "h_khung", bnX, bnY, 20);
         int lv = capS[sung];
         main.a.L.a(g, tenSung[sung] + "  Lv" + lv, W / 2, bnY + 7, 2);
@@ -2405,16 +2480,35 @@ public final class DauTruong {
             }
             return true;
         }
-        int kx = W - 24, ky = pY - 26;
+        boolean gon = gon();
+        int kx = gon ? chieuX : W - 24, ky = gon ? chieuY : pY - 26;
         if ((x - kx) * (x - kx) + (y - ky) * (y - ky) <= 20 * 20) {
             if (muc >= 0 && now() - chieuLuc >= chieuCd) {
                 dungChieu(muc);
             }
             return true;
         }
-        if (y >= pY + 4 && y < pY + 4 + THE_H) {
-            int i = (x - the0x) / (THE_W + 4);
+        if (gon) {
+            if (x >= ccX - 4 && x < ccX + CC_W + 4 && y >= ccY - 4 && y < ccY + CC_H + 4) {
+                mo = !mo;               // nut cong cu: hien / an dai sung
+                moLuc = now();
+                tuDongLuc = 0;
+                return true;
+            }
+            if (mo && (x < daiX || x >= daiX + DAI_W || y < daiY || y >= daiY + DAI_H)) {
+                mo = false;             // cham ra ngoai dai: an
+                moLuc = now();
+                tuDongLuc = 0;
+                return true;
+            }
+        }
+        boolean coBang = !gon || mo;
+        if (coBang && y >= pY + 4 && y < pY + 4 + THE_H) {
+            int i = x < the0x ? -1 : (x - the0x) / (THE_W + 4);
             if (i >= 0 && i < 4) {
+                if (gon) {
+                    tuDongLuc = now() + 380;
+                }
                 if (i != sung) {
                     sung = i;
                     banner(null, tenSung[i] + " Lv" + capS[i], MAU[i]);
@@ -2425,7 +2519,10 @@ public final class DauTruong {
             }
             return true;
         }
-        if (y >= nutY && y < nutY + 26) {
+        if (coBang && y >= nutY && y < nutY + 26 && (!gon || (x >= the0x && x < the0x + 232))) {
+            if (gon) {
+                tuDongLuc = 0;
+            }
             if (x < the0x + 92) {
                 tuDanh = !tuDanh;
                 banner(null, tuDanh ? "Tự chạy tới boss, tự bắn, tự dùng chiêu" : "Chạm boss để bắn, chạm nút tròn để tung chiêu", 0xFFFFFF);
@@ -2438,12 +2535,16 @@ public final class DauTruong {
                 bang = "";
             } else {
                 bangNang = true;
+                if (gon) {
+                    mo = false;
+                    moLuc = now();
+                }
             }
             ghiTuyChon();
             return true;
         }
-        if (y >= pY) {
-            return true;                                   // nen bang duoi: khong cho di bo
+        if (gon ? mo : y >= pY) {
+            return true;                                   // nen bang duoi / dai sung: khong cho di bo
         }
         // cham vao boss: chon muc tieu + ban 1 phat
         int wx = (x + Cam.x()) / Math.max(1, js.ay), wy = (y + Cam.y()) / Math.max(1, js.ay);

@@ -797,6 +797,183 @@ static inline uint32_t ui_mix(uint32_t d, int r, int g, int b, int a) {       /*
     return 0xFF000000u | ((uint32_t)R << 16) | ((uint32_t)G << 8) | (uint32_t)B;
 }
 
+static inline float ui_buoc(float a, float b, float x) {                       /* smoothstep */
+    float t = (x - a) / (b - a);
+    t = t < 0 ? 0 : t > 1 ? 1 : t;
+    return t * t * (3.0f - 2.0f * t);
+}
+
+/* Cac kieu giao dien dot 4 (HdUi.kieu 5..10), toa do diem anh that:
+ *  5 quang sang quanh nut (chi phan NGOAI hinh), mau color
+ *  6 ban choi boc ni: bong do + vien go + mat ni mau color (sang o giua, toi dan ve vien)
+ *  7 lam sau nen: toi dan ve 4 goc + sang nhe o giua (phu len nen hoa van cua cac man OnGame)
+ *  8 vong ghe trong: vien mau color + long mo
+ *  9 bang sang (hop thoai kieu moi): bong do, vien trang, than chuyen tu color (tren) sang nhat hon (duoi)
+ * 10 dai mau phang bo goc (nen cho dong chu / the thong tin), color, do duc ~62%
+ * 11 lam mo ca vung (sau hop thoai): phu mau color ~34% */
+static void hd_ui2(tgt *o, int X, int Y, int Wd, int Hd, int R, int kieu, uint32_t color, int K) {
+    int cx0 = o->x0, cy0 = o->y0, cx1 = o->x1, cy1 = o->y1;
+    float hw = Wd * 0.5f, hh = Hd * 0.5f, mx = X + hw, my = Y + hh;
+    int br = (color >> 16) & 255, bg = (color >> 8) & 255, bb = color & 255;
+    if (kieu == 11) {
+        /* lam mo nen sau hop thoai: phu mau color ~34% len ca vung (khong bo goc) */
+        int y0 = Y < cy0 ? cy0 : Y, y1 = Y + Hd > cy1 ? cy1 : Y + Hd, x0 = X < cx0 ? cx0 : X, x1 = X + Wd > cx1 ? cx1 : X + Wd;
+        for (int y = y0; y < y1; y++) {
+            uint32_t *row = o->px + (size_t)y * o->w;
+            for (int x = x0; x < x1; x++) {
+                uint32_t d = row[x];
+                int R0 = (d >> 16) & 255, G0 = (d >> 8) & 255, B0 = d & 255;
+                R0 += (br - R0) * 87 >> 8;
+                G0 += (bg - G0) * 87 >> 8;
+                B0 += (bb - B0) * 87 >> 8;
+                row[x] = 0xFF000000u | ((uint32_t)R0 << 16) | ((uint32_t)G0 << 8) | (uint32_t)B0;
+            }
+        }
+        return;
+    }
+    if (kieu == 7) {
+        int y0 = Y < cy0 ? cy0 : Y, y1 = Y + Hd > cy1 ? cy1 : Y + Hd, x0 = X < cx0 ? cx0 : X, x1 = X + Wd > cx1 ? cx1 : X + Wd;
+        for (int y = y0; y < y1; y++) {
+            uint32_t *row = o->px + (size_t)y * o->w;
+            float ny = (y + 0.5f - my) / hh;
+            float ny2 = ny * ny;
+            for (int x = x0; x < x1; x++) {
+                float nx = (x + 0.5f - mx) / hw;
+                float r2 = nx * nx * 0.82f + ny2;                  /* elip hoi det ngang */
+                if (r2 < 0.30f) {
+                    int a = (int)(30 * (1.0f - r2 / 0.30f));
+                    if (a > 0) row[x] = ui_mix(row[x], 255, 255, 255, a);
+                } else if (r2 > 0.42f) {
+                    float t = (r2 - 0.42f) / 1.25f;
+                    if (t > 1) t = 1;
+                    int a = (int)(150 * t * (2.0f - t));
+                    if (a > 0) row[x] = ui_mix(row[x], 0, 10, 12, a);
+                }
+            }
+        }
+        return;
+    }
+    int M = (kieu == 6 ? 10 : kieu == 9 ? 9 : kieu == 5 ? 7 : 0) * K;       /* tam bong / quang ben ngoai */
+    int oy = (kieu == 6 ? 4 : kieu == 9 ? 3 : 0) * K;
+    int y0 = Y - M - 1, y1 = Y + Hd + M + oy + 1, x0 = X - M - 1, x1 = X + Wd + M + 1;
+    if (y0 < cy0) y0 = cy0;
+    if (y1 > cy1) y1 = cy1;
+    if (x0 < cx0) x0 = cx0;
+    if (x1 > cx1) x1 = cx1;
+    float vien = (kieu == 6 ? 5.0f : 1.6f) * K;                             /* do day vien go / vien trang */
+    for (int y = y0; y < y1; y++) {
+        uint32_t *row = o->px + (size_t)y * o->w;
+        float py = y + 0.5f - my;
+        float ty = (float)(y - Y) / (float)Hd;
+        ty = ty < 0 ? 0 : ty > 1 ? 1 : ty;
+        for (int x = x0; x < x1; x++) {
+            float px = x + 0.5f - mx;
+            float d = ui_sdf(px, py, hw, hh, (float)R);
+            if (kieu == 5) {
+                if (d <= 0 || d >= M) continue;
+                float t = 1.0f - d / M;
+                int a = (int)(170 * t * t);
+                if (a > 0) row[x] = ui_mix(row[x], br + (255 - br) / 3, bg + (255 - bg) / 3, bb + (255 - bb) / 3, a);
+                continue;
+            }
+            if (kieu == 8) {
+                float e = fabsf(d + 1.0f * K) - 0.8f * K;                    /* duong vien nam ben trong mep 1K */
+                if (e < 0.5f) {
+                    float cov = 0.5f - e;
+                    if (cov > 1) cov = 1;
+                    row[x] = ui_mix(row[x], br, bg, bb, (int)(165 * cov));
+                } else if (d < 0) {
+                    row[x] = ui_mix(row[x], br, bg, bb, 26);
+                }
+                continue;
+            }
+            if (kieu == 10) {
+                if (d >= 0.5f) continue;
+                float cov = 0.5f - d;
+                if (cov > 1) cov = 1;
+                row[x] = ui_mix(row[x], br, bg, bb, (int)(158 * cov));
+                continue;
+            }
+            /* 6 / 9: co bong do ben ngoai */
+            if (d >= 0.5f) {
+                float ds = ui_sdf(px, py - oy, hw, hh, (float)R);
+                if (ds >= M) continue;
+                float tq = ds <= 0 ? 1.0f : 1.0f - ds / M;
+                int a = (int)((kieu == 6 ? 135 : 96) * tq * tq);
+                if (a > 0) row[x] = ui_mix(row[x], 0, 8, 14, a);
+                continue;
+            }
+            float cov = 0.5f - d;
+            if (cov > 1) cov = 1;
+            float sau = -d;
+            int cr, cg, cb;
+            if (kieu == 6) {
+                if (sau < vien) {
+                    /* vien go: sang phia tren, 2 duong ke dam o mep ngoai va mep trong */
+                    float v = sau / vien;                               /* 0 mep ngoai .. 1 mep trong */
+                    float sg = 1.0f - 0.45f * ty + 0.22f * sinf(v * 3.1416f);
+                    cr = (int)(168 * sg);
+                    cg = (int)(104 * sg);
+                    cb = (int)(48 * sg);
+                    if (sau < 0.9f * K || sau > vien - 0.9f * K) {
+                        cr = cr * 120 >> 8;
+                        cg = cg * 112 >> 8;
+                        cb = cb * 104 >> 8;
+                    }
+                } else {
+                    /* mat ni: sang o giua, toi dan ve vien + bong trong sat vien (phia tren dam hon) */
+                    float nx = px / hw, ny = py / hh;
+                    float r2 = nx * nx + ny * ny;
+                    float sg = 1.16f - 0.34f * r2;
+                    float trong = sau - vien;
+                    float bt = trong < 7.0f * K ? 1.0f - trong / (7.0f * K) : 0;
+                    sg *= 1.0f - bt * bt * (0.42f - 0.20f * ty);
+                    /* van ni rat nhe */
+                    unsigned hsh = ((unsigned)x * 73856093u) ^ ((unsigned)y * 19349663u);
+                    sg += ((int)((hsh >> 9) & 15) - 7) * 0.0022f;
+                    cr = (int)(br * sg);
+                    cg = (int)(bg * sg);
+                    cb = (int)(bb * sg);
+                }
+            } else {
+                /* 9: bang sang */
+                if (sau < vien) {
+                    cr = 255;
+                    cg = 255;
+                    cb = 255;
+                    if (sau > vien - 0.6f * K) {                        /* duong ke mong sat vien trang */
+                        cr = br * 200 >> 8;
+                        cg = bg * 214 >> 8;
+                        cb = bb * 232 >> 8;
+                    }
+                } else {
+                    float f = 1.0f - ty;                                /* tren dung mau color, duoi nhat dan ve trang */
+                    cr = br + (int)((255 - br) * (0.50f - 0.50f * f));
+                    cg = bg + (int)((255 - bg) * (0.50f - 0.50f * f));
+                    cb = bb + (int)((255 - bb) * (0.50f - 0.50f * f));
+                    if (ty < 0.16f) {                                   /* mang sang sat mep tren */
+                        int sgw = (int)(70 * (1.0f - ty / 0.16f));
+                        cr += (255 - cr) * sgw / 255;
+                        cg += (255 - cg) * sgw / 255;
+                        cb += (255 - cb) * sgw / 255;
+                    }
+                }
+            }
+            cr = cr < 0 ? 0 : cr > 255 ? 255 : cr;
+            cg = cg < 0 ? 0 : cg > 255 ? 255 : cg;
+            cb = cb < 0 ? 0 : cb > 255 ? 255 : cb;
+            if (cov < 1.0f) {
+                float ds = ui_sdf(px, py - oy, hw, hh, (float)R);
+                if (ds < M) {
+                    float tq = ds <= 0 ? 1.0f : 1.0f - ds / M;
+                    row[x] = ui_mix(row[x], 0, 8, 14, (int)((kieu == 6 ? 135 : 96) * tq * tq));
+                }
+            }
+            row[x] = ui_mix(row[x], cr, cg, cb, (int)(255 * cov));
+        }
+    }
+}
+
 static void hd_ui(tgt *o, int X, int Y, int Wd, int Hd, int R, int kieu, uint32_t color) {
     int k = o->k;                                   /* dich da chuyen sang diem anh that -> k = 1; lay ti le tu gfx_hdk */
     (void)k;
@@ -805,6 +982,10 @@ static void hd_ui(tgt *o, int X, int Y, int Wd, int Hd, int R, int kieu, uint32_
     if (R > Wd / 2) R = Wd / 2;
     if (R > Hd / 2) R = Hd / 2;
     float hw = Wd * 0.5f, hh = Hd * 0.5f, mx = X + hw, my = Y + hh;
+    if (kieu >= 5 && kieu <= 11) {
+        hd_ui2(o, X, Y, Wd, Hd, R, kieu, color, K);
+        return;
+    }
     if (kieu == 4) {
         /* NUT MAU (giao dien dot 3): bong mo ben duoi, vien trang, than chuyen mau tu sang (tren) xuong dam (duoi), mang sang
          * nua tren, 1 duong vien dam mong sat vien trang. color = mau than. Mep khu rang cua bang khoang cach co dau. */

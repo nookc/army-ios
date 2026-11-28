@@ -34,6 +34,12 @@ public final class TocDo {
 
     /** thay Canvas.repaint() trong vong lap game (sau phan logic cua vong) */
     public static void ve(Canvas c) {
+        if (HdUi.GO) {
+            HdUi.goSauLogic();
+        }
+        if (HdUi.THU_LOI && main.a.l % 40 == 5) {
+            throw new RuntimeException("thu loi logic (J2N_THULOI)");       // CHI ban thu Linux: kiem TocDo.loiVong
+        }
         if (x <= 1) {
             c.repaint();
             return;
@@ -51,6 +57,40 @@ public final class TocDo {
         if ((lich >= nay && cach >= VE_NHANH) || cach >= VE_CHAM) {
             veLuc = bay;
             c.repaint();
+        }
+    }
+
+    private static int loiDem;
+    private static long loiLuc;
+
+    /**
+     * Thay Throwable.printStackTrace() trong vong lap game (main.a.run). Game goc: 1 loi o phan logic la bo luon ca phan con
+     * lai cua vong - khong xoa co "vua cham / vua nha", khong ve, KHONG NGU. Loi lap lai moi vong (vd co cham chua duoc xoa)
+     * thi vong lap quay het toc luc: man dung hinh, may nong, nhat ky day (da gap o nong trai: cham o dat chua mua). O day:
+     * ghi loi (co gioi han), xoa co cham nhu cuoi vong binh thuong, van xin ve va ngu 1 nhip -> game khong bao gio "dung
+     * hinh quay vong" vi 1 loi logic.
+     */
+    public static void loiVong(Throwable e) {
+        try {
+            loiDem++;
+            long nay = System.currentTimeMillis();
+            if (loiDem <= 20 || nay - loiLuc >= 5000) {
+                loiLuc = nay;
+                Object man = main.a.r;
+                System.out.println("[vong] LOI LOGIC #" + loiDem + " man " + (man == null ? "null" : man.getClass().getName()) + " ban do "
+                        + ir.a + ": " + e);
+                if (loiDem <= 3 && e != null) {
+                    e.printStackTrace();
+                }
+            }
+            main.a.g = false;
+            main.a.f = false;
+            Canvas c = main.a.a;
+            if (c != null) {
+                c.repaint();
+            }
+            Thread.sleep(40);
+        } catch (Throwable t) {
         }
     }
 

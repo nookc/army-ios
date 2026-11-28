@@ -5,7 +5,8 @@ import javax.microedition.lcdui.Image;
 /**
  * Ban "Avatar 250 HD": vat trang tri / cho chup anh do app tu ve (anh x4 trong jar: hdx/p_<ten>.png), dat theo ban do va
  * theo chu de quan tri chon (HdUi.chuDe). Moi vat la 1 HdVat (vat the ban do) chen vao ir.l dung thu tu chieu sau.
- * Bang HdViTri.VT: {ma ban do, chu de (-1 = luc nao cung co, 0 = chi khi khong co chu de, 1..4 = chu de do), so anh, x, y}
+ * Bang HdViTri.VT: {ma ban do, chu de (-1 = vat chung: co khi quan tri bat chu de 1..5, 1..4 = chi chu de do), so anh, x, y}
+ * Quan tri tat chu de (0) -> khong chen vat nao (canh nhu game goc).
  * (x, y = diem CHAN GIUA cua vat, don vi ban do: 1 o = 24).
  * capNhat() duoc goi moi khung (HdUi.nenTg): ban do / chu de doi, hoac game nap lai ban do (xoa ir.l) thi dat lai.
  */
@@ -130,7 +131,9 @@ public final class HdTrangTri {
             manDang = man;
             int[] v = HdViTri.VT;
             for (int i = 0; i + 4 < v.length; i += 5) {
-                if (v[i] != map || (v[i + 1] != -1 && v[i + 1] != cd)) {
+                // chu de 0 (quan tri tat): KHONG ve vat trang tri nao - canh nhu game goc. 1..4 = vat chung (-1) + vat cua
+                // chu de do; 5 = "cong vien hoa": chi vat chung (dai phun, cong hoa, chau hoa, bong bay...)
+                if (v[i] != map || cd < 1 || cd > 5 || (v[i + 1] != -1 && v[i + 1] != cd)) {
                     continue;
                 }
                 Image im = lay(v[i + 2]);

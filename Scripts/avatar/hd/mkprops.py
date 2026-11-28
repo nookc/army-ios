@@ -1007,6 +1007,19 @@ def nut_them():
     return c.xong()
 
 
+def nut_dong():
+    """nut DONG tron: nen trang vien xam xanh, dau X do (goc tren phai cua bang shop / ruong - theo mau quan tri gui)"""
+    c = Cv(26, 28)
+    _bong_nut(c, 1.6, 1.6, 24.4, 24.6, 11.4)
+    c.ell(13, 13, 11.8, 11.8, (255, 255, 255), (226, 234, 246), vien=(104, 128, 160), dv=0.5)
+    c.ell(13, 9.6, 8.6, 5.4, (255, 255, 255), None, vien=None)
+    do, v = (232, 64, 64), (150, 28, 34)
+    c.line([(8.4, 8.4), (17.6, 17.6)], 3.3, do, vien=v, dv=0.45)
+    c.line([(17.6, 8.4), (8.4, 17.6)], 3.3, do, vien=v, dv=0.45)
+    c.line([(9.0, 8.6), (12.2, 11.8)], 0.9, (255, 150, 140))
+    return c.xong()
+
+
 def nut_menu():
     """nut MENU: the nhon dau ben trai, vien trang, than xanh chuyen mau, chu trang (anh 54 x 26, nut 50 x 22 tai (1, 1))"""
     c = Cv(54, 26)
@@ -1044,7 +1057,7 @@ def bao_n():
     return _bao('!')
 
 
-NUT = [nut_menu, nut_thu, nut_chat, nut_cam_xuc, nut_hanh_dong, nut_them, bao_n] + [_bao_n(i) for i in range(1, 10)]
+NUT = [nut_menu, nut_thu, nut_chat, nut_cam_xuc, nut_hanh_dong, nut_them, nut_dong, bao_n] + [_bao_n(i) for i in range(1, 10)]
 
 VAT = NUT + [vong, bui_0, bui_1, bui_2, bui_3, cong_hoa, khung_anh, huong_duong, rom_bi, bu_nhin, co_day, cay_thong, nguoi_tuyet, ong_noel, hop_qua, cong_tim, chu_love, gau_tim,
        cong_bong, sao_vui, bi_ngo, cay_ma, bia_mo, canh_tt, dai_phun, khi_cau, xich_du, den_long, chau_hoa, cong_trai,
